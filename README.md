@@ -10,7 +10,7 @@ This is version 2 of the HI Source Finding Application (SoFiA). SoFiA 2 is a rei
 
 ## Installation
 
-Please ensure that the **GNU C compiler** (GCC) and **WCSLIB** (https://www.atnf.csiro.au/people/mcalabre/WCS/) are installed on your machine, before downloading and extracting the SoFiA 2 **source code** into a directory of your choice. You may want to first check if WCSLIB is either already installed or available from your operating system’s software repository (`wcslib-dev` package) before attempting to install it manually.
+Please ensure that the **GNU C compiler** (GCC) and **WCSLIB** (https://www.atnf.csiro.au/people/mcalabre/WCS/) are installed on your machine, before downloading and extracting the SoFiA 2 **source code** into a directory of your choice. You may want to first check if WCSLIB is either already installed or available from your operating system’s software repository (`wcslib-dev` package on Ubuntu/Debian; `wcslib-devel` on Fedora/CentOS/Red Hat; `wcslib` on MacOS/Homebrew) before attempting to install it manually.
 
 Once WCSLIB is installed, simply execute the `compile.sh` script to compile SoFiA 2 using the GCC compiler:
 
@@ -18,9 +18,11 @@ Once WCSLIB is installed, simply execute the `compile.sh` script to compile SoFi
 
 Note that the `-fopenmp` parameter is optional and will enable **multi-threading** using OpenMP. If your compiler does not support OpenMP, this parameter can simply be omitted to install a single-threaded version of SoFiA 2. Please ensure that you read and follow the **instructions** printed at the end of the compilation process to finalise the installation. If a compiler error related to WCSLIB shows up, please ensure that WCSLIB is installed in a standard location where it can be found by the GCC. Then run the compilation script again to see if the error message has disappeared.
 
+As an alternative, we provide a `Makefile` for those who prefer to use `make` to install SoFiA 2. The `Makefile` itself contains a few examples of how to invoke it with different compilers (with or without OpenMP support). Note that if you prefer to use `make`, you may still want to create a symbolic link or alias to the `sofia` executable file in the end to make SoFiA 2 easily accessible across your system.
+
 ## Documentation
 
-An overview of all control parameters as well as a PDF copy of the SoFiA 2 User Manual can be found on the wiki at https://github.com/SoFiA-Admin/SoFiA-2/wiki.
+An overview of all control parameters as well as a PDF copy of the SoFiA 2 User Manual can be found on the wiki at https://github.com/SoFiA-Admin/SoFiA-2/wiki. The wiki also contains a small test data cube and parameter file that users can download to verify their SoFiA 2 installation.
 
 ## Feedback
 
