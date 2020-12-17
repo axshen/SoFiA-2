@@ -592,6 +592,7 @@ PUBLIC void Parameter_default(Parameter *self)
 	Parameter_set(self, "linker.minSizeZ"          , "5");
 	Parameter_set(self, "linker.maxSizeXY"         , "0");
 	Parameter_set(self, "linker.maxSizeZ"          , "0");
+	Parameter_set(self, "linker.positivity"        , "false");
 	Parameter_set(self, "linker.keepNegative"      , "false");
 	
 	// Reliability

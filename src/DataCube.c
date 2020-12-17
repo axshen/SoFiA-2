@@ -4333,8 +4333,9 @@ PUBLIC void DataCube_run_threshold(const DataCube *self, DataCube *maskCube, con
 //   (9) max_size_x - Maximum size requirement for objects in x.     //
 //  (10) max_size_y - Maximum size requirement for objects in y.     //
 //  (11) max_size_z - Maximum size requirement for objects in z.     //
-//  (12) positivity - If true, negative sources will be discarded.   //
-//  (13) rms        - Global rms value by which all flux values will //
+//  (12) pos_pix    - If true, negative pixels will be discarded.    //
+//  (13) pos_src    - If true, negative sources will be discarded.   //
+//  (14) rms        - Global rms value by which all flux values will //
 //                    be normalised. 1 = no normalisation.           //
 //                                                                   //
 // Return value:                                                     //
@@ -4350,12 +4351,14 @@ PUBLIC void DataCube_run_threshold(const DataCube *self, DataCube *maskCube, con
 //   set to -1 at the start. The linker will first give objects that //
 //   are connected within the specified radii a unique label.        //
 //   Objects that fall outside of the minimum or maximum size re-    //
-//   quirements will be removed on the fly. If positivity is set to  //
+//   quirements will be removed on the fly. If pos_src is set to     //
 //   true, sources with negative total flux will also be removed.    //
+//   Likewise, if pos_pix is true, only positive pixels will be      //
+//   linked and negative ones discarded.                             //
 // ----------------------------------------------------------------- //
 
 
-PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, const size_t radius_x, const size_t radius_y, const size_t radius_z, const size_t min_size_x, const size_t min_size_y, const size_t min_size_z, const size_t max_size_x, const size_t max_size_y, const size_t max_size_z, const bool positivity, const double rms)
+PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, const size_t radius_x, const size_t radius_y, const size_t radius_z, const size_t min_size_x, const size_t min_size_y, const size_t min_size_z, const size_t max_size_x, const size_t max_size_y, const size_t max_size_z, const bool pos_pix, const bool pos_src, const double rms)
 {
 	// Sanity checks
 	check_null(self);
@@ -4371,7 +4374,7 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 	message(" - Merging radii:  %zu, %zu, %zu", radius_x, radius_y, radius_z);
 	message(" - Minimum size:   %zu x %zu x %zu", min_size_x, min_size_y, min_size_z);
 	if(max_size_x || max_size_y || max_size_z) message("  - Maximum size:   %zu x %zu x %zu", max_size_x, max_size_y, max_size_z);
-	message(" - Keep negative:  %s\n", positivity ? "no" : "yes");
+	message(" - Keep negative:  %s\n", pos_src ? "no" : "yes");
 	
 	// Create empty linker parameter object
 	LinkerPar *lpar = LinkerPar_new(self->verbosity);
@@ -4403,9 +4406,9 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 				// Check if pixel is detected
 				if(ptr_mask[index] < 0)
 				{
-					// Get flux value and check for NaN and Inf
+					// Get flux value and check for NaN, Inf and positivity
 					const double flux = DataCube_get_data_flt(self, x, y, z);
-					if(!isfinite(flux))
+					if(!isfinite(flux) || (pos_pix && flux < 0.0))
 					{
 						ptr_mask[index] = 0;
 						continue;
@@ -4425,7 +4428,7 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 					// Recursively process neighbouring pixels
 					Stack *stack = Stack_new();
 					Stack_push(stack, index);
-					DataCube_process_stack(self, mask, stack, radius_x, radius_y, radius_z, label, lpar, rms_inv);
+					DataCube_process_stack(self, mask, stack, radius_x, radius_y, radius_z, label, lpar, rms_inv, pos_pix);
 					Stack_delete(stack);
 					
 					// Check if new source outside size (and other) requirements
@@ -4435,7 +4438,7 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 					|| (max_size_x && LinkerPar_get_obj_size(lpar, label, 0) > max_size_x)
 					|| (max_size_y && LinkerPar_get_obj_size(lpar, label, 1) > max_size_y)
 					|| (max_size_z && LinkerPar_get_obj_size(lpar, label, 2) > max_size_z)
-					|| (positivity && LinkerPar_get_flux(lpar, label) < 0.0))
+					|| (pos_src && LinkerPar_get_flux(lpar, label) < 0.0))
 					{
 						// Yes, it is -> discard source
 						// Get source bounding box
@@ -4505,6 +4508,7 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 //   (9) rms_inv   - Inverse of the global rms value by which all    //
 //                   flux values will multiplied. If set to 1, no    //
 //                   normalisation will occur.                       //
+//  (10) pos_pix   - If true, negative pixels will be discarded.     //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -4516,7 +4520,9 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 //   the specified location (x, y, z) within the specified merging   //
 //   radii are detected by the source finder (value of < 0). If so,  //
 //   their value will be set to the same label as (x, y, z) and the  //
-//   LinkerPar object will be updated to include the new pixel.      //
+//   LinkerPar object will be updated to include the new pixel. If   //
+//   pos_pix is set to true, then only positive pixels will be ac-   //
+//   cepted and negative ones discarded.                             //
 //   The function will then process the neighbours of each neighbour //
 //   recursively by using an internal stack rather than recursive    //
 //   function calls, which makes stack overflows controllable and    //
@@ -4525,7 +4531,7 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 //   needed.                                                         //
 // ----------------------------------------------------------------- //
 
-PRIVATE void DataCube_process_stack(const DataCube *self, DataCube *mask, Stack *stack, const size_t radius_x, const size_t radius_y, const size_t radius_z, const int32_t label, LinkerPar *lpar, const double rms_inv)
+PRIVATE void DataCube_process_stack(const DataCube *self, DataCube *mask, Stack *stack, const size_t radius_x, const size_t radius_y, const size_t radius_z, const int32_t label, LinkerPar *lpar, const double rms_inv, const bool pos_pix)
 {
 	// Set up a few parameters
 	size_t x, y, z;
@@ -4583,6 +4589,13 @@ PRIVATE void DataCube_process_stack(const DataCube *self, DataCube *mask, Stack 
 					{
 						*ptr = 0;                                // unmask pixel
 						LinkerPar_update_flag(lpar, flag |= 4);  // update flag
+						continue;
+					}
+					
+					// Check for positivity
+					if(pos_pix && flux < 0.0)
+					{
+						*ptr = 0;  // unmask pixel
 						continue;
 					}
 					
