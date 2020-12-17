@@ -889,7 +889,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 	ensure(n_neg, ERR_FAILURE, "No negative sources found. Cannot proceed.");
 	ensure(n_pos, ERR_FAILURE, "No positive sources found. Cannot proceed.");
 	message("Found %zu positive and %zu negative sources.", n_pos, n_neg);
-	if(n_neg < threshold_warning) warning("Only %zu negative detections found.\n         Reliability calculation may not be accurate.", n_neg);
+	if(n_neg < threshold_warning) warning("Only %zu negative %s found.\n         Reliability calculation may not be accurate.", n_neg, n_neg > 1 ? "detections" : "detection");
 	
 	// Extract relevant parameters
 	double *par_pos = (double *)memory(MALLOC, dim * n_pos, sizeof(double));

@@ -1155,7 +1155,7 @@ int main(int argc, char **argv)
 		// Apply flags if required
 		if(use_flagging) DataCube_flag_regions(dataCube, flag_regions);
 		
-		// Apply flagging catalogue if required		
+		// Apply flagging catalogue if required
 		if(use_flagging_cat) DataCube_continuum_flagging(dataCube, Parameter_get_str(par, "flag.catalog"), 1, Parameter_get_int(par, "flag.radius"));
 		
 		// Invert cube if requested
