@@ -1733,8 +1733,13 @@ PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat sta
 					}
 				}
 				
-				// Move on if no finite values found
-				if(counter == 0) continue;
+				// Move on if not enough finite values found
+				// NOTE: The threshold of 10 is somewhat arbitrary.
+				if(counter < 10)
+				{
+					free(array);
+					continue;
+				}
 				
 				// Determine noise level in temporary array
 				double rms;
