@@ -866,21 +866,6 @@ int main(int argc, char **argv)
 	
 	
 	// ---------------------------- //
-	// Write raw mask if requested  //
-	// ---------------------------- //
-	
-	if(write_rawmask)
-	{
-		status("Writing raw binary mask");
-		DataCube_save(maskCubeTmp, Path_get(path_mask_raw), overwrite, DESTROY);
-		
-		// Print time
-		timestamp(start_time, start_clock);
-	}
-	
-	
-	
-	// ---------------------------- //
 	// Load mask cube if specified  //
 	// ---------------------------- //
 	
@@ -966,11 +951,26 @@ int main(int argc, char **argv)
 	const size_t n_pix_det = DataCube_copy_mask_32(maskCube, maskCubeTmp, -1);
 	message("%zu pixels detected by source finder (%.3f%%).", n_pix_det, 100.0 * (double)(n_pix_det) / (double)(DataCube_get_size(maskCube)));
 	
-	// Delete temporary SF mask again
-	DataCube_delete(maskCubeTmp);
-	
 	// Print time
 	timestamp(start_time, start_clock);
+	
+	
+	
+	// ---------------------------- //
+	// Write SF mask if requested   //
+	// ---------------------------- //
+	
+	if(write_rawmask)
+	{
+		status("Writing raw binary mask");
+		DataCube_save(maskCubeTmp, Path_get(path_mask_raw), overwrite, DESTROY);
+		
+		// Print time
+		timestamp(start_time, start_clock);
+	}
+	
+	// Delete temporary SF mask again
+	DataCube_delete(maskCubeTmp);
 	
 	
 	
