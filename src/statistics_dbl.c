@@ -256,13 +256,7 @@ double max_dbl(const double *data, const size_t size)
 	while(IS_NAN(*result) && data <-- result);
 	const double *ptr = result;
 	
-	while(ptr --> data)
-	{
-		// Note that this weird construct is a lot faster than without
-		// the useless if clause, possibly due to the branch predictor.
-		if(*ptr < *result);
-		else if(*ptr > *result) result = ptr;
-	}
+	while(ptr --> data) if(*ptr > *result) result = ptr;
 	
 	return *result;
 }
@@ -295,13 +289,7 @@ double min_dbl(const double *data, const size_t size)
 	while(IS_NAN(*result) && data <-- result);
 	const double *ptr = result;
 	
-	while(ptr --> data)
-	{
-		// Note that this weird construct is a lot faster than without
-		// the useless if clause, possibly due to the branch predictor.
-		if(*ptr > *result);
-		else if(*ptr < *result) result = ptr;
-	}
+	while(ptr --> data) if(*ptr < *result) result = ptr;
 	
 	return *result;
 }
@@ -387,11 +375,11 @@ double moment_dbl(const double *data, const size_t size, unsigned int order, con
 {
 	if(order == 0) return 1.0;
 	
-	const double *ptr = data + size;
 	double result = 0.0;
 	size_t counter = 0;
 	double tmp;
 	unsigned int i;
+	const double *ptr = data + size;
 	
 	while(ptr --> data)
 	{
@@ -586,7 +574,7 @@ double std_dev_dbl(const double *data, const size_t size)
 //   smallest element is at the n-th position within the     //
 //   array. After sorting, all elements below position n     //
 //   will be smaller than or equal to the n-th-smallest      //
-//   element, while  all elements above position n will be   //
+//   element, while all elements above position n will be    //
 //   greater than or equal to the n-th-smallest element. The //
 //   value of the n-th-smallest element is returned.         //
 //   Note that this function is not NaN-safe and will modify //
