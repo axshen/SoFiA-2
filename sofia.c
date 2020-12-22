@@ -262,21 +262,21 @@ int main(int argc, char **argv)
 	const char *base_dir  = Parameter_get_str(par, "output.directory");
 	const char *base_name = Parameter_get_str(par, "output.filename");
 	
-	// Set up input paths
-	Path *path_data_in = Path_new();
-	Path_set(path_data_in, Parameter_get_str(par, "input.data"));
-	
-	Path *path_gain_in = Path_new();
-	if(use_gain) Path_set(path_gain_in, Parameter_get_str(par, "input.gain"));
-	
-	Path *path_noise_in = Path_new();
-	if(use_noise) Path_set(path_noise_in, Parameter_get_str(par, "input.noise"));
-	
+	// Create input paths
+	Path *path_data_in    = Path_new();
+	Path *path_gain_in    = Path_new();
+	Path *path_noise_in   = Path_new();
 	Path *path_weights_in = Path_new();
-	if(use_weights) Path_set(path_weights_in, Parameter_get_str(par, "input.weights"));
+	Path *path_mask_in    = Path_new();
+	Path *path_flag_cat   = Path_new();
 	
-	Path *path_mask_in = Path_new();
-	if(use_mask) Path_set(path_mask_in, Parameter_get_str(par, "input.mask"));
+	// Set up input paths
+	                     Path_set(path_data_in,    Parameter_get_str(par, "input.data"));
+	if(use_gain)         Path_set(path_gain_in,    Parameter_get_str(par, "input.gain"));
+	if(use_noise)        Path_set(path_noise_in,   Parameter_get_str(par, "input.noise"));
+	if(use_weights)      Path_set(path_weights_in, Parameter_get_str(par, "input.weights"));
+	if(use_mask)         Path_set(path_mask_in,    Parameter_get_str(par, "input.mask"));
+	if(use_flagging_cat) Path_set(path_flag_cat,   Parameter_get_str(par, "flag.catalog"));
 	
 	// Choose appropriate output file and directory names depending on user input
 	String *output_file_name = String_new(strlen(base_name) ? base_name : Path_get_file(path_data_in));
@@ -288,7 +288,7 @@ int main(int argc, char **argv)
 	if(!String_compare(check_mime_type, "fits") && !String_compare(check_mime_type, "fit")) String_append(output_file_name, ".fits");
 	String_delete(check_mime_type);
 	
-	// Set up output paths
+	// Create output paths
 	Path *path_cat_ascii = Path_new();
 	Path *path_cat_xml   = Path_new();
 	Path *path_cat_sql   = Path_new();
@@ -348,6 +348,36 @@ int main(int argc, char **argv)
 	// Delete temporary strings again
 	String_delete(output_file_name);
 	String_delete(output_dir_name);
+	
+	
+	
+	// ---------------------------- //
+	// Check input files            //
+	// ---------------------------- //
+	
+	ensure(Path_file_is_readable(path_data_in), ERR_FILE_ACCESS,
+		"Failed to read data cube. Please ensure\n       that the file exists and is readable.");
+	
+	if(use_gain) {
+		ensure(Path_file_is_readable(path_gain_in), ERR_FILE_ACCESS,
+			"Failed to read gain cube. Please ensure\n       that the file exists and is readable.");
+	}
+	if(use_noise) {
+		ensure(Path_file_is_readable(path_noise_in), ERR_FILE_ACCESS,
+			"Failed to read noise cube. Please ensure\n       that the file exists and is readable.");
+	}
+	if(use_weights) {
+		ensure(Path_file_is_readable(path_weights_in), ERR_FILE_ACCESS,
+			"Failed to read weights cube. Please ensure\n       that the file exists and is readable.");
+	}
+	if(use_mask) {
+		ensure(Path_file_is_readable(path_mask_in), ERR_FILE_ACCESS,
+			"Failed to read mask cube. Please ensure\n       that the file exists and is readable.");
+	}
+	if(use_flagging_cat) {
+		ensure(Path_file_is_readable(path_flag_cat), ERR_FILE_ACCESS,
+			"Failed to read flagging catalogue. Please ensure\n       that the file exists and is readable.");
+	}
 	
 	
 	
@@ -1336,12 +1366,15 @@ int main(int argc, char **argv)
 	// Delete input parameters
 	Parameter_delete(par);
 	
-	// Delete file paths
+	// Delete input file paths
 	Path_delete(path_data_in);
 	Path_delete(path_gain_in);
 	Path_delete(path_noise_in);
 	Path_delete(path_weights_in);
 	Path_delete(path_mask_in);
+	Path_delete(path_flag_cat);
+	
+	// Delete output file paths
 	Path_delete(path_cat_ascii);
 	Path_delete(path_cat_xml);
 	Path_delete(path_cat_sql);

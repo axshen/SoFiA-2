@@ -145,7 +145,13 @@ PUBLIC void Path_set(Path *self, const char *path)
 	check_null(path);
 	
 	const size_t size = strlen(path);
-	ensure(size, ERR_USER_INPUT, "Empty path name encountered.");
+	if(size == 0)
+	{
+		// Empty string supplied
+		String_clear(self->dir);
+		String_clear(self->file);
+		return;
+	}
 	
 	// Check for last slash
 	const char *delimiter = strrchr(path, '/');
