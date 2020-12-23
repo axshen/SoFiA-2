@@ -53,8 +53,8 @@
 // -------------------- //
 
 // Check if array contains NaN
-int contains_nan_SFX(const DATA_T *data, const size_t size);
-int contains_inf_SFX(DATA_T *data, const size_t size, const bool flag_inf);
+bool contains_nan_SFX(const DATA_T *data, const size_t size);
+bool contains_inf_SFX(DATA_T *data, const size_t size, const bool flag_inf);
 
 // Maximum and minimum
 void max_min_SFX(const DATA_T *data, const size_t size, DATA_T *value_max, DATA_T *value_min);

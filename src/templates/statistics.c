@@ -67,11 +67,11 @@
 //   ber (NaN).                                              //
 // --------------------------------------------------------- //
 
-int contains_nan_SFX(const DATA_T *data, const size_t size)
+bool contains_nan_SFX(const DATA_T *data, const size_t size)
 {
 	const DATA_T *ptr = data + size;
-	while(ptr --> data) if(IS_NAN(*ptr)) return 1;
-	return 0;
+	while(ptr --> data) if(IS_NAN(*ptr)) return true;
+	return false;
 }
 
 
@@ -97,21 +97,18 @@ int contains_nan_SFX(const DATA_T *data, const size_t size)
 //   will be replaced with NaN.                              //
 // --------------------------------------------------------- //
 
-int contains_inf_SFX(DATA_T *data, const size_t size, const bool flag_inf)
+bool contains_inf_SFX(DATA_T *data, const size_t size, const bool flag_inf)
 {
-	DATA_T *ptr = data + size;
 	bool inf_found = false;
+	DATA_T *ptr = data + size;
 	
 	while(ptr --> data)
 	{
 		if(isinf(*ptr))
 		{
-			if(flag_inf)
-			{
-				inf_found = true;
-				*ptr = NAN;
-			}
-			else return true;
+			if(!flag_inf) return true;
+			inf_found = true;
+			*ptr = NAN;
 		}
 	}
 	
@@ -146,84 +143,20 @@ int contains_inf_SFX(DATA_T *data, const size_t size, const bool flag_inf)
 
 void max_min_SFX(const DATA_T *data, const size_t size, DATA_T *value_max, DATA_T *value_min)
 {
-	const DATA_T *tmp1;
-	const DATA_T *tmp2;
-	const DATA_T *data2 = data + 1;
+	// Find the last non-NaN element
 	const DATA_T *ptr = data + size - 1;
-	const DATA_T *result_min;
-	const DATA_T *result_max;
+	while(IS_NAN(*ptr) && ptr > data) --ptr;
 	
-	// Find last non-NaN element
-	while(IS_NAN(*ptr) && data <-- ptr);
-	result_max = ptr;
+	// Copy values across
+	*value_min = *ptr;
+	*value_max = *ptr;
 	
-	if(IS_NAN(*result_max))
+	// Check remaining elements
+	for(const DATA_T *ptr2 = ptr; ptr2 --> data;)
 	{
-		// Data array only contains NaN
-		*value_max = NAN;
-		*value_min = NAN;
-		return;
+		if(*ptr2 < *value_min) *value_min = *ptr2;
+		else if(*ptr2 > *value_max) *value_max = *ptr2;
 	}
-	
-	if(ptr == data)
-	{
-		// Data array only contains one non-NaN value
-		*value_max = *result_max;
-		*value_min = *result_max;
-		return;
-	}
-	
-	// Find second-to-last non-NaN element
-	if(--ptr > data) while(IS_NAN(*ptr) && data <-- ptr);
-	result_min = ptr;
-	
-	if(IS_NAN(*result_min))
-	{
-		// Data array only contains one non-NaN value
-		*value_max = *result_max;
-		*value_min = *result_max;
-		return;
-	}
-	
-	// Swap min and max if necessary
-	if(*result_min > *result_max)
-	{
-		tmp1 = result_min;
-		result_min = result_max;
-		result_max = tmp1;
-	}
-	
-	// Iterate over remaining array to update min and max
-	while(ptr > data2)
-	{
-		tmp1 = --ptr;
-		tmp2 = --ptr;
-		
-		// Bizarrely, the following faster by more than a factor of 2
-		// than first checking if tmp1 > tmp2, presumably due to branch
-		// predictor optimisation.
-		if(*tmp1 > *result_max || *tmp2 > *result_max)
-		{
-			if(*tmp2 > *tmp1) result_max = tmp2;
-			else result_max = tmp1;
-		}
-		if(*tmp1 < *result_min || *tmp2 < *result_min)
-		{
-			if(*tmp2 < *tmp1) result_min = tmp2;
-			else result_min = tmp1;
-		}
-	}
-	
-	// Ensure that we didn't miss the first array element
-	if(ptr > data)
-	{
-		tmp1 = --ptr;
-		if(*tmp1 > *result_max) result_max = tmp1;
-		if(*tmp1 < *result_min) result_min = tmp1;
-	}
-	
-	*value_max = *result_max;
-	*value_min = *result_min;
 	
 	return;
 }
