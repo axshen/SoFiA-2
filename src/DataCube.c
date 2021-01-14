@@ -5662,7 +5662,7 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 		DataCube *mom1;
 		DataCube *mom2;
 		DataCube *chan;
-		DataCube_create_moments(cubelet, masklet, &mom0, &mom1, &mom2, &chan, Source_get_identifier(src), use_wcs, false);
+		DataCube_create_moments(cubelet, masklet, &mom0, &mom1, &mom2, &chan, Source_get_identifier(src), use_wcs, true);
 		
 		// Save output products...
 		// ...cubelet
