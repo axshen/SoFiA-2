@@ -2,11 +2,13 @@
 
 This is version 2 of the HI Source Finding Application (SoFiA). SoFiA 2 is a reimplementation of the original SoFiA pipeline in the C programming language. It is intended for use in HI data analysis pipelines and will be developed and maintained in parallel to SoFiA 1.x. While SoFiA 2 is still under active development, a **stable release** is already available at this point in time and can be used in production mode. In addition, users will be able to continue using **SoFiA 1.x** (https://github.com/SoFiA-Admin/SoFiA) for processing their data.
 
+
 ## Improvements in SoFiA 2
 
 * Being written in C and making extensive use of multi-threading, SoFiA 2 is much faster than SoFiA 1.x.
 * SoFiA 2 requires significantly less memory than SoFiA 1.x (down from > 5 × cube size to ~ 2.3 × cube size).
 * SoFiA 2 currently has only a single external dependency (WCSLIB) and should therefore compile and run on any machine with a Linux or Unix operating system and the GCC compiler and WCSLIB installed.
+
 
 ## Installation
 
@@ -20,13 +22,18 @@ Note that the `-fopenmp` parameter is optional and will enable **multi-threading
 
 As an alternative, we provide a `Makefile` for those who prefer to use `make` to install SoFiA 2. The `Makefile` itself contains a few examples of how to invoke it with different compilers (with or without OpenMP support). Note that if you prefer to use `make`, you may still want to create a symbolic link or alias to the `sofia` executable file in the end to make SoFiA 2 easily accessible across your system.
 
+**NOTE:** Others may have created alternative ways of downloading and installing SoFiA 2. As we have no control over such third-party distibutions, we cannot provide support for installation methods other than the ones described here. If you have installed SoFiA 2 through a third-party repository, please contact the administrator of that package in the case of installation issues.
+
+
 ## Documentation
 
 An overview of all control parameters as well as a PDF copy of the SoFiA 2 User Manual can be found on the wiki at https://github.com/SoFiA-Admin/SoFiA-2/wiki. The wiki also contains a small test data cube and parameter file that users can download to verify their SoFiA 2 installation.
 
+
 ## Feedback
 
 Should you decide to run SoFiA 2 on your own data cubes, we would welcome any feedback on how well SoFiA 2 works for you and whether any improvements could be made. If you have a GitHub account, you can directly create a new issue (https://github.com/SoFiA-Admin/SoFiA-2/issues/new) on GitHub for questions, feature requests or bug reports. Alternatively, please feel free to directly contact the project leader, Tobias Westmeier, via e-mail at `tobias.westmeier (at) uwa.edu.au` to provide feedback on your experience with SoFiA 2. Note that the main purpose of SoFiA 2 is to facilitate the processing of HI data from SKA precursor surveys, and we are unlikely to be able to accommodate requests for additional features beyond this primary scope.
+
 
 ## Copyright and licence
 
