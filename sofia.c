@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 	// Check command line arguments //
 	// ---------------------------- //
 	
-	ensure(argc == 2, ERR_USER_INPUT, "Unexpected number of command line arguments.\nUsage: %s <parameter_file>", argv[0]);
+	ensure(argc >= 2, ERR_USER_INPUT, "Unexpected number of command line arguments.\nUsage: %s <parameter_file>", argv[0]);
 	
 	
 	
@@ -134,8 +134,44 @@ int main(int argc, char **argv)
 	// Load user parameters         //
 	// ---------------------------- //
 	
-	message("Loading user parameter file: \'%s\'.\n", argv[1]);
-	Parameter_load(par, argv[1], PARAMETER_UPDATE);
+	message("Loading user-specified parameters.");
+	
+	for(int i = 1; i < argc; ++i)
+	{
+		bool unknown_parameter = false;
+		
+		if(strchr(argv[i], '=') == NULL)
+		{
+			// Load parameter file
+			message("- Loading user parameter file: %s", argv[i]);
+			Parameter_load(par, argv[i], PARAMETER_UPDATE);
+		}
+		else
+		{
+			// Read command-line setting
+			String *key = String_new("");
+			String *val = String_new("");
+			
+			String_set_delim(key, argv[i], '=', true, true);
+			String_set_delim(val, argv[i], '=', true, false);
+			
+			if(Parameter_exists(par, String_get(key), NULL))
+			{
+				message("- Setting parameter: %s = %s", String_get(key), String_get(val));
+				Parameter_set(par, String_get(key), String_get(val));
+			}
+			else
+			{
+				warning("Unknown parameter: \'%s\'.", String_get(key));
+				unknown_parameter = true;
+			}
+			
+			String_delete(key);
+			String_delete(val);
+		}
+		
+		ensure(!unknown_parameter || !Parameter_get_bool(par, "pipeline.pedantic"), ERR_USER_INPUT, "Unknown parameter settings encountered. Please check\n       your input or change \'pipeline.pedantic\' to \'false\'.");
+	}
 	
 	
 	

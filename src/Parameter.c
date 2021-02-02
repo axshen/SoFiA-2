@@ -183,7 +183,8 @@ PUBLIC void Parameter_set(Parameter *self, const char *key, const char *value)
 //   (1) self     - Object self-reference.                           //
 //   (2) key      - Name of the parameter to be checked.             //
 //   (3) index    - Pointer to an index variable that will be set to //
-//                  the index of the parameter, if found.            //
+//                  the index of the parameter, if found. This can   //
+//                  be NULL if the index is not required.            //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
