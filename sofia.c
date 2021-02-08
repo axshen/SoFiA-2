@@ -181,15 +181,23 @@ int main(int argc, char **argv)
 	
 	#ifdef _OPENMP
 		const int n_threads = Parameter_get_int(par, "pipeline.threads");
-		if(n_threads > 0 && n_threads < n_cpu_cores)
+		if(n_threads > 0)
 		{
-			omp_set_num_threads(n_threads);
-			message("Using %d out of %d available CPU cores.\n", n_threads, n_cpu_cores);
+			if(n_threads < n_cpu_cores)
+			{
+				omp_set_num_threads(n_threads);
+				message("Using %d out of %d available CPU cores.\n", n_threads, n_cpu_cores);
+			}
+			else
+			{
+				omp_set_num_threads(n_cpu_cores);
+				message("Using all %d available CPU cores.\n", n_cpu_cores);
+			}
 		}
 		else
 		{
-			omp_set_num_threads(n_cpu_cores);
-			message("Using all %d available CPU cores.\n", n_cpu_cores);
+			char *env_omp_num_threads = getenv("OMP_NUM_THREADS");
+			message("Number of CPU cores controlled by OMP_NUM_THREADS = %s.\n", env_omp_num_threads == NULL ? "[default]" : env_omp_num_threads);
 		}
 	#else
 		warning("Multi-threading is currently disabled. To enable it, please re-\n         install SoFiA with the '-fopenmp' option.");
