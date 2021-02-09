@@ -5268,8 +5268,10 @@ PRIVATE void DataCube_create_src_name(const DataCube *self, String **source_name
 //   (7)  obj_name  - Name of the object for OBJECT header entry.    //
 //                    If NULL, no OBJECT entry will be created.      //
 //   (8)  use_wcs   - If true, convert channel numbers to WCS.       //
-//   (9)  positive  - If true, use only pixels with positive flux in //
-//                    the generation of moments 1 and 2.             //
+//   (9)  threshold - Flux threshold to be used in the calculation   //
+//                    of moment 1 and 2. Note that moment 0 will al- //
+//                    ways include all channels to avoid a positive  //
+//                    flux bias.                                     //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -5292,7 +5294,7 @@ PRIVATE void DataCube_create_src_name(const DataCube *self, String **source_name
 //   from affecting the moment calculation.                          //
 // ----------------------------------------------------------------- //
 
-PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, const char *obj_name, bool use_wcs, const bool positive)
+PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, const char *obj_name, bool use_wcs, const double threshold)
 {
 	// Sanity checks
 	check_null(self);
@@ -5396,7 +5398,7 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 					{
 						DataCube_add_data_int(*chan, x, y, 0, 1);
 						
-						if(!positive || flux > 0.0)
+						if(flux > threshold)
 						{
 							DataCube_add_data_flt(*mom1, x, y, 0, flux * spectral);
 							DataCube_add_data_flt(sum_pos, x, y, 0, flux);
@@ -5437,7 +5439,7 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 				{
 					const double flux = DataCube_get_data_flt(self, x, y, z);
 					
-					if(!positive || flux > 0.0)
+					if(flux > threshold)
 					{
 						const double velo = DataCube_get_data_flt(*mom1, x, y, 0) - spectral;
 						DataCube_add_data_flt(*mom2, x, y, 0, velo * velo * flux);
@@ -5489,6 +5491,7 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 //   (7)  physical  - If true, correct flux for beam solid angle.    //
 //   (8)  margin    - Margin in pixels to be added around each       //
 //                    source. If 0, sources will be cut out exactly. //
+//   (9)  threshold - Flux threshold to be used for moment 1 and 2.  //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -5504,7 +5507,7 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 //   leted again.                                                    //
 // ----------------------------------------------------------------- //
 
-PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask, const Catalog *cat, const char *basename, const bool overwrite, bool use_wcs, bool physical, const size_t margin)
+PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask, const Catalog *cat, const char *basename, const bool overwrite, bool use_wcs, bool physical, const size_t margin, const double threshold)
 {
 	// Sanity checks
 	check_null(self);
@@ -5587,6 +5590,10 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 		const size_t src_id = Source_get_par_by_name_int(src, "id");
 		ensure(src_id, ERR_USER_INPUT, "Source ID missing from catalogue; cannot create cubelets.");
 		
+		// Get local RMS
+		double rms = Source_get_par_by_name_flt(src, "rms");
+		if IS_NAN(rms) rms = 0.0;
+		
 		// Get source bounding box
 		size_t x_min = Source_get_par_by_name_int(src, "x_min");
 		size_t x_max = Source_get_par_by_name_int(src, "x_max");
@@ -5662,7 +5669,7 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 		DataCube *mom1;
 		DataCube *mom2;
 		DataCube *chan;
-		DataCube_create_moments(cubelet, masklet, &mom0, &mom1, &mom2, &chan, Source_get_identifier(src), use_wcs, true);
+		DataCube_create_moments(cubelet, masklet, &mom0, &mom1, &mom2, &chan, Source_get_identifier(src), use_wcs, threshold * rms);
 		
 		// Save output products...
 		// ...cubelet

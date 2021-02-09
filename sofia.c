@@ -249,6 +249,7 @@ int main(int argc, char **argv)
 	const bool write_cubelets    = Parameter_get_bool(par, "output.writeCubelets");
 	const bool overwrite         = Parameter_get_bool(par, "output.overwrite");
 	
+	const double thresh_mom      = Parameter_get_flt(par, "output.thresholdMom12");
 	const double rel_threshold   = Parameter_get_flt(par, "reliability.threshold");
 	const double rel_fmin        = Parameter_get_flt(par, "reliability.fmin");
 	
@@ -1284,7 +1285,8 @@ int main(int argc, char **argv)
 	if(write_cubelets)
 	{
 		status("Creating cubelets");
-		DataCube_create_cubelets(dataCube, maskCube, catalog, Path_get(path_cubelets), overwrite, use_wcs, use_physical, Parameter_get_int(par, "output.marginCubelets"));
+		message("Flux threshold (moment 1 and 2): %.2e", thresh_mom);
+		DataCube_create_cubelets(dataCube, maskCube, catalog, Path_get(path_cubelets), overwrite, use_wcs, use_physical, Parameter_get_int(par, "output.marginCubelets"), thresh_mom);
 		
 		// Print time
 		timestamp(start_time, start_clock);
@@ -1305,7 +1307,7 @@ int main(int argc, char **argv)
 		DataCube *mom1 = NULL;
 		DataCube *mom2 = NULL;
 		DataCube *chan = NULL;
-		DataCube_create_moments(dataCube, maskCube, &mom0, &mom1, &mom2, &chan, NULL, use_wcs, true);
+		DataCube_create_moments(dataCube, maskCube, &mom0, &mom1, &mom2, &chan, NULL, use_wcs, 0.0);
 		
 		// Save moment maps to disk
 		if(mom0 != NULL) DataCube_save(mom0, Path_get(path_mom0), overwrite, DESTROY);

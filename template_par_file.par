@@ -140,4 +140,5 @@ output.writeRawMask        =  false
 output.writeMoments        =  false
 output.writeCubelets       =  false
 output.marginCubelets      =  0
+output.thresholdMom12      =  0.0
 output.overwrite           =  true
