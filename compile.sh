@@ -1,8 +1,8 @@
 #!/bin/sh
 ### ____________________________________________________________________ ###
 ###                                                                      ###
-### SoFiA 2.2.1 (compile.sh) - Source Finding Application                ###
-### Copyright (C) 2020 Tobias Westmeier                                  ###
+### SoFiA 2.3.0 (compile.sh) - Source Finding Application                ###
+### Copyright (C) 2021 Tobias Westmeier                                  ###
 ### ____________________________________________________________________ ###
 ###                                                                      ###
 ### Address:  Tobias Westmeier                                           ###

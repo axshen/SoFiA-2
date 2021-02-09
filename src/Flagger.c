@@ -1,7 +1,7 @@
 /// ____________________________________________________________________ ///
 ///                                                                      ///
-/// SoFiA 2.2.1 (Flagger.c) - Source Finding Application                 ///
-/// Copyright (C) 2020 Tobias Westmeier                                  ///
+/// SoFiA 2.3.0 (Flagger.c) - Source Finding Application                 ///
+/// Copyright (C) 2021 Tobias Westmeier                                  ///
 /// ____________________________________________________________________ ///
 ///                                                                      ///
 /// Address:  Tobias Westmeier                                           ///
