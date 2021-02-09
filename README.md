@@ -22,7 +22,7 @@ Note that the `-fopenmp` parameter is optional and will enable **multi-threading
 
 As an alternative, we provide a `Makefile` for those who prefer to use `make` to install SoFiA 2. The `Makefile` itself contains a few examples of how to invoke it with different compilers (with or without OpenMP support). Note that if you prefer to use `make`, you may still want to create a symbolic link or alias to the `sofia` executable file in the end to make SoFiA 2 easily accessible across your system.
 
-**NOTE:** Others may have created alternative ways of downloading and installing SoFiA 2. As we have no control over such third-party distibutions, we cannot provide support for installation methods other than the ones described here. If you have installed SoFiA 2 through a third-party repository, please contact the administrator of that package in the case of installation issues.
+**NOTE:** Others may have created alternative ways of downloading and installing SoFiA 2. As we have no control over such third-party distributions, we cannot provide support for installation methods other than the ones described here. If you have installed SoFiA 2 through a third-party repository, please contact the administrator of that package in the case of installation issues.
 
 
 ## Documentation
