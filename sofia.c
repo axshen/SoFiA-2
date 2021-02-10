@@ -1208,7 +1208,9 @@ int main(int argc, char **argv)
 	// Create and save reliability parameter catalogues if requested
 	if(use_reliability && use_rel_debug)
 	{
-		message("Writing reliability debugging catalogues.");
+		message("Writing reliability debugging catalogues:");
+		message(" - %s", Path_get_file(path_rel_cat_n));
+		message(" - %s", Path_get_file(path_rel_cat_p));
 		
 		Catalog *cat_rel_par_neg = Catalog_new();
 		Catalog *cat_rel_par_pos = Catalog_new();
