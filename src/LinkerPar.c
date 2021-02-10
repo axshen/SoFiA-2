@@ -645,6 +645,84 @@ PUBLIC Catalog *LinkerPar_make_catalog(const LinkerPar *self, const Map *filter,
 
 
 // ----------------------------------------------------------------- //
+// Create reliability parameter catalogues from LinkerPar object     //
+// ----------------------------------------------------------------- //
+// Arguments:                                                        //
+//                                                                   //
+//   (1) self            - Object self-reference.                    //
+//   (2) flux_unit       - String holding the flux unit of the data. //
+//   (3) cat_rel_par_neg - Pointer to catalogue that will hold the   //
+//                         reliability parameters of all negative    //
+//                         detections.                               //
+//   (4) cat_rel_par_pos - Pointer to catalogue that will hold the   //
+//                         reliability parameters of all positive    //
+//                         detections.                               //
+//                                                                   //
+// Return value:                                                     //
+//                                                                   //
+//   No return value.                                                //
+//                                                                   //
+// Description:                                                      //
+//                                                                   //
+//   Public method for generating catalogues of relevant reliability //
+//   parameters of all negative and positive detections for debug-   //
+//   ging purposes. These include the source ID, geometric centroid  //
+//   (x, y, z), reliability and the three parameters used in the re- //
+//   liability calculation: log(f_max), log(f_sum) and log(f_mean).  //
+//   Two pointers to empty catalogues must be provided; they will be //
+//   holding the negative and positive detections, respectively.     //
+// ----------------------------------------------------------------- //
+
+PUBLIC void LinkerPar_get_rel_cat(const LinkerPar *self, const char *flux_unit, Catalog **cat_rel_par_neg, Catalog **cat_rel_par_pos)
+{
+	// Sanity checks
+	check_null(self);
+	check_null(flux_unit);
+	check_null(cat_rel_par_neg);
+	check_null(cat_rel_par_pos);
+	ensure(Catalog_get_size(*cat_rel_par_neg) == 0 && Catalog_get_size(*cat_rel_par_pos) == 0, ERR_USER_INPUT, "Non-empty reliability parameter catalogue provided.");
+	
+	// Create string for holding identifier
+	String *identifier = String_new("");
+	
+	// Loop over all LinkerPar entries
+	for(size_t i = 0; i < self->size; ++i)
+	{
+		// Check if flux is negative
+		const bool is_neg = (self->f_sum[i] < 0.0);
+		
+		// Create a new source
+		Source *src = Source_new(self->verbosity);
+		
+		// Set identifier according to current label
+		String_set_int(identifier, is_neg ? "neg_%zu" : "pos_%zu", self->label[i]);
+		Source_set_identifier(src, String_get(identifier));
+		
+		// Add basic parameters
+		Source_add_par_int(src, "id",  self->label[i],                                  "",    "meta.id");
+		Source_add_par_flt(src, "x",   (double)(self->x_max[i] - self->x_min[i]) / 2.0, "pix", "pos.cartesian.x");
+		Source_add_par_flt(src, "y",   (double)(self->y_max[i] - self->y_min[i]) / 2.0, "pix", "pos.cartesian.y");
+		Source_add_par_flt(src, "z",   (double)(self->z_max[i] - self->z_min[i]) / 2.0, "pix", "pos.cartesian.z");
+		Source_add_par_flt(src, "rel", self->rel[i],                                    "",    "stat.probability");
+		
+		// Add relevant reliability parameters
+		Source_add_par_flt(src, "log_f_peak", is_neg ? log10(-self->f_min[i]) : log10(self->f_max[i]), flux_unit, "phot.flux.density;stat.max");
+		Source_add_par_flt(src, "log_f_sum", is_neg ? log10(-self->f_sum[i]) : log10(self->f_sum[i]), flux_unit, "phot.flux");
+		Source_add_par_flt(src, "log_f_mean", is_neg ? log10(-self->f_sum[i] / self->n_pix[i]) : log10(self->f_sum[i] / self->n_pix[i]), flux_unit, "phot.flux;stat.mean");
+		
+		// Add source to appropriate catalogue
+		Catalog_add_source(is_neg ? *cat_rel_par_neg : *cat_rel_par_pos, src);
+	}
+	
+	// Clean up
+	String_delete(identifier);
+	
+	return;
+}
+
+
+
+// ----------------------------------------------------------------- //
 // Print some basic information about the LinkerPar object           //
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //

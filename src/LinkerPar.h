@@ -68,6 +68,7 @@ PUBLIC  double     LinkerPar_get_rel      (const LinkerPar *self, const size_t l
 PUBLIC  size_t     LinkerPar_get_label    (const LinkerPar *self, const size_t index);
 
 PUBLIC  Catalog   *LinkerPar_make_catalog (const LinkerPar *self, const Map *filter, const char *flux_unit);
+PUBLIC  void       LinkerPar_get_rel_cat  (const LinkerPar *self, const char *flux_unit, Catalog **cat_rel_par_neg, Catalog **cat_rel_par_pos);
 PUBLIC  void       LinkerPar_print_info   (const LinkerPar *self);
 
 // Reliability filtering

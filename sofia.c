@@ -231,6 +231,7 @@ int main(int argc, char **argv)
 	const bool use_reliability   = Parameter_get_bool(par, "reliability.enable");
 	const bool use_rel_plot      = Parameter_get_bool(par, "reliability.plot");
 	const bool use_rel_cat       = strlen(Parameter_get_str(par, "reliability.catalog")) ? true : false;
+	const bool use_rel_debug     = Parameter_get_bool(par, "reliability.debug");
 	const bool use_mask_dilation = Parameter_get_bool(par, "dilation.enable");
 	const bool use_parameteriser = Parameter_get_bool(par, "parameter.enable");
 	const bool use_wcs           = Parameter_get_bool(par, "parameter.wcs");
@@ -347,6 +348,8 @@ int main(int argc, char **argv)
 	Path *path_mom2      = Path_new();
 	Path *path_chan      = Path_new();
 	Path *path_rel_plot  = Path_new();
+	Path *path_rel_cat_n = Path_new();
+	Path *path_rel_cat_p = Path_new();
 	Path *path_skel_plot = Path_new();
 	Path *path_flag      = Path_new();
 	Path *path_cubelets  = Path_new();
@@ -365,26 +368,30 @@ int main(int argc, char **argv)
 	Path_set_dir(path_mom2,      String_get(output_dir_name));
 	Path_set_dir(path_chan,      String_get(output_dir_name));
 	Path_set_dir(path_rel_plot,  String_get(output_dir_name));
+	Path_set_dir(path_rel_cat_n, String_get(output_dir_name));
+	Path_set_dir(path_rel_cat_p, String_get(output_dir_name));
 	Path_set_dir(path_skel_plot, String_get(output_dir_name));
 	Path_set_dir(path_flag,      String_get(output_dir_name));
 	Path_set_dir(path_cubelets,  String_get(output_dir_name));
 	
 	// Set up output file names
-	Path_set_file_from_template(path_cat_ascii,  String_get(output_file_name), "_cat",      ".txt");
-	Path_set_file_from_template(path_cat_xml,    String_get(output_file_name), "_cat",      ".xml");
-	Path_set_file_from_template(path_cat_sql,    String_get(output_file_name), "_cat",      ".sql");
-	Path_set_file_from_template(path_noise_out,  String_get(output_file_name), "_noise",    ".fits");
-	Path_set_file_from_template(path_filtered,   String_get(output_file_name), "_filtered", ".fits");
-	Path_set_file_from_template(path_mask_out,   String_get(output_file_name), "_mask",     ".fits");
-	Path_set_file_from_template(path_mask_2d,    String_get(output_file_name), "_mask-2d",  ".fits");
-	Path_set_file_from_template(path_mask_raw,   String_get(output_file_name), "_mask-raw", ".fits");
-	Path_set_file_from_template(path_mom0,       String_get(output_file_name), "_mom0",     ".fits");
-	Path_set_file_from_template(path_mom1,       String_get(output_file_name), "_mom1",     ".fits");
-	Path_set_file_from_template(path_mom2,       String_get(output_file_name), "_mom2",     ".fits");
-	Path_set_file_from_template(path_chan,       String_get(output_file_name), "_chan",     ".fits");
-	Path_set_file_from_template(path_rel_plot,   String_get(output_file_name), "_rel",      ".eps");
-	Path_set_file_from_template(path_skel_plot,  String_get(output_file_name), "_skellam",  ".eps");
-	Path_set_file_from_template(path_flag,       String_get(output_file_name), "_flags",    ".log");
+	Path_set_file_from_template(path_cat_ascii,  String_get(output_file_name), "_cat",         ".txt");
+	Path_set_file_from_template(path_cat_xml,    String_get(output_file_name), "_cat",         ".xml");
+	Path_set_file_from_template(path_cat_sql,    String_get(output_file_name), "_cat",         ".sql");
+	Path_set_file_from_template(path_noise_out,  String_get(output_file_name), "_noise",       ".fits");
+	Path_set_file_from_template(path_filtered,   String_get(output_file_name), "_filtered",    ".fits");
+	Path_set_file_from_template(path_mask_out,   String_get(output_file_name), "_mask",        ".fits");
+	Path_set_file_from_template(path_mask_2d,    String_get(output_file_name), "_mask-2d",     ".fits");
+	Path_set_file_from_template(path_mask_raw,   String_get(output_file_name), "_mask-raw",    ".fits");
+	Path_set_file_from_template(path_mom0,       String_get(output_file_name), "_mom0",        ".fits");
+	Path_set_file_from_template(path_mom1,       String_get(output_file_name), "_mom1",        ".fits");
+	Path_set_file_from_template(path_mom2,       String_get(output_file_name), "_mom2",        ".fits");
+	Path_set_file_from_template(path_chan,       String_get(output_file_name), "_chan",        ".fits");
+	Path_set_file_from_template(path_rel_plot,   String_get(output_file_name), "_rel",         ".eps");
+	Path_set_file_from_template(path_rel_cat_n,  String_get(output_file_name), "_rel_cat_neg", ".xml");
+	Path_set_file_from_template(path_rel_cat_p,  String_get(output_file_name), "_rel_cat_pos", ".xml");
+	Path_set_file_from_template(path_skel_plot,  String_get(output_file_name), "_skellam",     ".eps");
+	Path_set_file_from_template(path_flag,       String_get(output_file_name), "_flags",       ".log");
 	
 	// Set up cubelet directory and file base name
 	Path_append_dir_from_template(path_cubelets, String_get(output_file_name), "_cubelets");
@@ -501,6 +508,11 @@ int main(int argc, char **argv)
 			/*ensure(!Path_file_is_readable(path_skel_plot), ERR_FILE_ACCESS,
 				"Skellam plot already exists. Please delete the file\n"
 				"       or set \'output.overwrite = true\'.");*/
+		}
+		if(use_reliability && use_rel_debug) {
+			ensure(!Path_file_is_readable(path_rel_cat_n) && !Path_file_is_readable(path_rel_cat_p), ERR_FILE_ACCESS,
+				   "Reliability debugging catalogue already exists. Please delete\n"
+				   "       the file or set \'output.overwrite = true\'.");
 		}
 		if(autoflag_log) {
 			ensure(!Path_file_is_readable(path_flag), ERR_FILE_ACCESS,
@@ -1179,6 +1191,8 @@ int main(int argc, char **argv)
 	// Create initial catalogue     //
 	// ---------------------------- //
 	
+	status("Creating initial catalogue");
+	
 	// Extract flux unit from header
 	String *unit_flux = String_trim(DataCube_gethd_string(dataCube, "BUNIT"));
 	if(!String_size(unit_flux))
@@ -1189,6 +1203,23 @@ int main(int argc, char **argv)
 	
 	// Generate catalogue of reliable sources from linker output
 	Catalog *catalog = LinkerPar_make_catalog(lpar, rel_filter, String_get(unit_flux));
+	message("Initial source catalogue created.");
+	
+	// Create and save reliability parameter catalogues if requested
+	if(use_reliability && use_rel_debug)
+	{
+		message("Writing reliability debugging catalogues.");
+		
+		Catalog *cat_rel_par_neg = Catalog_new();
+		Catalog *cat_rel_par_pos = Catalog_new();
+		
+		LinkerPar_get_rel_cat(lpar, String_get(unit_flux), &cat_rel_par_neg, &cat_rel_par_pos);
+		Catalog_save(cat_rel_par_neg, Path_get(path_rel_cat_n), CATALOG_FORMAT_XML, overwrite);
+		Catalog_save(cat_rel_par_pos, Path_get(path_rel_cat_p), CATALOG_FORMAT_XML, overwrite);
+		
+		Catalog_delete(cat_rel_par_neg);
+		Catalog_delete(cat_rel_par_pos);
+	}
 	
 	// Delete linker parameters, reliability filter and flux unit string, as they are no longer needed
 	LinkerPar_delete(lpar);
@@ -1197,6 +1228,9 @@ int main(int argc, char **argv)
 	
 	// Terminate if catalogue is empty
 	ensure(Catalog_get_size(catalog), ERR_NO_SRC_FOUND, "No reliable sources found. Terminating pipeline.");
+	
+	// Print time
+	timestamp(start_time, start_clock);
 	
 	
 	
@@ -1434,6 +1468,8 @@ int main(int argc, char **argv)
 	Path_delete(path_mom2);
 	Path_delete(path_chan);
 	Path_delete(path_rel_plot);
+	Path_delete(path_rel_cat_n);
+	Path_delete(path_rel_cat_p);
 	Path_delete(path_skel_plot);
 	Path_delete(path_flag);
 	Path_delete(path_cubelets);
