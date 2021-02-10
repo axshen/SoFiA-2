@@ -700,9 +700,9 @@ PUBLIC void LinkerPar_get_rel_cat(const LinkerPar *self, const char *flux_unit, 
 		
 		// Add basic parameters
 		Source_add_par_int(src, "id",  self->label[i],                                  "",    "meta.id");
-		Source_add_par_flt(src, "x",   (double)(self->x_max[i] - self->x_min[i]) / 2.0, "pix", "pos.cartesian.x");
-		Source_add_par_flt(src, "y",   (double)(self->y_max[i] - self->y_min[i]) / 2.0, "pix", "pos.cartesian.y");
-		Source_add_par_flt(src, "z",   (double)(self->z_max[i] - self->z_min[i]) / 2.0, "pix", "pos.cartesian.z");
+		Source_add_par_flt(src, "x",   (double)(self->x_max[i] + self->x_min[i]) / 2.0, "pix", "pos.cartesian.x");
+		Source_add_par_flt(src, "y",   (double)(self->y_max[i] + self->y_min[i]) / 2.0, "pix", "pos.cartesian.y");
+		Source_add_par_flt(src, "z",   (double)(self->z_max[i] + self->z_min[i]) / 2.0, "pix", "pos.cartesian.z");
 		Source_add_par_flt(src, "rel", self->rel[i],                                    "",    "stat.probability");
 		
 		// Add relevant reliability parameters
