@@ -66,7 +66,6 @@ rippleFilter.windowZ       =  15
 rippleFilter.gridXY        =  0
 rippleFilter.gridZ         =  0
 rippleFilter.interpolate   =  false
-rippleFilter.boxcar        =  0
 
 
 # S+C finder

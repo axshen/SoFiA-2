@@ -571,9 +571,8 @@ PUBLIC void Parameter_default(Parameter *self)
 	Parameter_set(self, "rippleFilter.gridXY"      , "0");
 	Parameter_set(self, "rippleFilter.gridZ"       , "0");
 	Parameter_set(self, "rippleFilter.interpolate" , "false");
-	Parameter_set(self, "rippleFilter.boxcar"      , "0");
 	
-	// S+C finder                                   , "
+	// S+C finder
 	Parameter_set(self, "scfind.enable"            , "true");
 	Parameter_set(self, "scfind.kernelsXY"         , "0, 3, 6");
 	Parameter_set(self, "scfind.kernelsZ"          , "0, 3, 7, 15");
