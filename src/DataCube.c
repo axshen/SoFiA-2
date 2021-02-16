@@ -1598,18 +1598,25 @@ PUBLIC void DataCube_scale_noise_spec(const DataCube *self, const noise_stat sta
 //                     NOISE_STAT_MAD for median absolute deviation  //
 //                     or NOISE_STAT_GAUSS for Gaussian fitting to   //
 //                     the flux histogram.                           //
+//                     Alternatively, NOISE_STAT_MEAN or NOISE_STAT_ //
+//                     MEDIAN can be used to measure and subtract    //
+//                     the mean or median value.                     //
 //   (3) range       - Flux range to be used in noise measurement.   //
 //                     Can be -1, 0 or +1 for negative range, full   //
-//                     range or positive range, respectively.        //
+//                     range or positive range, respectively. NOTE   //
+//                     that this has no effect if the mean or median //
+//                     is to be calculated rather than the noise.    //
 //   (4) window_spat - Spatial window size in pixels; must be odd.   //
 //   (5) window_spec - Spectral window size in chan.; must be odd.   //
 //   (6) grid_spat   - Spatial grid size in pixels; must be odd.     //
 //   (7) grid_spec   - Spectral grid size in chan.; must be odd.     //
-//   (8) interpolate - If true, the noise values will be interpola-  //
+//   (8) interpolate - If true, the noise or mean/median values will //
+//                     be interpolated in between the grid points.   //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
-//   Returns a data cube containing the measured noise values.       //
+//   Returns a data cube containing the measured noise values (or    //
+//   the mean/median value if requested).                            //
 //                                                                   //
 // Description:                                                      //
 //                                                                   //
@@ -1625,6 +1632,12 @@ PUBLIC void DataCube_scale_noise_spec(const DataCube *self, const noise_stat sta
 //   positions in between the grid points. Once completed, the me-   //
 //   thod will return a DataCube object that contains the measured   //
 //   noise values by which the cube was divided.                     //
+//                                                                   //
+//   Alternatively, this method can also be used to measure and sub- //
+//   tract either the mean or the median across the specified window //
+//   by setting the argument 'statistic' to either 'NOISE_STAT_MEAN' //
+//   or 'NOISE_STAT_MEDIAN'. This can be useful to remove DC offsets //
+//   or bandpass ripples from the data.                              //
 // ----------------------------------------------------------------- //
 
 PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat statistic, const int range, size_t window_spat, size_t window_spec, size_t grid_spat, size_t grid_spec, const bool interpolate)
@@ -1632,7 +1645,7 @@ PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat sta
 	// Sanity checks
 	check_null(self);
 	check_null(self->data);
-	ensure(self->data_type == -32 || self->data_type == -64, ERR_USER_INPUT, "Cannot run noise scaling on integer array.");
+	ensure(self->data_type == -32 || self->data_type == -64, ERR_USER_INPUT, "Cannot run filter on integer array.");
 	
 	// Make window sizes integers >= 1
 	window_spat = window_spat ? window_spat : 25;
@@ -1674,17 +1687,18 @@ PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat sta
 	const size_t grid_end_y = self->axis_size[1] - ((self->axis_size[1] - grid_start_y - 1) % grid_spat) - 1;
 	const size_t grid_end_z = self->axis_size[2] - ((self->axis_size[2] - grid_start_z - 1) % grid_spec) - 1;
 	
-	// Create empty cube (filled with NaN) to hold noise values
+	// Create empty cube (filled with NaN) to hold noise/mean/median values
 	DataCube *noiseCube = DataCube_blank(self->axis_size[0], self->axis_size[1], self->axis_size[2], self->data_type, self->verbosity);
 	Header_copy_wcs(self->header, noiseCube->header);
 	Header_copy_misc(self->header, noiseCube->header, true, true);
 	DataCube_fill_flt(noiseCube, NAN);
 	
-	message("Measuring noise in running window.");
+	if(statistic == NOISE_STAT_STD || statistic == NOISE_STAT_MAD || statistic == NOISE_STAT_GAUSS) message("Measuring noise in running window.");
+	else message("Measuring %s in running window.", statistic == NOISE_STAT_MEAN ? "mean" : "median");
 	size_t progress = 0;
 	const size_t progress_max = (grid_end_z - grid_start_z) / grid_spec;
 	
-	// Determine RMS across window centred on grid cell
+	// Determine RMS/mean/median across window centred on grid cell
 	#pragma omp parallel for schedule(static)
 	for(size_t z = grid_start_z; z <= grid_end_z; z += grid_spec)
 	{
@@ -1741,16 +1755,18 @@ PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat sta
 					continue;
 				}
 				
-				// Determine noise level in temporary array
+				// Determine noise/mean/median in temporary array
 				double rms;
 				if(statistic == NOISE_STAT_STD) rms = std_dev_val_flt(array, counter, 0.0, 1, range);
 				else if(statistic == NOISE_STAT_MAD) rms = MAD_TO_STD * mad_val_flt(array, counter, 0.0, 1, range);
-				else rms = gaufit_flt(array, counter, 1, range);
+				else if(statistic == NOISE_STAT_GAUSS) rms = gaufit_flt(array, counter, 1, range);
+				else if(statistic == NOISE_STAT_MEAN) rms = mean_flt(array, counter);
+				else rms = median_flt(array, counter, false);
 				
 				// Delete temporary array again
 				free(array);
 				
-				// Fill entire grid cell with rms value
+				// Fill entire grid cell with noise/mean/median value
 				for(size_t zz = grid[4]; zz <= grid[5]; ++zz)
 				{
 					for(size_t yy = grid[2]; yy <= grid[3]; ++yy)
@@ -1853,29 +1869,56 @@ PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat sta
 		}
 	}
 	
-	// Divide data cube by noise cube
-	if(self->data_type == -32)
+	if(statistic == NOISE_STAT_STD || statistic == NOISE_STAT_MAD || statistic == NOISE_STAT_GAUSS)
 	{
-		#pragma omp parallel for schedule(static)
-		for(size_t i = 0; i < self->data_size; ++i)
+		// Divide data cube by noise cube
+		if(self->data_type == -32)
 		{
-			float *ptr_data  = (float *)(self->data) + i;
-			float *ptr_noise = (float *)(noiseCube->data) + i;
-			
-			if(*ptr_noise > 0.0) *ptr_data /= *ptr_noise;
-			else *ptr_data = NAN;
+			#pragma omp parallel for schedule(static)
+			for(size_t i = 0; i < self->data_size; ++i)
+			{
+				float *ptr_data  = (float *)(self->data) + i;
+				float *ptr_noise = (float *)(noiseCube->data) + i;
+				
+				if(*ptr_noise > 0.0) *ptr_data /= *ptr_noise;
+				else *ptr_data = NAN;
+			}
+		}
+		else
+		{
+			#pragma omp parallel for schedule(static)
+			for(size_t i = 0; i < self->data_size; ++i)
+			{
+				double *ptr_data  = (double *)(self->data) + i;
+				double *ptr_noise = (double *)(noiseCube->data) + i;
+				
+				if(*ptr_noise > 0.0) *ptr_data /= *ptr_noise;
+				else *ptr_data = NAN;
+			}
 		}
 	}
 	else
 	{
-		#pragma omp parallel for schedule(static)
-		for(size_t i = 0; i < self->data_size; ++i)
+		// Subtract mean/median value
+		if(self->data_type == -32)
 		{
-			double *ptr_data  = (double *)(self->data) + i;
-			double *ptr_noise = (double *)(noiseCube->data) + i;
-			
-			if(*ptr_noise > 0.0) *ptr_data /= *ptr_noise;
-			else *ptr_data = NAN;
+			#pragma omp parallel for schedule(static)
+			for(size_t i = 0; i < self->data_size; ++i)
+			{
+				float *ptr_data  = (float *)(self->data) + i;
+				float *ptr_noise = (float *)(noiseCube->data) + i;
+				*ptr_data -= *ptr_noise;
+			}
+		}
+		else
+		{
+			#pragma omp parallel for schedule(static)
+			for(size_t i = 0; i < self->data_size; ++i)
+			{
+				double *ptr_data  = (double *)(self->data) + i;
+				double *ptr_noise = (double *)(noiseCube->data) + i;
+				*ptr_data -= *ptr_noise;
+			}
 		}
 	}
 	
@@ -2303,125 +2346,6 @@ PUBLIC void DataCube_contsub(DataCube *self, unsigned int order, size_t shift, c
 		free(spectrum);
 		free(spectrum_tmp);
 	}
-	
-	return;
-}
-
-
-
-// ----------------------------------------------------------------- //
-// Spatial filter                                                    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self        - Object self-reference.                        //
-//   (2) statistic   - Statistic to use for averaging.               //
-//                     Can be 0 (mean) or 1 (median).                //
-//   (3) window_spat - Spatial window size over which to average.    //
-//   (4) radius_spec - Radius of spectral boxcar filter to apply to  //
-//                     averaged spectrum.                            //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for applying a spatial averaging filter to the    //
-//   data cube. The filter will be applied across grid cells the     //
-//   size of which is controlled by the window_spat parameter and    //
-//   assumed to be square-shaped. For each spectral channel, the     //
-//   data from all pixels within the grid cell will be averaged      //
-//   using the specified statistic (mean or median). The averaged    //
-//   value will then be subtracted from each pixel in the grid cell. //
-//   If radius_spec > 0 then the spectrum averaged across the grid   //
-//   cell will be spectrally smoothed with a boxcar filter of that   //
-//   radius before being subtracted from each pixel. This can help   //
-//   to reduce the noisiness of the averaged spectrum.               //
-// ----------------------------------------------------------------- //
-
-PUBLIC void DataCube_spatial_filter(DataCube *self, const int statistic, const size_t window_spat, const size_t radius_spec)
-{
-	// Sanity checks
-	check_null(self);
-	
-	// Determine number of grid cells
-	const size_t nx = self->axis_size[0];
-	const size_t ny = self->axis_size[1];
-	const size_t nz = self->axis_size[2];
-	
-	// Set up progress bar
-	size_t progress = 1;
-	const size_t n_cells_x = nx % window_spat ? nx / window_spat + 1 : nx / window_spat;
-	const size_t n_cells_y = ny % window_spat ? ny / window_spat + 1 : ny / window_spat;
-	const size_t progress_max = n_cells_x * n_cells_y;
-	
-	#pragma omp parallel
-	{
-		// Create average spectrum + temporary array
-		double *spectrum_avg = memory(MALLOC, nz, sizeof(double));
-		double *spectrum_copy = memory(MALLOC, nz + 2 * radius_spec, sizeof(double));
-		double *array_tmp = memory(MALLOC, window_spat * window_spat, sizeof(double));
-		
-		// Loop over all spatial grid cells
-		#pragma omp for collapse(2) schedule(static)
-		for(size_t y = 0; y < ny; y += window_spat)
-		{
-			for(size_t x = 0; x < nx; x += window_spat)
-			{
-				#pragma omp critical
-				progress_bar("Progress: ", progress++, progress_max);
-				
-				// Loop over all channels
-				for(size_t z = 0; z < nz; ++z)
-				{
-					size_t counter = 0;
-					
-					// Loop over spatial window
-					for(size_t dy = 0; dy < window_spat; ++dy)
-					{
-						for(size_t dx = 0; dx < window_spat; ++dx)
-						{
-							if(x + dx < nx && y + dy < ny)
-							{
-								// Copy pixel values into temporary array
-								const double value = DataCube_get_data_flt(self, x + dx, y + dy, z);
-								if(isfinite(value))
-								{
-									array_tmp[counter] = value;
-									++counter;
-								}
-							}
-						}
-					}
-					
-					// Determine average value
-					if(counter) spectrum_avg[z] = statistic ? median_dbl(array_tmp, counter, false) : mean_dbl(array_tmp, counter);
-					else spectrum_avg[z] = 0.0;
-				}
-				
-				// If requested, smooth average spectrum using boxcar filter
-				if(radius_spec) filter_boxcar_1d_dbl(spectrum_avg, spectrum_copy, nz, radius_spec);
-				
-				// Subtract cell average from original data
-				for(size_t z = 0; z < nz; ++z)
-				{
-					for(size_t dy = 0; dy < window_spat; ++dy)
-					{
-						for(size_t dx = 0; dx < window_spat; ++dx)
-						{
-							if(x + dx < nx && y + dy < ny) DataCube_add_data_flt(self, x + dx, y + dy, z, -spectrum_avg[z]);
-						}
-					}
-				}
-			}
-		}
-		
-		// Clean up
-		free(spectrum_avg);
-		free(spectrum_copy);
-		free(array_tmp);
-	} // END parallel section
 	
 	return;
 }

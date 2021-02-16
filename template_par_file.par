@@ -57,12 +57,16 @@ scaleNoise.interpolate     =  false
 scaleNoise.scfind          =  false
 
 
-# Spatial filter
+# Ripple filter
 
-spatFilter.enable          =  false
-spatFilter.window          =  50
-spatFilter.statistic       =  median
-spatFilter.boxcar          =  0
+rippleFilter.enable        =  false
+rippleFilter.statistic     =  median
+rippleFilter.windowXY      =  31
+rippleFilter.windowZ       =  15
+rippleFilter.gridXY        =  0
+rippleFilter.gridZ         =  0
+rippleFilter.interpolate   =  false
+rippleFilter.boxcar        =  0
 
 
 # S+C finder

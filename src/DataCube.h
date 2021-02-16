@@ -48,7 +48,7 @@
 
 #define DESTROY  false
 #define PRESERVE true
-typedef enum {NOISE_STAT_STD, NOISE_STAT_MAD, NOISE_STAT_GAUSS} noise_stat;
+typedef enum {NOISE_STAT_STD, NOISE_STAT_MAD, NOISE_STAT_GAUSS, NOISE_STAT_MEAN, NOISE_STAT_MEDIAN} noise_stat;
 
 
 // ----------------------------------------------------------------- //
@@ -125,7 +125,6 @@ PUBLIC void       DataCube_gaussian_filter  (DataCube *self, const double sigma)
 
 // Continuum subtraction and ripple removal
 PUBLIC void       DataCube_contsub          (DataCube *self, unsigned int order, size_t shift, const size_t padding, double threshold);
-PUBLIC void       DataCube_spatial_filter   (DataCube *self, const int statistic, const size_t window_spat, const size_t radius_spec);
 
 // Masking
 PUBLIC void       DataCube_mask             (const DataCube *self, DataCube *maskCube, const double threshold);

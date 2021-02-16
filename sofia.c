@@ -83,8 +83,7 @@ int main(int argc, char **argv)
 	// A few global definitions     //
 	// ---------------------------- //
 	
-	const char *noise_stat_name[] = {"standard deviation", "median absolute deviation", "Gaussian fit to flux histogram"};
-	const char *average_stat_name[] = {"mean", "median"};
+	const char *noise_stat_name[] = {"standard deviation", "median absolute deviation", "Gaussian fit to flux histogram", "mean", "median"};
 	const char *flux_range_name[] = {"negative", "full", "positive"};
 	double global_rms = 1.0;
 	#ifdef _OPENMP
@@ -222,7 +221,7 @@ int main(int argc, char **argv)
 	const bool use_cont_sub      = Parameter_get_bool(par, "contsub.enable");
 	const bool use_noise_scaling = Parameter_get_bool(par, "scaleNoise.enable");
 	const bool use_sc_scaling    = Parameter_get_bool(par, "scaleNoise.scfind");
-	const bool use_spat_filter   = Parameter_get_bool(par, "spatFilter.enable");
+	const bool use_ripple_filter = Parameter_get_bool(par, "rippleFilter.enable");
 	const bool use_scfind        = Parameter_get_bool(par, "scfind.enable");
 	const bool use_threshold     = Parameter_get_bool(par, "threshold.enable");
 	const bool use_linker        = Parameter_get_bool(par, "linker.enable");
@@ -285,9 +284,9 @@ int main(int argc, char **argv)
 	if(strcmp(Parameter_get_str(par, "threshold.fluxRange"), "negative") == 0) tf_range = -1;
 	else if(strcmp(Parameter_get_str(par, "threshold.fluxRange"), "positive") == 0) tf_range = 1;
 	
-	// Spatial filter statistic
-	int spat_filter_statistic = 0;
-	if(strcmp(Parameter_get_str(par, "spatFilter.statistic"), "median") == 0) spat_filter_statistic = 1;
+	// Ripple filter statistic
+	int ripple_filter_statistic = NOISE_STAT_MEDIAN;
+	if(strcmp(Parameter_get_str(par, "rippleFilter.statistic"), "mean") == 0) ripple_filter_statistic = NOISE_STAT_MEAN;
 	
 	// Noise and weights sanity check
 	if(use_noise && use_weights) warning("Applying both a weights cube and a noise cube.");
@@ -773,26 +772,29 @@ int main(int argc, char **argv)
 	
 	
 	// ---------------------------- //
-	// Spatial averaging filter     //
+	// Ripple filter                //
 	// ---------------------------- //
 	
-	if(use_spat_filter)
+	if(use_ripple_filter)
 	{
-		status("Applying spatial filter");
+		status("Applying ripple filter");
 		
-		long int spat_filter_window = Parameter_get_int(par, "spatFilter.window");
-		if(spat_filter_window < 30) warning("Adjusting window size to minimum of %zu.", spat_filter_window = 30);
+		// Ripple filter
+		message("Subtracting offset from data.");
+		message("- Statistic:    %s", noise_stat_name[ripple_filter_statistic]);
 		
-		const long int spat_filter_kernel_size = Parameter_get_int(par, "spatFilter.boxcar");
-		const long int spat_filter_kernel_radius = spat_filter_kernel_size ? spat_filter_kernel_size / 2 : 0;
-		if(spat_filter_kernel_size && spat_filter_kernel_size % 2 == 0) warning("Forcing boxcar size to be odd.");
+		DataCube *rippleCube = DataCube_scale_noise_local(
+			dataCube,
+			ripple_filter_statistic,
+			0,
+			Parameter_get_int(par, "rippleFilter.windowXY"),
+			Parameter_get_int(par, "rippleFilter.windowZ"),
+			Parameter_get_int(par, "rippleFilter.gridXY"),
+			Parameter_get_int(par, "rippleFilter.gridZ"),
+			Parameter_get_bool(par, "rippleFilter.interpolate")
+		);
 		
-		message("Using the following parameters:");
-		message("- Window size:   %ld x %ld", spat_filter_window, spat_filter_window);
-		message("- Statistic:     %s", average_stat_name[spat_filter_statistic]);
-		message("- Boxcar width:  %ld\n", 2 * spat_filter_kernel_radius + 1);
-		
-		DataCube_spatial_filter(dataCube, spat_filter_statistic, spat_filter_window, spat_filter_kernel_radius);
+		DataCube_delete(rippleCube);
 		
 		// Print time
 		timestamp(start_time, start_clock);
@@ -804,7 +806,7 @@ int main(int argc, char **argv)
 	// Write filtered cube          //
 	// ---------------------------- //
 	
-	if(write_filtered && (use_region || use_flagging || use_flagging_cat || use_cont_sub || use_noise || use_weights || use_noise_scaling || use_spat_filter))  // ALERT: Add conditions here as needed.
+	if(write_filtered && (use_region || use_flagging || use_flagging_cat || use_cont_sub || use_noise || use_weights || use_noise_scaling || use_ripple_filter))  // ALERT: Add conditions here as needed.
 	{
 		status("Writing filtered cube");
 		DataCube_save(dataCube, Path_get(path_filtered), overwrite, PRESERVE);
