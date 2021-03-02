@@ -1784,7 +1784,8 @@ PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat sta
 	// Apply bilinear interpolation if requested
 	if(interpolate && (grid_spat > 1 || grid_spec > 1))
 	{
-		message("Interpolating noise values.");
+		if(statistic == NOISE_STAT_STD || statistic == NOISE_STAT_MAD || statistic == NOISE_STAT_GAUSS) message("Interpolating noise values.");
+		else message("Interpolating %s values.", statistic == NOISE_STAT_MEAN ? "mean" : "median");
 		
 		// First interpolate along z-axis if necessary
 		// (No need for multi-threading, as this is super-fast anyway)

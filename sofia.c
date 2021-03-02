@@ -251,7 +251,7 @@ int main(int argc, char **argv)
 	
 	const double thresh_mom      = Parameter_get_flt(par, "output.thresholdMom12");
 	const double rel_threshold   = Parameter_get_flt(par, "reliability.threshold");
-	const double rel_fmin        = Parameter_get_flt(par, "reliability.fmin");
+	const double rel_snr_min     = Parameter_get_flt(par, "reliability.minSNR");
 	
 	unsigned int autoflag_mode = 0;
 	if     (strcmp(Parameter_get_str(par, "flag.auto"), "channels") == 0) autoflag_mode = 1;
@@ -1154,6 +1154,16 @@ int main(int argc, char **argv)
 			}
 		}
 		
+		// Extract beam information from header
+		// WARNING: Implicitly assumes the same unit for BMAJ, BMIN and CDELT1!
+		const double bmaj = DataCube_gethd_flt(dataCube, "BMAJ");
+		const double bmin = DataCube_gethd_flt(dataCube, "BMIN");
+		const double cdelt = fabs(DataCube_gethd_flt(dataCube, "CDELT1"));
+		double sqrt_beam_area = 1.0;
+		if(IS_NAN(bmaj) || IS_NAN(bmin) || IS_NAN(cdelt)) warning("Failed to determine beam area from header information.\n         Value of reliability.minSNR will not be meaningful.");
+		else sqrt_beam_area = sqrt(M_PI * bmaj * bmin / (4.0 * log(2.0) * cdelt * cdelt));
+		const double rel_fmin = rel_snr_min * sqrt_beam_area;
+		
 		// Calculate reliability values
 		Matrix *covar = LinkerPar_reliability(lpar, Parameter_get_flt(par, "reliability.scaleKernel"), rel_fmin, rel_cat);
 		
@@ -1171,7 +1181,7 @@ int main(int argc, char **argv)
 		{
 			const size_t old_label = LinkerPar_get_label(lpar, i);
 			
-			// Keep source if reliability > threshold and fmin parameter satisfied
+			// Keep source if reliability > threshold and fmin = snr_min * sqrt(beam) parameter satisfied
 			if(LinkerPar_get_rel(lpar, old_label) >= rel_threshold && LinkerPar_get_flux(lpar, old_label) / sqrt(LinkerPar_get_npix(lpar, old_label)) > rel_fmin) Map_push(rel_filter, old_label, new_label++);
 		}
 		
