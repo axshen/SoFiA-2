@@ -296,7 +296,31 @@ int main(int argc, char **argv)
 	ensure(!(linker_pos_pix && use_reliability), ERR_USER_INPUT, "With linker.positivity = true, there would be no negative\n       detections for the reliability filter to work on. Please either\n       disable the reliability filter or set linker.positivity = false.");
 	
 	// Linker sanity check
-	ensure(use_linker || write_noise || write_filtered || write_rawmask, ERR_USER_INPUT, "When disabling the linker, you will want to write either the\n       noise cube, the filtered cube or the raw mask, as otherwise\n       no output would be produced at all.");
+	//ensure(use_linker || write_noise || write_filtered || write_rawmask, ERR_USER_INPUT, "When disabling the linker, you will want to write either the\n       noise cube, the filtered cube or the raw mask, as otherwise\n       no output would be produced at all.");
+	
+	// Print parameterisation warning
+	if(use_physical)
+	{
+		warning( "┌──────────────────────────────────────────────────────────┐\n"
+		"         │ You have set parameter.physical = true. SoFiA will try   │\n"
+		"         │ to convert some parameters into physical units under the │\n"
+		"         │ following assumptions:                                   │\n"
+		"         │                                                          │\n"
+		"         │  * The beam information in the FITS header (BMAJ, BMIN)  │\n"
+		"         │    is correct and accurate across the entire image and   │\n"
+		"         │    frequency range.                                      │\n"
+		"         │                                                          │\n"
+		"         │  * The spectral channels of the data cube are uncorrela- │\n"
+		"         │    ted, i.e. the spectral resolution is the same as the  │\n"
+		"         │    channel width.                                        │\n"
+		"         │                                                          │\n"
+		"         │ Should any of those assumptions not be correct then the  │\n"
+		"         │ measurement of parameters such as flux or line width may │\n"
+		"         │ be incorrect. Please also note that SoFiA will in prin-  │\n"
+		"         │ cipal not correct line widths for any form of instrumen- │\n"
+		"         │ tal broadening.                                          │\n"
+		"         └──────────────────────────────────────────────────────────┘\n");
+	}
 	
 	
 	
