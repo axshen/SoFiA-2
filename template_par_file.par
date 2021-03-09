@@ -106,7 +106,6 @@ linker.keepNegative        =  false
 reliability.enable         =  false
 reliability.threshold      =  0.9
 reliability.scaleKernel    =  0.4
-reliability.fmin           =  15.0
 reliability.minSNR         =  3.0
 reliability.catalog        =  
 reliability.plot           =  true

@@ -603,7 +603,6 @@ PUBLIC void Parameter_default(Parameter *self)
 	Parameter_set(self, "reliability.enable"       , "false");
 	Parameter_set(self, "reliability.threshold"    , "0.9");
 	Parameter_set(self, "reliability.scaleKernel"  , "0.4");
-	Parameter_set(self, "reliability.fmin"         , "15.0");
 	Parameter_set(self, "reliability.minSNR"       , "3.0");
 	Parameter_set(self, "reliability.catalog"      , "");
 	Parameter_set(self, "reliability.plot"         , "true");
