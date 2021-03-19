@@ -5476,23 +5476,20 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 	String *label_spec = Header_get_string(self->header, "CTYPE3");
 	String *unit_spec  = Header_get_string(self->header, "CUNIT3");
 	
-	if(String_size(unit_spec) == 0)
+	if(DataCube_cmphd(self, "CTYPE3", "FREQ", 4))
 	{
-		if(DataCube_cmphd(self, "CTYPE3", "FREQ", 4))
-		{
-			String_set(label_spec, "Frequency");
-			String_set(unit_spec,  "Hz");
-		}
-		else if(DataCube_cmphd(self, "CTYPE3", "VRAD", 4) || DataCube_cmphd(self, "CTYPE3", "VOPT", 4) || DataCube_cmphd(self, "CTYPE3", "VELO", 4) || DataCube_cmphd(self, "CTYPE3", "FELO", 4))
-		{
-			String_set(label_spec, "Velocity");
-			String_set(unit_spec,  "m/s");
-		}
-		else
-		{
-			warning("Unsupported CTYPE3 value. Supported: FREQ, VRAD, VOPT, VELO.");
-			if(String_size(unit_spec) == 0) String_set(unit_spec, "???");
-		}
+		String_set(label_spec, "Frequency");
+		if(String_size(unit_spec) == 0) String_set(unit_spec,  "Hz");  // FITS default
+	}
+	else if(DataCube_cmphd(self, "CTYPE3", "VRAD", 4) || DataCube_cmphd(self, "CTYPE3", "VOPT", 4) || DataCube_cmphd(self, "CTYPE3", "VELO", 4) || DataCube_cmphd(self, "CTYPE3", "FELO", 4))
+	{
+		String_set(label_spec, "Velocity");
+		if(String_size(unit_spec) == 0) String_set(unit_spec,  "m/s");  // FITS default
+	}
+	else
+	{
+		warning("Unsupported CTYPE3 value. Supported: FREQ, VRAD, VOPT, VELO.");
+		if(String_size(unit_spec) == 0) String_set(unit_spec, "???");  // Unit undefined
 	}
 	
 	// Extract beam solid angle in pixels from header
