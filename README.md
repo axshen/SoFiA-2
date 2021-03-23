@@ -30,6 +30,20 @@ As an alternative, we provide a `Makefile` for those who prefer to use `make` to
 An overview of all control parameters as well as a PDF copy of the SoFiA 2 User Manual can be found on the wiki at https://github.com/SoFiA-Admin/SoFiA-2/wiki. The wiki also contains a small test data cube and parameter file that users can download to verify their SoFiA 2 installation.
 
 
+## Additional tools
+
+Several useful tools have been developed to help with running SoFiA 2 or process the output produced by the pipeline:
+
+* **SoFiA-X** is a parallel wrapper around SoFiA 2 that can be used to process large data cubes in a supercomputing environment.
+  Download: https://github.com/AusSRC/SoFiAX
+* **OptiFind** is a wrapper around SoFiA 2 that can be used to search for HI emission in small regions of a data cube as defined by an input catalogue.
+  Download: https://github.com/SoFiA-Admin/OptiFind
+* **SpecPlot** is a tool for producing publication-ready plots of integrated spectra from SoFiA 2.
+  Download: https://github.com/SoFiA-Admin/SpecPlot
+* **BusyFit** is a tool for fitting the Busy Function to an integrated spectrum for the purpose of accurate parameterisation.
+  Download: https://github.com/SoFiA-Admin/BusyFit
+
+
 ## Feedback
 
 Should you decide to run SoFiA 2 on your own data cubes, we would welcome any feedback on how well SoFiA 2 works for you and whether any improvements could be made. If you have a GitHub account, you can directly create a new issue (https://github.com/SoFiA-Admin/SoFiA-2/issues/new) on GitHub for questions, feature requests or bug reports. Alternatively, please feel free to directly contact the project leader, Tobias Westmeier, via e-mail at `tobias.westmeier (at) uwa.edu.au` to provide feedback on your experience with SoFiA 2. Note that the main purpose of SoFiA 2 is to facilitate the processing of HI data from SKA precursor surveys, and we are unlikely to be able to accommodate requests for additional features beyond this primary scope.
