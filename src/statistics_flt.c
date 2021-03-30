@@ -1639,8 +1639,8 @@ void spectral_line_width_flt(const float *spectrum, const size_t size, float *w2
 //                                                                   //
 //   Function for measuring the position angle of the kinematic      //
 //   major axis of a galaxy from an array of flux-weighted centroid  //
-//   measurement per spectral channel. The position angle is deter-  //
-//   minedby fitting a straight line to the centroid positions using //
+//   measurements per spectral channel. The position angle is deter- //
+//   mined by fitting a straight line to the centroid values using   //
 //   orthogonal (Deming) regression. Missing or invalid centroids in //
 //   certain channels can be indicated by setting the corresponding  //
 //   value in the sum array to zero. The resulting position angle    //
@@ -1696,18 +1696,51 @@ float kin_maj_axis_flt(const float *centroidX, const float *centroidY, const flo
 	float pa = atan(slope);
 	
 	// Check orientation of approaching/receding side of disc:
-	float fullAngle = atan2(centroidY[last] - centroidY[first], centroidX[last] - centroidX[first]);
+	// (by averaging the lower and upper half of centroids)
+	float x_first = 0.0;
+	float x_last  = 0.0;
+	float y_first = 0.0;
+	float y_last  = 0.0;
+	size_t counter_first = 0;
+	size_t counter_last  = 0;
+	float fullAngle     = 0.0;
 	
-	// Correct for full angle and astronomers' favourite definition of PA:
-	float difference = fabs(atan2(sin(fullAngle) * cos(pa) - cos(fullAngle) * sin(pa), cos(fullAngle) * cos(pa) + sin(fullAngle) * sin(pa)));
-	if(difference > M_PI / 2.0)
+	for(size_t i = 0; i < size / 2; ++i)
 	{
-		pa += M_PI;
-		difference -= M_PI;
+		if(sum[i] > 0.0)
+		{
+			x_first += centroidX[i];
+			y_first += centroidY[i];
+			++counter_first;
+		}
+		if(sum[size - i - 1] > 0.0)
+		{
+			x_last += centroidX[size - i - 1];
+			y_last += centroidY[size - i - 1];
+			++counter_last;
+		}
 	}
 	
-	//if(fabs(difference) > M_PI / 6.0) flagWarp = true;     // WARNING: Warping angle of 30° hard-coded here!
+	if(counter_first > 0 && counter_last > 0)
+	{
+		// User lower and upper half averages by default
+		x_first /= counter_first;
+		y_first /= counter_first;
+		x_last  /= counter_last;
+		y_last  /= counter_last;
+		fullAngle = atan2(y_last - y_first, x_last - x_first);
+	}
+	else
+	{
+		// Otherwise use first and last point as a back-up option
+		fullAngle = atan2(centroidY[last] - centroidY[first], centroidX[last] - centroidX[first]);
+	}
 	
+	// Flip PA by 180° if necessary:
+	const float difference = fabs(atan2(sin(fullAngle) * cos(pa) - cos(fullAngle) * sin(pa), cos(fullAngle) * cos(pa) + sin(fullAngle) * sin(pa)));
+	if(difference > M_PI / 2.0) pa += M_PI;
+	
+	// Correct for astronomers' favourite definition of PA:
 	pa = 180.0 * pa / M_PI - 90.0;
 	while(pa <    0.0) pa += 360.0;
 	while(pa >= 360.0) pa -= 360.0;
