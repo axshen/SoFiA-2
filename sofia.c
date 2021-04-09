@@ -299,7 +299,7 @@ int main(int argc, char **argv)
 	//ensure(use_linker || write_noise || write_filtered || write_rawmask, ERR_USER_INPUT, "When disabling the linker, you will want to write either the\n       noise cube, the filtered cube or the raw mask, as otherwise\n       no output would be produced at all.");
 	
 	// Print parameterisation warning
-	if(use_physical)
+	if(use_parameteriser && use_physical)
 	{
 		warning( "┌──────────────────────────────────────────────────────────┐\n"
 		"         │ You have set parameter.physical = true. SoFiA will try   │\n"
