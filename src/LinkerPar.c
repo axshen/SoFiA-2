@@ -41,6 +41,7 @@
 
 #include "LinkerPar.h"
 #include "String.h"
+#include "statistics_dbl.h"
 
 // Set to 1 if measurement of flux-weighted centroid required
 #define MEASURE_CENTROID_POSITION 0
@@ -900,6 +901,8 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 //                      cluding those positions will be removed be-  //
 //                      fore reliability calculation. NULL can be    //
 //                      used to disable this feature.                //
+//   (5) skellam      - Pointer to an Array of type double to hold   //
+//                      the Skellam array. Set NULL to disable.      //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -938,9 +941,13 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 //   the reliability calculation. rel_cat must contain exactly two   //
 //   columns (x and y in pixels). If set to NULL, this feature will  //
 //   be disabled altogether.                                         //
+//   This method can also create a Skellam array to assist with the  //
+//   optimisation of the kernel scale. This can be controlled using  //
+//   the 'skellam' parameter. If set to NULL, no SKellam array will  //
+//   be generated.                                                   //
 // ----------------------------------------------------------------- //
 
-PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel, const double fmin, const Table *rel_cat)
+PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel, const double fmin, const Table *rel_cat, Array_dbl **skellam)
 {
 	// Sanity checks
 	check_null(self);
@@ -1060,67 +1067,63 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 	
 	// Inverse of the square root of |2 * pi * covar| = (2 pi)^n |covar|
 	// This is the scale factor needed to calculate the PDF of the multivariate normal distribution later on.
-	const double scal_fact = 1.0 / sqrt(Matrix_det(covar, 2.0 * M_PI));
-	// const double scal_fact = 1.0;
+	// const double scal_fact = 1.0 / sqrt(Matrix_det(covar, 2.0 * M_PI));
+	const double scal_fact = 1.0;
 	// NOTE: This can be set to 1, as we don’t really care about the correct
 	//       normalisation of the Gaussian kernel, so we might as well normalise
-	//       the amplitude rather than the integral. The normalisation factor 
-	//       does matter for the Skellam plot generation further down, though.
+	//       the amplitude to 1 rather than the integral. The normalisation factor 
+	//       does matter for the Skellam parameter, though.
 	
-	
-	// Create Skellam array
-	/*Array_dbl *skellam = Array_dbl_new(n_neg);
-	
-	// Loop over all negative sources to derive Skellam distribution
-	#pragma omp parallel
+	// Create Skellam array if requested
+	if(skellam != NULL)
 	{
-		Matrix *vector = Matrix_new(dim, 1);
+		*skellam = Array_dbl_new(n_neg);
 		
-		#pragma omp for schedule(static)
-		for(size_t i = 0; i < n_neg; ++i)
+		// Loop over all negative sources to derive Skellam distribution
+		#pragma omp parallel
 		{
-			double p1 = par_neg[dim * i];
-			double p2 = par_neg[dim * i + 1];
-			double p3 = par_neg[dim * i + 2];
+			Matrix *vector = Matrix_new(dim, 1);
 			
-			// Multivariate kernel density estimation for negative detections
-			double pdf_neg_sum = 0.0;
-			
-			for(double *ptr = par_neg + n_neg * dim; ptr > par_neg;)
+			#pragma omp for schedule(static)
+			for(size_t i = 0; i < n_neg; ++i)
 			{
-				// Set up relative position vector
-				Matrix_set_value_nocheck(vector, 2, 0, *(--ptr) - p3);
-				Matrix_set_value_nocheck(vector, 1, 0, *(--ptr) - p2);
-				Matrix_set_value_nocheck(vector, 0, 0, *(--ptr) - p1);
+				double p1 = par_neg[dim * i];
+				double p2 = par_neg[dim * i + 1];
+				double p3 = par_neg[dim * i + 2];
 				
-				pdf_neg_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
+				// Multivariate kernel density estimation for negative detections
+				double pdf_neg_sum = 0.0;
+				
+				for(double *ptr = par_neg + n_neg * dim; ptr > par_neg;)
+				{
+					// Set up relative position vector
+					Matrix_set_value_nocheck(vector, 2, 0, *(--ptr) - p3);
+					Matrix_set_value_nocheck(vector, 1, 0, *(--ptr) - p2);
+					Matrix_set_value_nocheck(vector, 0, 0, *(--ptr) - p1);
+					
+					pdf_neg_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
+				}
+				
+				// Multivariate kernel density estimation for positive detections
+				double pdf_pos_sum = 0.0;
+				
+				for(double *ptr = par_pos + n_pos * dim; ptr > par_pos;)
+				{
+					// Set up relative position vector
+					Matrix_set_value_nocheck(vector, 2, 0, *(--ptr) - p3);
+					Matrix_set_value_nocheck(vector, 1, 0, *(--ptr) - p2);
+					Matrix_set_value_nocheck(vector, 0, 0, *(--ptr) - p1);
+					
+					pdf_pos_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
+				}
+				
+				// Determine normalised Skellam parameter S = (P - N) / SQRT(P + N)
+				Array_dbl_set(*skellam, i, (pdf_pos_sum - pdf_neg_sum) / sqrt(pdf_pos_sum + pdf_neg_sum));
 			}
 			
-			// Multivariate kernel density estimation for positive detections
-			double pdf_pos_sum = 0.0;
-			
-			for(double *ptr = par_pos + n_pos * dim; ptr > par_pos;)
-			{
-				// Set up relative position vector
-				Matrix_set_value_nocheck(vector, 2, 0, *(--ptr) - p3);
-				Matrix_set_value_nocheck(vector, 1, 0, *(--ptr) - p2);
-				Matrix_set_value_nocheck(vector, 0, 0, *(--ptr) - p1);
-				
-				pdf_pos_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
-			}
-			
-			// Determine Skellam parameter
-			Array_dbl_set(skellam, i, (pdf_pos_sum - pdf_neg_sum) / sqrt(scal_fact * pdf_pos_sum + pdf_neg_sum));
+			Matrix_delete(vector);
 		}
-		
-		Matrix_delete(vector);
 	}
-	
-	// Create Skellam plot
-	LinkerPar_skellam_plot(skellam, "skellam_plot_test.eps", true);
-	
-	// Delete Skellam array again
-	Array_dbl_delete(skellam);*/
 	
 	
 	// Loop over all positive detections to measure their reliability
@@ -1520,43 +1523,42 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 //                                                                   //
 // Description:                                                      //
 //                                                                   //
-//   Private function for generating a Skellam diagnostic plot show- //
+//   Public function for generating a Skellam diagnostic plot show-  //
 //   ing the cumulative distribution of values in the Array called   //
-//   'skellam' which should contain values of (P - N) / sqrt(P + N)  //
+//   'skellam' which must contain values of (P - N) / sqrt(P + N)    //
 //   generated by the reliability module. The resulting plot will be //
 //   written to an EPS file with the specified file name.            //
 // ----------------------------------------------------------------- //
 
-PRIVATE void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, const bool overwrite)
+PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, const bool overwrite)
 {
 	// Sanity checks
 	check_null(skellam);
 	const size_t size = Array_dbl_get_size(skellam);
 	ensure(size, ERR_USER_INPUT, "Failed to create Skellam plot; no valid data found.");
 	
-	// Open output file
-	FILE *fp;
-	if(overwrite) fp = fopen(filename, "wb");
-	else fp = fopen(filename, "wxb");
-	ensure(fp != NULL, ERR_FILE_ACCESS, "Failed to open output file: %s", filename);
-	
-	message("Creating postscript file: %s", strrchr(filename, '/') == NULL ? filename : strrchr(filename, '/') + 1);
-	
-	// Print PS header
-	write_eps_header(fp, "SoFiA Skellam Plot", SOFIA_VERSION_FULL, "0 0 480 360");
-	
 	// Sort the Skellam array
 	Array_dbl_sort(skellam);
-	//double data_min_x = Array_dbl_get(skellam, 0);
-	//double data_max_x = Array_dbl_get(skellam, size - 1);
-	//if(data_min_x < -10.0) data_min_x = -10.0;
-	//else if(data_min_x > -4.0) data_min_x = -4.0;
-	//if(data_max_x > 10.0) data_max_x = 10.0;
-	//else if(data_max_x < 4.0) data_max_x = 4.0;
-	//if(data_max_x < -data_min_x) data_max_x = -data_min_x;
-	//else data_min_x = -data_max_x;
-	const double data_min_x = -4.0;
-	const double data_max_x = 4.0;
+	
+	// Scale all Skellam values by standard deviation
+	// NOTE: This is necessary to ensure that the standard deviation of the
+	//       Skellam parameter values is 1 such that their distribution can
+	//       be readily compared to a standard Gaussian.
+	const double skel_mean = mean_dbl(Array_dbl_get_ptr(skellam), size);
+	const double skel_std  = std_dev_val_dbl(Array_dbl_get_ptr(skellam), size, skel_mean, 1, 0);
+	for(size_t i = 0; i < size; ++i) Array_dbl_set(skellam, i, (Array_dbl_get(skellam, i) - skel_mean) / skel_std + skel_mean);
+	
+	// Determine plotting range
+	double data_min_x = fabs(Array_dbl_get(skellam, 0));
+	double data_max_x = fabs(Array_dbl_get(skellam, size - 1));
+	if(data_min_x < 4.0) data_min_x = 4.0;
+	if(data_max_x < 4.0) data_max_x = 4.0;
+	if(data_min_x > data_max_x)
+	{
+		data_max_x = data_min_x;
+		data_min_x *= -1.0;
+	}
+	else data_min_x = -data_max_x;
 	const double data_min_y = 0.0;
 	const double data_max_y = 1.0;
 	
@@ -1577,8 +1579,19 @@ PRIVATE void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, co
 	const char *colour_axes = "0 0 0";
 	
 	// Labels
-	const char *label_x = "\\(P - N\\) / sqrt\\(P + N\\)";
+	const char *label_x = "Skellam parameter"; // "\\(P - N\\) / sqrt\\(P + N\\)";
 	const char *label_y = "Cumulative fraction";
+	
+	// Open output file
+	FILE *fp;
+	if(overwrite) fp = fopen(filename, "wb");
+	else fp = fopen(filename, "wxb");
+	ensure(fp != NULL, ERR_FILE_ACCESS, "Failed to open output file: %s", filename);
+	
+	message("Creating postscript file: %s", strrchr(filename, '/') == NULL ? filename : strrchr(filename, '/') + 1);
+	
+	// Print PS header
+	write_eps_header(fp, "SoFiA Skellam Plot", SOFIA_VERSION_FULL, "0 0 480 360");
 	
 	// Set clip path
 	fprintf(fp, "gsave\n");

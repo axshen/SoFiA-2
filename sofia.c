@@ -528,9 +528,9 @@ int main(int argc, char **argv)
 			ensure(!Path_file_is_readable(path_rel_plot), ERR_FILE_ACCESS,
 				"Reliability plot already exists. Please delete the file\n"
 				"       or set \'output.overwrite = true\'.");
-			/*ensure(!Path_file_is_readable(path_skel_plot), ERR_FILE_ACCESS,
+			ensure(!Path_file_is_readable(path_skel_plot), ERR_FILE_ACCESS,
 				"Skellam plot already exists. Please delete the file\n"
-				"       or set \'output.overwrite = true\'.");*/
+				"       or set \'output.overwrite = true\'.");
 		}
 		if(use_reliability && use_rel_debug) {
 			ensure(!Path_file_is_readable(path_rel_cat_n) && !Path_file_is_readable(path_rel_cat_p), ERR_FILE_ACCESS,
@@ -1189,12 +1189,18 @@ int main(int argc, char **argv)
 		const double rel_fmin = rel_snr_min * sqrt_beam_area;
 		
 		// Calculate reliability values
-		Matrix *covar = LinkerPar_reliability(lpar, Parameter_get_flt(par, "reliability.scaleKernel"), rel_fmin, rel_cat);
+		Array_dbl *skellam = NULL;
+		Matrix *covar = LinkerPar_reliability(lpar, Parameter_get_flt(par, "reliability.scaleKernel"), rel_fmin, rel_cat, use_rel_plot ? &skellam : NULL);
 		
 		// Create plots if requested
-		if(use_rel_plot) LinkerPar_rel_plots(lpar, rel_threshold, rel_fmin, covar, Path_get(path_rel_plot), overwrite);
+		if(use_rel_plot)
+		{
+			LinkerPar_rel_plots(lpar, rel_threshold, rel_fmin, covar, Path_get(path_rel_plot), overwrite);
+			LinkerPar_skellam_plot(skellam, Path_get(path_skel_plot), overwrite);
+		}
 		
-		// Delete covariance matrix and catalogue table again
+		// Clean up
+		Array_dbl_delete(skellam);
 		Matrix_delete(covar);
 		Table_delete(rel_cat);
 		

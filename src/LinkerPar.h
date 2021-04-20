@@ -72,14 +72,14 @@ PUBLIC  void       LinkerPar_get_rel_cat  (const LinkerPar *self, const char *fl
 PUBLIC  void       LinkerPar_print_info   (const LinkerPar *self);
 
 // Reliability filtering
-PUBLIC  Matrix    *LinkerPar_reliability  (LinkerPar *self, const double scale_kernel, const double fmin, const Table *rel_cat);
+PUBLIC  Matrix    *LinkerPar_reliability  (LinkerPar *self, const double scale_kernel, const double fmin, const Table *rel_cat, Array_dbl **skellam);
 PUBLIC  void       LinkerPar_rel_plots    (const LinkerPar *self, const double threshold, const double fmin, const Matrix *covar, const char *filename, const bool overwrite);
 
 // Private methods
 PRIVATE size_t     LinkerPar_get_index    (const LinkerPar *self, const size_t label);
 PRIVATE void       LinkerPar_reallocate_memory(LinkerPar *self);
 
-// Private functions
-PRIVATE void       LinkerPar_skellam_plot (Array_dbl *skellam, const char *filename, const bool overwrite);
+// Public functions
+PUBLIC  void       LinkerPar_skellam_plot (Array_dbl *skellam, const char *filename, const bool overwrite);
 
 #endif
