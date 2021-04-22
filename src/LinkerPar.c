@@ -943,7 +943,7 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 //   be disabled altogether.                                         //
 //   This method can also create a Skellam array to assist with the  //
 //   optimisation of the kernel scale. This can be controlled using  //
-//   the 'skellam' parameter. If set to NULL, no SKellam array will  //
+//   the 'skellam' parameter. If set to NULL, no Skellam array will  //
 //   be generated.                                                   //
 // ----------------------------------------------------------------- //
 
@@ -1549,16 +1549,10 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	for(size_t i = 0; i < size; ++i) Array_dbl_set(skellam, i, (Array_dbl_get(skellam, i) - skel_mean) / skel_std + skel_mean);
 	
 	// Determine plotting range
-	double data_min_x = fabs(Array_dbl_get(skellam, 0));
-	double data_max_x = fabs(Array_dbl_get(skellam, size - 1));
-	if(data_min_x < 4.0) data_min_x = 4.0;
-	if(data_max_x < 4.0) data_max_x = 4.0;
-	if(data_min_x > data_max_x)
-	{
-		data_max_x = data_min_x;
-		data_min_x *= -1.0;
-	}
-	else data_min_x = -data_max_x;
+	//double data_min_x = Array_dbl_get(skellam, 0);
+	//double data_max_x = Array_dbl_get(skellam, size - 1);
+	const double data_min_x = -4.0;
+	const double data_max_x = 4.0;
 	const double data_min_y = 0.0;
 	const double data_max_y = 1.0;
 	
@@ -1579,7 +1573,7 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	const char *colour_axes = "0 0 0";
 	
 	// Labels
-	const char *label_x = "Skellam parameter"; // "\\(P - N\\) / sqrt\\(P + N\\)";
+	const char *label_x = "\\(P - N\\) / sqrt\\(P + N\\)  normalised to sigma = 1";
 	const char *label_y = "Cumulative fraction";
 	
 	// Open output file

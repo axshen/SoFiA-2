@@ -303,8 +303,8 @@ int main(int argc, char **argv)
 	{
 		warning( "┌──────────────────────────────────────────────────────────┐\n"
 		"         │ You have set parameter.physical = true. SoFiA will try   │\n"
-		"         │ to convert some parameters into physical units under the │\n"
-		"         │ following assumptions:                                   │\n"
+		"         │ to convert some parameters to physical units under the   │\n"
+		"         │ following fundamental assumptions:                       │\n"
 		"         │                                                          │\n"
 		"         │  * The beam information in the FITS header (BMAJ, BMIN)  │\n"
 		"         │    is correct and accurate across the entire image and   │\n"
@@ -314,11 +314,10 @@ int main(int argc, char **argv)
 		"         │    ted, i.e. the spectral resolution is the same as the  │\n"
 		"         │    channel width.                                        │\n"
 		"         │                                                          │\n"
-		"         │ Should any of those assumptions not be correct then the  │\n"
+		"         │ Should any of these assumptions be incorrect then the    │\n"
 		"         │ measurement of parameters such as flux or line width may │\n"
-		"         │ be incorrect. Please also note that SoFiA will in prin-  │\n"
-		"         │ cipal not correct line widths for any form of instrumen- │\n"
-		"         │ tal broadening.                                          │\n"
+		"         │ be wrong. Note that SoFiA will in principal not correct  │\n"
+		"         │ line widths for any form of instrumental broadening.     │\n"
 		"         └──────────────────────────────────────────────────────────┘\n");
 	}
 	
