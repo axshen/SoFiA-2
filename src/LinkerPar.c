@@ -1203,9 +1203,11 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 //   (1) self         - Object self-reference.                       //
 //   (2) threshold    - Reliability threshold.                       //
 //   (3) fmin         - Threshold for SNR filtering.                 //
-//   (4) covar        - Covariance matrix.                           //
-//   (5) filename     - Name of the output EPS file.                 //
-//   (6) overwrite    - If true, overwrite output file, otherwise do //
+//   (4) minSNR       - Only needed for labelling plot, while fmin   //
+//                      is the parameter used for drawing SNR line.  //
+//   (5) covar        - Covariance matrix.                           //
+//   (6) filename     - Name of the output EPS file.                 //
+//   (7) overwrite    - If true, overwrite output file, otherwise do //
 //                      not overwrite.                               //
 //                                                                   //
 // Return value:                                                     //
@@ -1227,7 +1229,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 //   ready exists, the process will be terminated.                   //
 // ----------------------------------------------------------------- //
 
-PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, const double fmin, const Matrix *covar, const char *filename, const bool overwrite)
+PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, const double fmin, const double minSNR, const Matrix *covar, const char *filename, const bool overwrite)
 {
 	// Sanity checks
 	check_null(self);
@@ -1267,6 +1269,9 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 	
 	// Print PS header
 	write_eps_header(fp, "SoFiA Reliability Plots", SOFIA_VERSION_FULL, "0 10 1060 360");
+	
+	// Select font
+	fprintf(fp, "roman\n");
 	
 	for(int n = 0; n < 3; ++n)
 	{
@@ -1457,6 +1462,11 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 			plot_y = (2.0 * log10(fmin) - data_max_x - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 			
 			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+			
+			fprintf(fp, "np %zu %.zu m\n", plot_offset_x + 14, plot_offset_y + plot_size_y - 20);
+			fprintf(fp, "%s rgb\n", colour_fmin);
+			fprintf(fp, "(minSNR = %.1f) show\n", minSNR);
+			
 			fprintf(fp, "grestore\n");
 		}
 		
@@ -1573,7 +1583,8 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	const char *colour_axes = "0 0 0";
 	
 	// Labels
-	const char *label_x = "\\(P - N\\) / sqrt\\(P + N\\)  normalised to sigma = 1";
+	const char *label_x_placeholder = "\\(P - N\\) / sqrt\\(P + N\\)  normalised to s = 1";
+	const char *label_x = "\\(P - N\\) / sqrt\\(P + N\\)  normalised to ";
 	const char *label_y = "Cumulative fraction";
 	
 	// Open output file
@@ -1586,6 +1597,9 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	
 	// Print PS header
 	write_eps_header(fp, "SoFiA Skellam Plot", SOFIA_VERSION_FULL, "0 0 480 360");
+	
+	// Select font
+	fprintf(fp, "roman\n");
 	
 	// Set clip path
 	fprintf(fp, "gsave\n");
@@ -1604,6 +1618,14 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	fprintf(fp, "[5 3] 0 setdash\n");
 	fprintf(fp, "s\n");
 	
+	// Plot vertical line at mean
+	fprintf(fp, "np\n");
+	fprintf(fp, "%.2f %zu m\n", (skel_mean - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x, plot_offset_y);
+	fprintf(fp, "%.2f %zu l\n", (skel_mean - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x, plot_offset_y + plot_size_y);
+	fprintf(fp, "%s rgb\n", colour_data);
+	fprintf(fp, "[1 3] 0 setdash\n");
+	fprintf(fp, "s\n");
+	
 	// Plot error function for Gaussian with sigma = 1
 	fprintf(fp, "np\n");
 	for(int i = -100; i <= 100; ++i)
@@ -1612,7 +1634,7 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 		const double plot_x = (x - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
 		const double plot_y = (0.5 - 0.5 * erf(-x / sqrt(2.0)) - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 		
-		fprintf(fp, "%.1f %.1f %s\n", plot_x, plot_y, i == -100 ? "m" : "l");
+		fprintf(fp, "%.2f %.2f %s\n", plot_x, plot_y, i == -100 ? "m" : "l");
 	}
 	fprintf(fp, "%s rgb\n", colour_erf);
 	fprintf(fp, "[] 0 setdash\n");
@@ -1660,7 +1682,12 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	}
 	
 	// Print labels
-	fprintf(fp, "np %zu 10 m (%s) dup stringwidth pop 2 div neg 0 rmoveto show\n", plot_offset_x + plot_size_x / 2, label_x);
+	fprintf(fp, "np\n");
+	fprintf(fp, "%zu 10 m (%s) stringwidth pop 2 div neg 0 rmoveto (%s) show\n", plot_offset_x + plot_size_x / 2, label_x_placeholder, label_x);
+	fprintf(fp, "greek\n");
+	fprintf(fp, "(s) show\n");
+	fprintf(fp, "roman\n");
+	fprintf(fp, "( = 1) show\n");
 	fprintf(fp, "np %zu %zu m gsave 90 rotate (%s) dup stringwidth pop 2 div neg 0 rmoveto show grestore\n", plot_offset_x - 34, plot_offset_y + plot_size_y / 2, label_y);
 	
 	// Plot legend
@@ -1671,7 +1698,11 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	fprintf(fp, "[] 0 setdash\n");
 	fprintf(fp, "s\n");
 	fprintf(fp, "%zu %zu m\n", plot_offset_x + 46, plot_offset_y + plot_size_y - 24);
-	fprintf(fp, "(Data) show\n");
+	fprintf(fp, "(Data \\() show\n");
+	fprintf(fp, "greek\n");
+	fprintf(fp, "(m) show\n");
+	fprintf(fp, "roman\n");
+	fprintf(fp, "( = %.3f\\)) show\n", skel_mean);
 	
 	fprintf(fp, "np\n");
 	fprintf(fp, "%zu %zu m\n", plot_offset_x + 20, plot_offset_y + plot_size_y - 35);
@@ -1680,7 +1711,11 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	fprintf(fp, "[] 0 setdash\n");
 	fprintf(fp, "s\n");
 	fprintf(fp, "%zu %zu m\n", plot_offset_x + 46, plot_offset_y + plot_size_y - 39);
-	fprintf(fp, "(Gaussian \\(sigma = 1\\)) show\n");
+	fprintf(fp, "(Gaussian \\() show\n");
+	fprintf(fp, "greek\n");
+	fprintf(fp, "(s) show\n");
+	fprintf(fp, "roman\n");
+	fprintf(fp, "( = 1\\)) show\n");
 	
 	// Print EPS footer
 	write_eps_footer(fp);

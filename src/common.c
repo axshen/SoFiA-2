@@ -602,8 +602,9 @@ void write_eps_header(FILE *fp, const char *title, const char *creator, const ch
 	fprintf(fp, "/np {newpath} bind def\n");
 	fprintf(fp, "/cp {closepath} bind def\n");
 	fprintf(fp, "/lw {setlinewidth} bind def\n");
-	fprintf(fp, "/Helvetica findfont 12 scalefont setfont\n");
-	fprintf(fp , "/ellipse {gsave /scf exch def /pa exch def /rmin exch def /rmaj exch def /posy exch def /posx exch def 0.5 setlinewidth newpath posx posy translate matrix currentmatrix 1 scf scale pa rotate 1 rmin rmaj div scale 0 0 rmaj 0 360 arc closepath setmatrix stroke grestore} bind def\n");
+	fprintf(fp, "/roman {/Helvetica findfont 12 scalefont setfont} bind def\n");
+	fprintf(fp, "/greek {/Symbol findfont 12 scalefont setfont} bind def\n");
+	fprintf(fp, "/ellipse {gsave /scf exch def /pa exch def /rmin exch def /rmaj exch def /posy exch def /posx exch def 0.5 setlinewidth newpath posx posy translate matrix currentmatrix 1 scf scale pa rotate 1 rmin rmaj div scale 0 0 rmaj 0 360 arc closepath setmatrix stroke grestore} bind def\n");
 	return;
 }
 

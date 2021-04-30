@@ -1194,7 +1194,7 @@ int main(int argc, char **argv)
 		// Create plots if requested
 		if(use_rel_plot)
 		{
-			LinkerPar_rel_plots(lpar, rel_threshold, rel_fmin, covar, Path_get(path_rel_plot), overwrite);
+			LinkerPar_rel_plots(lpar, rel_threshold, rel_fmin, rel_snr_min, covar, Path_get(path_rel_plot), overwrite);
 			LinkerPar_skellam_plot(skellam, Path_get(path_skel_plot), overwrite);
 		}
 		
