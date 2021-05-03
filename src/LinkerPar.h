@@ -80,6 +80,6 @@ PRIVATE size_t     LinkerPar_get_index    (const LinkerPar *self, const size_t l
 PRIVATE void       LinkerPar_reallocate_memory(LinkerPar *self);
 
 // Public functions
-PUBLIC  void       LinkerPar_skellam_plot (Array_dbl *skellam, const char *filename, const bool overwrite);
+PUBLIC  void       LinkerPar_skellam_plot (Array_dbl *skellam, const char *filename, const bool overwrite, const double kernelScale);
 
 #endif

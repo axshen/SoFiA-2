@@ -1526,6 +1526,7 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 //   (1) skellam      - Array of (P - N) / sqrt(P + N) values.       //
 //   (2) filename     - Output file name for plot.                   //
 //   (3) overwrite    - If true, overwrite existing file.            //
+//   (4) kernelScale  - Kernel scale factor, for labelling only.     //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -1540,7 +1541,7 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 //   written to an EPS file with the specified file name.            //
 // ----------------------------------------------------------------- //
 
-PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, const bool overwrite)
+PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, const bool overwrite, const double kernelScale)
 {
 	// Sanity checks
 	check_null(skellam);
@@ -1583,8 +1584,8 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	const char *colour_axes = "0 0 0";
 	
 	// Labels
-	const char *label_x_placeholder = "\\(P - N\\) / sqrt\\(P + N\\)  normalised to s = 1";
-	const char *label_x = "\\(P - N\\) / sqrt\\(P + N\\)  normalised to ";
+	const char *label_x_placeholder = "\\(P - N\\) / sqrt\\(P + N\\) normalised to s = 1";
+	const char *label_x = "\\(P - N\\) / sqrt\\(P + N\\) normalised to ";
 	const char *label_y = "Cumulative fraction";
 	
 	// Open output file
@@ -1702,15 +1703,17 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	fprintf(fp, "greek\n");
 	fprintf(fp, "(m) show\n");
 	fprintf(fp, "roman\n");
-	fprintf(fp, "( = %.3f\\)) show\n", skel_mean);
+	fprintf(fp, "( = %.3f,) show\n", skel_mean);
+	fprintf(fp, "%zu %zu m\n", plot_offset_x + 46, plot_offset_y + plot_size_y - 39);
+	fprintf(fp, "(kernel = %.2f\\)) show\n", kernelScale);
 	
 	fprintf(fp, "np\n");
-	fprintf(fp, "%zu %zu m\n", plot_offset_x + 20, plot_offset_y + plot_size_y - 35);
-	fprintf(fp, "%zu %zu l\n", plot_offset_x + 40, plot_offset_y + plot_size_y - 35);
+	fprintf(fp, "%zu %zu m\n", plot_offset_x + 20, plot_offset_y + plot_size_y - 50);
+	fprintf(fp, "%zu %zu l\n", plot_offset_x + 40, plot_offset_y + plot_size_y - 50);
 	fprintf(fp, "%s rgb\n", colour_erf);
 	fprintf(fp, "[] 0 setdash\n");
 	fprintf(fp, "s\n");
-	fprintf(fp, "%zu %zu m\n", plot_offset_x + 46, plot_offset_y + plot_size_y - 39);
+	fprintf(fp, "%zu %zu m\n", plot_offset_x + 46, plot_offset_y + plot_size_y - 54);
 	fprintf(fp, "(Gaussian \\() show\n");
 	fprintf(fp, "greek\n");
 	fprintf(fp, "(s) show\n");
