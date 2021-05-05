@@ -4660,6 +4660,9 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		double pos_x = 0.0;
 		double pos_y = 0.0;
 		double pos_z = 0.0;
+		size_t pos_x_peak = 0.0;
+		size_t pos_y_peak = 0.0;
+		size_t pos_z_peak = 0.0;
 		double f_sum = 0.0;
 		double f_min = INFINITY;
 		double f_max = -INFINITY;
@@ -4672,6 +4675,9 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		double longitude = 0.0;
 		double latitude = 0.0;
 		double spectral = 0.0;
+		double longitude_peak = 0.0;
+		double latitude_peak = 0.0;
+		double spectral_peak = 0.0;
 		double ell_maj = 0.0;
 		double ell_min = 0.0;
 		double ell_pa = 0.0;
@@ -4713,7 +4719,7 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 						if(f_min > value) f_min = value;
 						if(f_max < value) f_max = value;
 						
-						// Moment map for ellipse fitting
+						// Moment map for ellipse fitting and peak position
 						moment_map[x - x_min + nx * (y - y_min)] += value;
 						count_map [x - x_min + nx * (y - y_min)] += 1;
 						
@@ -4743,6 +4749,31 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		pos_x /= sum_pos;
 		pos_y /= sum_pos;
 		pos_z /= sum_pos;
+		
+		// Measure position of peak in moment map and spectrum
+		double value_peak = 0.0;
+		for(size_t y = 0; y < ny; ++y)
+		{
+			for(size_t x = 0; x < nx; ++x)
+			{
+				if(moment_map[x + nx * y] > value_peak)
+				{
+					value_peak = moment_map[x + nx * y];
+					pos_x_peak = x + x_min;
+					pos_y_peak = y + y_min;
+				}
+			}
+		}
+		
+		value_peak = 0.0;
+		for(size_t z = 0; z < nz; ++z)
+		{
+			if(spectrum[z] > value_peak)
+			{
+				value_peak = spectrum[z];
+				pos_z_peak = z + z_min;
+			}
+		}
 		
 		// Measure local RMS
 		if(Array_dbl_get_size(array_rms)) rms = MAD_TO_STD * mad_val_dbl(Array_dbl_get_ptr(array_rms), Array_dbl_get_size(array_rms), 0.0, 1, 0);
@@ -4825,6 +4856,7 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		if(use_wcs)
 		{
 			WCS_convertToWorld(wcs, pos_x, pos_y, pos_z, &longitude, &latitude, &spectral);
+			WCS_convertToWorld(wcs, (double)pos_x_peak, (double)pos_y_peak, (double)pos_z_peak, &longitude_peak, &latitude_peak, &spectral_peak);
 			DataCube_create_src_name(self, &source_name, prefix, longitude, latitude, label_lon);
 		}
 		else
@@ -4844,12 +4876,12 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		
 		// Update catalogue entries
 		Source_set_identifier(src, String_get(source_name));
-		Source_set_par_flt(src, "x",     pos_x, "pix",                      "pos.cartesian.x");
-		Source_set_par_flt(src, "y",     pos_y, "pix",                      "pos.cartesian.y");
-		Source_set_par_flt(src, "z",     pos_z, "pix",                      "pos.cartesian.z");
-		Source_set_par_flt(src, "rms",   rms,   String_get(unit_flux_dens), "instr.det.noise");
-		Source_set_par_flt(src, "f_min", f_min, String_get(unit_flux_dens), "phot.flux.density;stat.min");
-		Source_set_par_flt(src, "f_max", f_max, String_get(unit_flux_dens), "phot.flux.density;stat.max");
+		Source_set_par_flt(src, "x",      pos_x,      "pix",                      "pos.cartesian.x");
+		Source_set_par_flt(src, "y",      pos_y,      "pix",                      "pos.cartesian.y");
+		Source_set_par_flt(src, "z",      pos_z,      "pix",                      "pos.cartesian.z");
+		Source_set_par_flt(src, "rms",    rms,        String_get(unit_flux_dens), "instr.det.noise");
+		Source_set_par_flt(src, "f_min",  f_min,      String_get(unit_flux_dens), "phot.flux.density;stat.min");
+		Source_set_par_flt(src, "f_max",  f_max,      String_get(unit_flux_dens), "phot.flux.density;stat.max");
 		
 		if(physical)
 		{
@@ -4889,9 +4921,25 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		
 		if(use_wcs)
 		{
+			// Centroid
 			Source_set_par_flt(src, String_get(label_lon),  longitude, String_get(unit_lon),  String_get(ucd_lon));
 			Source_set_par_flt(src, String_get(label_lat),  latitude,  String_get(unit_lat),  String_get(ucd_lat));
 			Source_set_par_flt(src, String_get(label_spec), spectral,  String_get(unit_spec), String_get(ucd_spec));
+		}
+		
+		Source_set_par_int(src, "x_peak", pos_x_peak, "pix", "pos.cartesian.x");
+		Source_set_par_int(src, "y_peak", pos_y_peak, "pix", "pos.cartesian.y");
+		Source_set_par_int(src, "z_peak", pos_z_peak, "pix", "pos.cartesian.z");
+		
+		if(use_wcs)
+		{
+			// Peak
+			String_append(label_lon,  "_peak");
+			String_append(label_lat,  "_peak");
+			String_append(label_spec, "_peak");
+			Source_set_par_flt(src, String_get(label_lon),  longitude_peak, String_get(unit_lon),  String_get(ucd_lon));
+			Source_set_par_flt(src, String_get(label_lat),  latitude_peak,  String_get(unit_lat),  String_get(ucd_lat));
+			Source_set_par_flt(src, String_get(label_spec), spectral_peak,  String_get(unit_spec), String_get(ucd_spec));
 		}
 		
 		// Clean up (per source)
