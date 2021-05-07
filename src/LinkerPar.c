@@ -1555,7 +1555,9 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	// NOTE: This is necessary to ensure that the standard deviation of the
 	//       Skellam parameter values is 1 such that their distribution can
 	//       be readily compared to a standard Gaussian.
-	const double skel_mean = mean_dbl(Array_dbl_get_ptr(skellam), size);
+	//const double skel_mean = mean_dbl(Array_dbl_get_ptr(skellam), size);
+	// NOTE: Using median instead of mean, as it is more robust
+	const double skel_mean = IS_ODD(size) ? Array_dbl_get(skellam, size / 2) : 0.5 * (Array_dbl_get(skellam, size / 2 - 1) + Array_dbl_get(skellam, size / 2));
 	const double skel_std  = std_dev_val_dbl(Array_dbl_get_ptr(skellam), size, skel_mean, 1, 0);
 	for(size_t i = 0; i < size; ++i) Array_dbl_set(skellam, i, (Array_dbl_get(skellam, i) - skel_mean) / skel_std + skel_mean);
 	
