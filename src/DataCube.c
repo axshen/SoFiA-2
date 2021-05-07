@@ -5245,6 +5245,9 @@ PRIVATE void DataCube_create_src_name(const DataCube *self, String **source_name
 //                    of moment 1 and 2. Note that moment 0 will al- //
 //                    ways include all channels to avoid a positive  //
 //                    flux bias.                                     //
+//  (10)  rms       - If positive, then convert the number of chan-  //
+//                    nels map to a proper SNR map. Set to 0 to dis- //
+//                    able this conversion.                          //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -5267,7 +5270,7 @@ PRIVATE void DataCube_create_src_name(const DataCube *self, String **source_name
 //   from affecting the moment calculation.                          //
 // ----------------------------------------------------------------- //
 
-PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, const char *obj_name, bool use_wcs, const double threshold)
+PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, const char *obj_name, bool use_wcs, const double threshold, const double rms)
 {
 	// Sanity checks
 	check_null(self);
@@ -5353,6 +5356,11 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 	}
 	
 	// Determine moments 0 and 1
+	// NOTE: This should not be multi-threaded, as otherwise the moment-0 map would
+	//       no longer be deterministic due to the arbitrary order of the summation
+	//       which would result in slightly different rounding errors. While those
+	//       differences are negligible, the moment maps from different runs would
+	//       no longer be binary-identical, making unit testing impossible.
 	for(size_t z = self->axis_size[2]; z--;)
 	{
 		double spectral = z;
@@ -5380,6 +5388,33 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 				}
 			}
 		}
+	}
+	
+	// Convert channel map to SNR map if requested
+	if(is_3d && rms > 0.0)
+	{
+		// Create empty SNR map
+		DataCube *snr_map = DataCube_blank(self->axis_size[0], self->axis_size[1], 1, -32, self->verbosity);
+		Header_copy_wcs(self->header, snr_map->header);
+		Header_copy_misc(self->header, snr_map->header, false, true);
+		if(obj_name != NULL) Header_set_str(snr_map->header, "OBJECT", obj_name);
+		
+		// Calculate SNR values
+		#pragma omp parallel for collapse(2) schedule(static)
+		for(size_t y = 0; y < self->axis_size[1]; ++y)
+		{
+			for(size_t x = 0; x < self->axis_size[0]; ++x)
+			{
+				const long int value_chan = DataCube_get_data_int(*chan, x, y, 0);
+				const double   value_flux = DataCube_get_data_flt(*mom0, x, y, 0);
+				if(value_chan > 0) DataCube_set_data_flt(snr_map, x, y, 0, value_flux / (rms * sqrt((double)value_chan)));
+				else DataCube_set_data_flt(snr_map, x, y, 0, NAN);
+			}
+		}
+		
+		// Delete old channel map and point to new SNR map instead
+		DataCube_delete(*chan);
+		*chan = snr_map;
 	}
 	
 	// If image is 2-D then return, as nothing left to do
@@ -5639,7 +5674,7 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 		DataCube *mom1;
 		DataCube *mom2;
 		DataCube *chan;
-		DataCube_create_moments(cubelet, masklet, &mom0, &mom1, &mom2, &chan, Source_get_identifier(src), use_wcs, threshold * rms);
+		DataCube_create_moments(cubelet, masklet, &mom0, &mom1, &mom2, &chan, Source_get_identifier(src), use_wcs, threshold * rms, rms);
 		
 		// Save output products...
 		// ...cubelet
@@ -5683,7 +5718,7 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 		{
 			String_set(filename, String_get(filename_template));
 			String_append_int(filename, "%ld", src_id);
-			String_append(filename, "_chan.fits");
+			String_append(filename, "_snr.fits");
 			DataCube_save(chan, String_get(filename), overwrite, DESTROY);
 		}
 		
