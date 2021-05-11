@@ -4612,6 +4612,12 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 	
 	// Extract relevant header information
 	DataCube_get_wcs_info(self, &unit_flux_dens, &unit_flux, &label_lon, &label_lat, &label_spec, &ucd_lon, &ucd_lat, &ucd_spec, &unit_lon, &unit_lat, &unit_spec, &beam_area, &chan_size);
+	String *label_lon_peak = String_new(String_get(label_lon));
+	String *label_lat_peak = String_new(String_get(label_lat));
+	String *label_spec_peak = String_new(String_get(label_spec));
+	String_append(label_lon_peak,  "_peak");
+	String_append(label_lat_peak,  "_peak");
+	String_append(label_spec_peak, "_peak");
 	
 	// Extract WCS object if requested
 	WCS *wcs = NULL;
@@ -4934,12 +4940,9 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		if(use_wcs)
 		{
 			// Peak
-			String_append(label_lon,  "_peak");
-			String_append(label_lat,  "_peak");
-			String_append(label_spec, "_peak");
-			Source_set_par_flt(src, String_get(label_lon),  longitude_peak, String_get(unit_lon),  String_get(ucd_lon));
-			Source_set_par_flt(src, String_get(label_lat),  latitude_peak,  String_get(unit_lat),  String_get(ucd_lat));
-			Source_set_par_flt(src, String_get(label_spec), spectral_peak,  String_get(unit_spec), String_get(ucd_spec));
+			Source_set_par_flt(src, String_get(label_lon_peak),  longitude_peak, String_get(unit_lon),  String_get(ucd_lon));
+			Source_set_par_flt(src, String_get(label_lat_peak),  latitude_peak,  String_get(unit_lat),  String_get(ucd_lat));
+			Source_set_par_flt(src, String_get(label_spec_peak), spectral_peak,  String_get(unit_spec), String_get(ucd_spec));
 		}
 		
 		// Clean up (per source)
@@ -4963,6 +4966,9 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 	String_delete(label_lon);
 	String_delete(label_lat);
 	String_delete(label_spec);
+	String_delete(label_lon_peak);
+	String_delete(label_lat_peak);
+	String_delete(label_spec_peak);
 	String_delete(ucd_lon);
 	String_delete(ucd_lat);
 	String_delete(ucd_spec);
