@@ -1620,6 +1620,80 @@ void spectral_line_width_dbl(const double *spectrum, const size_t size, double *
 
 
 // ----------------------------------------------------------------- //
+// Determine wm50 line width from spectrum                           //
+// ----------------------------------------------------------------- //
+// Arguments:                                                        //
+//                                                                   //
+//   (1) spectrum   - Pointer to spectrum.                           //
+//   (2) size       - Size of spectrum.                              //
+//                                                                   //
+// Return value:                                                     //
+//                                                                   //
+//   Value of wm50.                                                  //
+//                                                                   //
+// Description:                                                      //
+//                                                                   //
+//   Function for measuring the wm50 line width from a spectrum fol- //
+//   lowing the algorithm described in Courtois et al. (2009). If    //
+//   the measurement fails for some reason, then a value of 0 will   //
+//   be returned and a warning message printed.                      //
+// ----------------------------------------------------------------- //
+
+double wm50_line_width_dbl(const double *spectrum, const size_t size)
+{
+	// Determine integrated flux
+	double flux = 0.0;
+	for(size_t i = size; i--;) if(IS_NOT_NAN(spectrum[i])) flux += (double)(spectrum[i]);
+	
+	// Sanity check
+	if(flux <= 0.0 || IS_NAN(flux))
+	{
+		warning("Failed to measure wm50.");
+		return 0.0;
+	}
+	
+	// Determine lower boundary
+	size_t lower = 0;
+	double flux_lower = spectrum[lower];
+	while(flux_lower < 0.05 * flux) flux_lower += spectrum[++lower];
+	
+	// Determine upper boundary
+	size_t upper = size - 1;
+	double flux_upper = spectrum[upper];
+	while(flux_upper < 0.05 * flux) flux_upper += spectrum[--upper];
+	
+	// Sanity check
+	if(upper <= lower)
+	{
+		warning("Failed to measure wm50.");
+		return 0.0;
+	}
+	
+	// Linearly interpolate for higher precision
+	double lower_intp = (double)lower - (flux_lower - 0.05 * flux) / spectrum[lower];
+	double upper_intp = (double)upper + (flux_upper - 0.05 * flux) / spectrum[upper];
+	
+	// Determine mean flux per channel within window
+	const double flux_mean = 0.9 * flux / (upper_intp - lower_intp);
+	
+	// Determine lower and upper boundaries for wm50
+	lower = 0;
+	upper = size - 1;
+	while(spectrum[lower] < 0.5 * flux_mean) ++lower;
+	while(spectrum[upper] < 0.5 * flux_mean) --upper;
+	
+	// Linearly interpolate for higher precision
+	lower_intp = (double)lower;
+	upper_intp = (double)upper;
+	if(lower > 0)        lower_intp -= (spectrum[lower] - 0.5 * flux_mean) / (spectrum[lower] - spectrum[lower - 1]);
+	if(upper < size - 1) upper_intp += (spectrum[upper] - 0.5 * flux_mean) / (spectrum[upper] - spectrum[upper + 1]);
+	
+	return upper_intp - lower_intp;
+}
+
+
+
+// ----------------------------------------------------------------- //
 // Determine kinematic major axis of galaxy                          //
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //

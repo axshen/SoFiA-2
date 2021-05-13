@@ -4674,6 +4674,7 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		double f_max = -INFINITY;
 		double w50 = 0.0;
 		double w20 = 0.0;
+		double wm50 = 0.0;
 		double err_x = 0.0;
 		double err_y = 0.0;
 		double err_z = 0.0;
@@ -4852,6 +4853,9 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 		// Determine w20 and w50 from spectrum (moving inwards)
 		spectral_line_width_dbl(spectrum, nz, &w20, &w50);
 		
+		// Determine wm50
+		wm50 = wm50_line_width_dbl(spectrum, nz);
+		
 		// Determine uncertainties
 		err_x = sqrt(err_x) * rms / sum_pos;
 		err_y = sqrt(err_y) * rms / sum_pos;
@@ -4894,12 +4898,14 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 			Source_set_par_flt(src, "f_sum", f_sum * chan_size / beam_area, String_get(unit_flux), "phot.flux");
 			Source_set_par_flt(src, "w20",   w20 * chan_size,               String_get(unit_spec), "spect.line.width");
 			Source_set_par_flt(src, "w50",   w50 * chan_size,               String_get(unit_spec), "spect.line.width");
+			Source_set_par_flt(src, "wm50",  wm50 * chan_size,              String_get(unit_spec), "spect.line.width");
 		}
 		else
 		{
 			Source_set_par_flt(src, "f_sum", f_sum, String_get(unit_flux_dens), "phot.flux");
 			Source_set_par_flt(src, "w20",   w20,   "pix",                      "spect.line.width");
 			Source_set_par_flt(src, "w50",   w50,   "pix",                      "spect.line.width");
+			Source_set_par_flt(src, "wm50",  wm50,  "pix",                      "spect.line.width");
 		}
 		
 		Source_set_par_flt(src, "ell_maj",   ell_maj,   "pix", "phys.angSize");
