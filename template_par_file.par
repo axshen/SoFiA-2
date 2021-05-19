@@ -143,6 +143,6 @@ output.writeMask2d         =  false
 output.writeRawMask        =  false
 output.writeMoments        =  false
 output.writeCubelets       =  false
-output.marginCubelets      =  0
+output.marginCubelets      =  10
 output.thresholdMom12      =  0.0
 output.overwrite           =  true

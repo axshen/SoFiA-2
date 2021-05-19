@@ -5409,6 +5409,7 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 		DataCube *snr_map = DataCube_blank(self->axis_size[0], self->axis_size[1], 1, -32, self->verbosity);
 		Header_copy_wcs(self->header, snr_map->header);
 		Header_copy_misc(self->header, snr_map->header, false, true);
+		Header_set_str(snr_map->header, "BUNIT", " ");
 		if(obj_name != NULL) Header_set_str(snr_map->header, "OBJECT", obj_name);
 		
 		// Calculate SNR values
