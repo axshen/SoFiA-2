@@ -2193,7 +2193,7 @@ PUBLIC void DataCube_contsub(DataCube *self, unsigned int order, size_t shift, c
 	const size_t ny = self->axis_size[1];
 	const size_t nz = self->axis_size[2];
 	const size_t nxy = nx * ny;
-	size_t counter = 0;        // For update of progress bar
+	size_t progress = 0;
 	
 	#pragma omp parallel
 	{
@@ -2205,7 +2205,7 @@ PUBLIC void DataCube_contsub(DataCube *self, unsigned int order, size_t shift, c
 		for(size_t y = 0; y < ny; ++y)
 		{
 			#pragma omp critical
-			progress_bar("Progress: ", ++counter, ny);
+			progress_bar("Progress: ", progress++, ny - 1);
 			
 			for(size_t x = 0; x < nx; ++x)
 			{
@@ -2254,7 +2254,7 @@ PUBLIC void DataCube_contsub(DataCube *self, unsigned int order, size_t shift, c
 				// Measure means
 				double x_mean = 0.0;
 				double y_mean = 0.0;
-				counter = 0;
+				size_t counter = 0;
 				
 				for(size_t i = 0; i < nz; ++i)
 				{
