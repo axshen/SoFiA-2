@@ -126,6 +126,14 @@ PUBLIC void Parameter_delete(Parameter *self)
 
 
 
+PUBLIC size_t Parameter_get_size(const Parameter *self)
+{
+	check_null(self);
+	return self->n_par;
+}
+
+
+
 // ----------------------------------------------------------------- //
 // Set parameter to given value                                      //
 // ----------------------------------------------------------------- //
@@ -358,6 +366,43 @@ PUBLIC bool Parameter_get_bool(const Parameter *self, const char *key)
 PUBLIC const char *Parameter_get_str(const Parameter *self, const char *key)
 {
 	return Parameter_get_raw(self, key);
+}
+
+// Same, but by index
+
+PUBLIC const char *Parameter_get_str_index(const Parameter *self, const size_t index)
+{
+	check_null(self);
+	ensure(index < self->n_par, ERR_INDEX_RANGE, "Parameter list index out of range.");
+	return String_get(self->values[index]);
+}
+
+
+
+// ----------------------------------------------------------------- //
+// Extract key at specified index position                           //
+// ----------------------------------------------------------------- //
+// Arguments:                                                        //
+//                                                                   //
+//   (1) self     - Object self-reference.                           //
+//   (2) index    - Index of the key to be returned.                 //
+//                                                                   //
+// Return value:                                                     //
+//                                                                   //
+//   Returns a pointer to the string representing the key.           //
+//                                                                   //
+// Description:                                                      //
+//                                                                   //
+//   Public method for returning the name of the parameter at the    //
+//   specified index position as a pointer to a string value. The    //
+//   method will be terminated if the index is out of range.         //
+// ----------------------------------------------------------------- //
+
+PUBLIC const char *Parameter_get_key(const Parameter *self, const size_t index)
+{
+	check_null(self);
+	ensure(index < self->n_par, ERR_INDEX_RANGE, "Parameter list index out of range.");
+	return String_get(self->keys[index]);
 }
 
 

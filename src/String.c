@@ -293,6 +293,37 @@ PUBLIC String *String_set(String *self, const char *string)
 
 
 // ----------------------------------------------------------------- //
+// Set character at specified index                                  //
+// ----------------------------------------------------------------- //
+// Arguments:                                                        //
+//                                                                   //
+//   (1) self     - Object self-reference.                           //
+//   (2) index    - Index of the character to be set.                //
+//   (3) c        - Character.                                       //
+//                                                                   //
+// Return value:                                                     //
+//                                                                   //
+//   Pointer to self after assignment.                               //
+//                                                                   //
+// Description:                                                      //
+//                                                                   //
+//   Public method for setting the character at the specified index  //
+//   position to the value of c. The method will terminate if the    //
+//   index is out of range.                                          //
+// ----------------------------------------------------------------- //
+
+PUBLIC String *String_set_char(String *self, const size_t index, const char c)
+{
+	// Sanity checks
+	check_null(self);
+	ensure(index < self->size, ERR_INDEX_RANGE, "String index out of range.");
+	self->string[index] = c;
+	return self;
+}
+
+
+
+// ----------------------------------------------------------------- //
 // Set string from integer                                           //
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //

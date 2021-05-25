@@ -689,6 +689,7 @@ int main(int argc, char **argv)
 			{
 				// Apply flags to noise cube
 				if(use_flagging) DataCube_flag_regions(noiseCube, flag_regions);
+				DataCube_add_history(noiseCube, par);
 				DataCube_save(noiseCube, Path_get(path_noise_out), overwrite, DESTROY);
 			}
 			DataCube_delete(noiseCube);
@@ -830,6 +831,7 @@ int main(int argc, char **argv)
 	if(write_filtered && (use_region || use_flagging || use_flagging_cat || use_cont_sub || use_noise || use_weights || use_noise_scaling || use_ripple_filter))  // ALERT: Add conditions here as needed.
 	{
 		status("Writing filtered cube");
+		DataCube_add_history(dataCube, par);
 		DataCube_save(dataCube, Path_get(path_filtered), overwrite, PRESERVE);
 		
 		// Print time
@@ -1073,6 +1075,7 @@ int main(int argc, char **argv)
 	if(write_rawmask)
 	{
 		status("Writing raw binary mask");
+		DataCube_add_history(maskCubeTmp, par);
 		DataCube_save(maskCubeTmp, Path_get(path_mask_raw), overwrite, DESTROY);
 		
 		// Print time
@@ -1361,7 +1364,7 @@ int main(int argc, char **argv)
 	{
 		status("Creating cubelets");
 		message("Flux threshold (moment 1 and 2): %.2e", thresh_mom);
-		DataCube_create_cubelets(dataCube, maskCube, catalog, Path_get(path_cubelets), overwrite, use_wcs, use_physical, Parameter_get_int(par, "output.marginCubelets"), thresh_mom);
+		DataCube_create_cubelets(dataCube, maskCube, catalog, Path_get(path_cubelets), overwrite, use_wcs, use_physical, Parameter_get_int(par, "output.marginCubelets"), thresh_mom, par);
 		
 		// Print time
 		timestamp(start_time, start_clock);
@@ -1385,10 +1388,26 @@ int main(int argc, char **argv)
 		DataCube_create_moments(dataCube, maskCube, &mom0, &mom1, &mom2, &chan, NULL, use_wcs, 0.0, 0.0);
 		
 		// Save moment maps to disk
-		if(mom0 != NULL) DataCube_save(mom0, Path_get(path_mom0), overwrite, DESTROY);
-		if(mom1 != NULL) DataCube_save(mom1, Path_get(path_mom1), overwrite, DESTROY);
-		if(mom2 != NULL) DataCube_save(mom2, Path_get(path_mom2), overwrite, DESTROY);
-		if(chan != NULL) DataCube_save(chan, Path_get(path_chan), overwrite, DESTROY);
+		if(mom0 != NULL)
+		{
+			DataCube_add_history(mom0, par);
+			DataCube_save(mom0, Path_get(path_mom0), overwrite, DESTROY);
+		}
+		if(mom1 != NULL)
+		{
+			DataCube_add_history(mom1, par);
+			DataCube_save(mom1, Path_get(path_mom1), overwrite, DESTROY);
+		}
+		if(mom2 != NULL)
+		{
+			DataCube_add_history(mom2, par);
+			DataCube_save(mom2, Path_get(path_mom2), overwrite, DESTROY);
+		}
+		if(chan != NULL)
+		{
+			DataCube_add_history(chan, par);
+			DataCube_save(chan, Path_get(path_chan), overwrite, DESTROY);
+		}
 		
 		// Delete moment maps again
 		DataCube_delete(mom0);
@@ -1414,12 +1433,17 @@ int main(int argc, char **argv)
 		if(write_mask2d)
 		{
 			DataCube *maskImage = DataCube_2d_mask(maskCube);
+			DataCube_add_history(maskImage, par);
 			DataCube_save(maskImage, Path_get(path_mask_2d), overwrite, DESTROY);
 			DataCube_delete(maskImage);
 		}
 		
 		// Write 3-D mask cube
-		if(write_mask) DataCube_save(maskCube, Path_get(path_mask_out), overwrite, DESTROY);
+		if(write_mask)
+		{
+			DataCube_add_history(maskCube, par);
+			DataCube_save(maskCube, Path_get(path_mask_out), overwrite, DESTROY);
+		}
 		
 		// Print time
 		timestamp(start_time, start_clock);

@@ -451,10 +451,12 @@ PUBLIC String *Header_get_string(const Header *self, const char *key)
 //   The buffer needs to of size FITS_HEADER_VALUE_SIZE and padded   //
 //   with spaces (ASCII 32) at the end. If the specified keyword al- //
 //   ready exists, its first occurrence will be overwritten with the //
-//   new buffer. If the keyword does not exists, a new entry will be //
+//   new buffer. If the keyword does not exist, a new entry will be  //
 //   inserted at the end of the header just before the END keyword.  //
 //   If necessary, the header size will be automatically adjusted to //
 //   be able to accommodate the new entry.                           //
+//   Note that COMMENT and HISTORY items will always be appended at  //
+//   the end, and existing ones will never be overwritten.           //
 // ----------------------------------------------------------------- //
 
 PRIVATE int Header_set_raw(Header *self, const char *key, const char *buffer)
@@ -466,14 +468,23 @@ PRIVATE int Header_set_raw(Header *self, const char *key, const char *buffer)
 	check_null(buffer);
 	ensure(strlen(key) > 0 && strlen(key) <= FITS_HEADER_KEYWORD_SIZE, ERR_USER_INPUT, "Illegal length of header keyword.");
 	
-	char *ptr = self->header;
-	size_t line = Header_check(self, key);
+	const bool is_not_comment = (strcmp(key, "COMMENT") != 0);
+	const bool is_not_history = (strcmp(key, "HISTORY") != 0);
 	
-	// Overwrite header entry if already present
-	if(line > 0)
+	char *ptr = self->header;
+	size_t line = 0;
+	
+	if(is_not_comment && is_not_history)
 	{
-		memcpy(ptr + (line - 1) * FITS_HEADER_LINE_SIZE + FITS_HEADER_KEY_SIZE, buffer, FITS_HEADER_VALUE_SIZE);
-		return 0;
+		// Check if keyword already exists
+		line = Header_check(self, key);
+		
+		// Overwrite header entry if already present
+		if(line > 0)
+		{
+			memcpy(ptr + (line - 1) * FITS_HEADER_LINE_SIZE + FITS_HEADER_KEY_SIZE, buffer, FITS_HEADER_VALUE_SIZE);
+			return 0;
+		}
 	}
 	
 	// Create a new entry
@@ -496,7 +507,7 @@ PRIVATE int Header_set_raw(Header *self, const char *key, const char *buffer)
 	
 	// Add new header keyword at end
 	memcpy(ptr + (line - 1) * FITS_HEADER_LINE_SIZE, key, strlen(key)); // key
-	memcpy(ptr + (line - 1) * FITS_HEADER_LINE_SIZE + FITS_HEADER_KEYWORD_SIZE, "=", 1); // =
+	if(is_not_comment && is_not_history) memcpy(ptr + (line - 1) * FITS_HEADER_LINE_SIZE + FITS_HEADER_KEYWORD_SIZE, "=", 1); // =
 	memcpy(ptr + (line - 1) * FITS_HEADER_LINE_SIZE + FITS_HEADER_KEY_SIZE, buffer, FITS_HEADER_VALUE_SIZE); // value
 	memcpy(ptr + line * FITS_HEADER_LINE_SIZE, "END", 3); // new end
 	
@@ -568,6 +579,53 @@ PUBLIC int Header_set_str(Header *self, const char *key, const char *value)
 	memcpy(buffer + 1 + size, "\'", 1); // closing quotation mark
 	
 	return Header_set_raw(self, key, buffer);
+}
+
+
+
+// ----------------------------------------------------------------- //
+// Write comment or history item to header                           //
+// ----------------------------------------------------------------- //
+// Arguments:                                                        //
+//                                                                   //
+//   (1) self    - Object self-reference.                            //
+//   (2) value   - Comment or history string to be written.          //
+//   (3) history - If true, then a HISTORY item will be created,     //
+//                 otherwise a standard COMMENT will be written.     //
+//                                                                   //
+// Return value:                                                     //
+//                                                                   //
+//   Returns the number of lines written.                            //
+//                                                                   //
+// Description:                                                      //
+//                                                                   //
+//   Public method for writing a comment or history item into the    //
+//   header. If the value string exceeds the maximum permissible     //
+//   length, then the comment will automatically be broken into mul- //
+//   tiple lines. The number of lines written will be returned. If   //
+//   'history' to true, then a HISTORY keyword will be created.      //
+//   Otherwise, a standard COMMENT keyword will be written.          //
+// ----------------------------------------------------------------- //
+
+PUBLIC size_t Header_comment(Header *self, const char *value, const bool history)
+{
+	size_t size = strlen(value);
+	const size_t lines = (size == 0) ? 1 : (size - 1) / FITS_HEADER_VALUE_SIZE + 1;
+	char buffer[FITS_HEADER_VALUE_SIZE];
+	
+	for(size_t i = 0; i < lines; ++i)
+	{
+		memset(buffer, ' ', FITS_HEADER_VALUE_SIZE);
+		if(size > FITS_HEADER_VALUE_SIZE)
+		{
+			memcpy(buffer, value + i * FITS_HEADER_VALUE_SIZE, FITS_HEADER_VALUE_SIZE);
+			size -= FITS_HEADER_VALUE_SIZE;
+		}
+		else if(size > 0) memcpy(buffer, value + i * FITS_HEADER_VALUE_SIZE, size);
+		Header_set_raw(self, history ? "HISTORY" : "COMMENT", buffer);
+	}
+	
+	return lines;
 }
 
 

@@ -64,8 +64,11 @@ PUBLIC  long int          Parameter_get_int   (const Parameter *self, const char
 PUBLIC  unsigned long int Parameter_get_uint  (const Parameter *self, const char *key);
 PUBLIC  bool              Parameter_get_bool  (const Parameter *self, const char *key);
 PUBLIC  const char       *Parameter_get_str   (const Parameter *self, const char *key);
+PUBLIC  const char       *Parameter_get_str_index (const Parameter *self, const size_t index);
+PUBLIC  const char       *Parameter_get_key   (const Parameter *self, const size_t index);
 PUBLIC  void              Parameter_load      (Parameter *self, const char *filename, const int mode);
 PUBLIC  void              Parameter_default   (Parameter *self);
+PUBLIC  size_t            Parameter_get_size  (const Parameter *self);
 
 // Private methods
 PRIVATE void              Parameter_append_memory(Parameter *self);

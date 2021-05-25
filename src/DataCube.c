@@ -809,6 +809,58 @@ PUBLIC void DataCube_copy_wcs(const DataCube *source, DataCube *target) {
 
 
 // ----------------------------------------------------------------- //
+// Add SoFiA settings to FITS file history                           //
+// ----------------------------------------------------------------- //
+// Arguments:                                                        //
+//                                                                   //
+//   (1) self - Object self-reference.                               //
+//   (2) par  - SoFiA parameter settings object.                     //
+//                                                                   //
+// Return value:                                                     //
+//                                                                   //
+//   No return value.                                                //
+//                                                                   //
+// Description:                                                      //
+//                                                                   //
+//   Public method for writing the SoFiA parameter settings stored   //
+//   in 'par' as FITS header HISTORY items. If 'par' is NULL, then   //
+//   no history will be written.                                     //
+// ----------------------------------------------------------------- //
+
+PUBLIC void DataCube_add_history(DataCube *self, const Parameter *par)
+{
+	// Sanity checks
+	check_null(self);
+	if(par == NULL) return;
+	
+	String *value = String_new("");
+	Header_comment(self->header, "SoFiA control parameters", true);
+	
+	for(size_t i = 0; i < Parameter_get_size(par); ++i)
+	{
+		// Construct value string
+		String_set(value, Parameter_get_key(par, i));
+		String_append(value, " = ");
+		String_append(value, Parameter_get_str_index(par, i));
+		
+		// Sanitise value string
+		for(size_t j = 0; j < String_size(value); ++j)
+		{
+			const char c = String_at(value, j);
+			if(c < '\x20' || c > '\x7E') String_set_char(value, j, '\x23');  // Replace with '#'
+		}
+		
+		// Write history entry
+		Header_comment(self->header, String_get(value), true);
+	}
+	
+	String_delete(value);
+	return;
+}
+
+
+
+// ----------------------------------------------------------------- //
 // Read data value as double-precision floating-point number         //
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //
@@ -5513,6 +5565,9 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 //   (8)  margin    - Margin in pixels to be added around each       //
 //                    source. If 0, sources will be cut out exactly. //
 //   (9)  threshold - Flux threshold to be used for moment 1 and 2.  //
+//  (10)  par       - SoFiA parameter settings; these will be added  //
+//                    to the output FITS file history in the header. //
+//                    If NULL, then no history will be written.      //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -5528,7 +5583,7 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 //   leted again.                                                    //
 // ----------------------------------------------------------------- //
 
-PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask, const Catalog *cat, const char *basename, const bool overwrite, bool use_wcs, bool physical, const size_t margin, const double threshold)
+PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask, const Catalog *cat, const char *basename, const bool overwrite, bool use_wcs, bool physical, const size_t margin, const double threshold, const Parameter *par)
 {
 	// Sanity checks
 	check_null(self);
@@ -5694,12 +5749,14 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 		String_set(filename, String_get(filename_template));
 		String_append_int(filename, "%ld", src_id);
 		String_append(filename, "_cube.fits");
+		DataCube_add_history(cubelet, par);
 		DataCube_save(cubelet, String_get(filename), overwrite, DESTROY);
 		
 		// ...masklet
 		String_set(filename, String_get(filename_template));
 		String_append_int(filename, "%ld", src_id);
 		String_append(filename, "_mask.fits");
+		DataCube_add_history(masklet, par);
 		DataCube_save(masklet, String_get(filename), overwrite, DESTROY);
 		
 		// ...moment maps
@@ -5708,6 +5765,7 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 			String_set(filename, String_get(filename_template));
 			String_append_int(filename, "%ld", src_id);
 			String_append(filename, "_mom0.fits");
+			DataCube_add_history(mom0, par);
 			DataCube_save(mom0, String_get(filename), overwrite, DESTROY);
 		}
 		
@@ -5716,6 +5774,7 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 			String_set(filename, String_get(filename_template));
 			String_append_int(filename, "%ld", src_id);
 			String_append(filename, "_mom1.fits");
+			DataCube_add_history(mom1, par);
 			DataCube_save(mom1, String_get(filename), overwrite, DESTROY);
 		}
 		
@@ -5724,6 +5783,7 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 			String_set(filename, String_get(filename_template));
 			String_append_int(filename, "%ld", src_id);
 			String_append(filename, "_mom2.fits");
+			DataCube_add_history(mom2, par);
 			DataCube_save(mom2, String_get(filename), overwrite, DESTROY);
 		}
 		
@@ -5732,6 +5792,7 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 			String_set(filename, String_get(filename_template));
 			String_append_int(filename, "%ld", src_id);
 			String_append(filename, "_snr.fits");
+			DataCube_add_history(chan, par);
 			DataCube_save(chan, String_get(filename), overwrite, DESTROY);
 		}
 		

@@ -59,6 +59,7 @@ PUBLIC char        String_at         (const String *self, const size_t index);
 PUBLIC bool        String_compare    (const String *self, const char *string);
 
 PUBLIC String     *String_set        (String *self, const char *string);
+PUBLIC String     *String_set_char   (String *self, const size_t index, const char c);
 PUBLIC String     *String_set_int    (String *self, const char *format, const long int value);
 PUBLIC String     *String_set_delim  (String *self, const char *string, const char delimiter, const bool first, const bool until);
 PUBLIC String     *String_append     (String *self, const char *string);

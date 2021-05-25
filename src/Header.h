@@ -76,6 +76,7 @@ PUBLIC  int         Header_set_int    (Header *self, const char *key, const long
 PUBLIC  int         Header_set_flt    (Header *self, const char *key, const double value);
 PUBLIC  int         Header_set_bool   (Header *self, const char *key, const bool value);
 PUBLIC  int         Header_set_str    (Header *self, const char *key, const char *value);
+PUBLIC  size_t      Header_comment    (Header *self, const char *value, const bool history);
 
 // Miscellaneous header operations
 PUBLIC  size_t      Header_check      (const Header *self, const char *key);

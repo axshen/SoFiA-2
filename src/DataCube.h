@@ -45,6 +45,7 @@
 #include "LinkerPar.h"
 #include "Header.h"
 #include "WCS.h"
+#include "Parameter.h"
 
 #define DESTROY  false
 #define PRESERVE true
@@ -92,6 +93,7 @@ PUBLIC size_t     DataCube_chkhd            (const DataCube *self, const char *k
 PUBLIC bool       DataCube_cmphd            (const DataCube *self, const char *key, const char *value, const size_t n);
 PUBLIC int        DataCube_delhd            (DataCube *self, const char *key);
 PUBLIC void       DataCube_copy_wcs         (const DataCube *source, DataCube *target);
+PUBLIC void       DataCube_add_history      (DataCube *self, const Parameter *par);
 
 // Extract data values
 PUBLIC double     DataCube_get_data_flt     (const DataCube *self, const size_t x, const size_t y, const size_t z);
@@ -156,7 +158,7 @@ PUBLIC void       DataCube_parameterise     (const DataCube *self, const DataCub
 
 // Create moment maps and cubelets
 PUBLIC void       DataCube_create_moments   (const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, const char *obj_name, bool use_wcs, const double threshold, const double rms);
-PUBLIC void       DataCube_create_cubelets  (const DataCube *self, const DataCube *mask, const Catalog *cat, const char *basename, const bool overwrite, bool use_wcs, bool physical, const size_t margin, const double threshold);
+PUBLIC void       DataCube_create_cubelets  (const DataCube *self, const DataCube *mask, const Catalog *cat, const char *basename, const bool overwrite, bool use_wcs, bool physical, const size_t margin, const double threshold, const Parameter *par);
 
 // WCS
 PUBLIC WCS       *DataCube_extract_wcs      (const DataCube *self);
