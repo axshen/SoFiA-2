@@ -126,6 +126,23 @@ PUBLIC void Parameter_delete(Parameter *self)
 
 
 
+// ----------------------------------------------------------------- //
+// Return the number of parameters in the list                       //
+// ----------------------------------------------------------------- //
+// Arguments:                                                        //
+//                                                                   //
+//   (1) self     - Object self-reference.                           //
+//                                                                   //
+// Return value:                                                     //
+//                                                                   //
+//   Number of currently stored parameters.                          //
+//                                                                   //
+// Description:                                                      //
+//                                                                   //
+//   Public method for returning the number of parameters currently  //
+//   stored in the parameter list object.                            //
+// ----------------------------------------------------------------- //
+
 PUBLIC size_t Parameter_get_size(const Parameter *self)
 {
 	check_null(self);
