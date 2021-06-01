@@ -658,6 +658,10 @@ PUBLIC void Parameter_default(Parameter *self)
 	Parameter_set(self, "linker.minSizeZ"          , "5");
 	Parameter_set(self, "linker.maxSizeXY"         , "0");
 	Parameter_set(self, "linker.maxSizeZ"          , "0");
+	Parameter_set(self, "linker.minPixels"         , "0");
+	Parameter_set(self, "linker.maxPixels"         , "0");
+	Parameter_set(self, "linker.minFill"           , "0.0");
+	Parameter_set(self, "linker.maxFill"           , "0.0");
 	Parameter_set(self, "linker.positivity"        , "false");
 	Parameter_set(self, "linker.keepNegative"      , "false");
 	

@@ -1106,9 +1106,13 @@ int main(int argc, char **argv)
 		Parameter_get_int(par, "linker.minSizeXY"),
 		Parameter_get_int(par, "linker.minSizeXY"),
 		Parameter_get_int(par, "linker.minSizeZ"),
+		Parameter_get_int(par, "linker.minPixels"),
+		Parameter_get_flt(par, "linker.minFill"),
 		Parameter_get_int(par, "linker.maxSizeXY"),
 		Parameter_get_int(par, "linker.maxSizeXY"),
 		Parameter_get_int(par, "linker.maxSizeZ"),
+		Parameter_get_int(par, "linker.maxPixels"),
+		Parameter_get_flt(par, "linker.maxFill"),
 		linker_pos_pix,
 		remove_neg_src,
 		global_rms

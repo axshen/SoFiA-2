@@ -97,6 +97,10 @@ linker.minSizeXY           =  5
 linker.minSizeZ            =  5
 linker.maxSizeXY           =  0
 linker.maxSizeZ            =  0
+linker.minPixels           =  0
+linker.maxPixels           =  0
+linker.minFill             =  0.0
+linker.maxFill             =  0.0
 linker.positivity          =  false
 linker.keepNegative        =  false
 

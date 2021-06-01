@@ -4312,12 +4312,16 @@ PUBLIC void DataCube_run_threshold(const DataCube *self, DataCube *maskCube, con
 //   (6) min_size_x - Minimum size requirement for objects in x.     //
 //   (7) min_size_y - Minimum size requirement for objects in y.     //
 //   (8) min_size_z - Minimum size requirement for objects in z.     //
-//   (9) max_size_x - Maximum size requirement for objects in x.     //
-//  (10) max_size_y - Maximum size requirement for objects in y.     //
-//  (11) max_size_z - Maximum size requirement for objects in z.     //
-//  (12) pos_pix    - If true, negative pixels will be discarded.    //
-//  (13) pos_src    - If true, negative sources will be discarded.   //
-//  (14) rms        - Global rms value by which all flux values will //
+//   (9) min_npix   - Minimum required number of pixels.             //
+//  (10) min_fill   - Minimum required filling factor of object.     //
+//  (11) max_size_x - Maximum size requirement for objects in x.     //
+//  (12) max_size_y - Maximum size requirement for objects in y.     //
+//  (13) max_size_z - Maximum size requirement for objects in z.     //
+//  (14) max_npix   - Maximum required number of pixels.             //
+//  (15) max_fill   - Maximum required filling factor of object.     //
+//  (16) pos_pix    - If true, negative pixels will be discarded.    //
+//  (17) pos_src    - If true, negative sources will be discarded.   //
+//  (18) rms        - Global rms value by which all flux values will //
 //                    be normalised. 1 = no normalisation.           //
 //                                                                   //
 // Return value:                                                     //
@@ -4337,10 +4341,18 @@ PUBLIC void DataCube_run_threshold(const DataCube *self, DataCube *maskCube, con
 //   true, sources with negative total flux will also be removed.    //
 //   Likewise, if pos_pix is true, only positive pixels will be      //
 //   linked and negative ones discarded.                             //
+//   Several thresholds can be provided by the user. Objects that    //
+//   fall outside these thresholds will be discarded by the linker.  //
+//   Thresholds are specified with the min_ or max_ prefix and in-   //
+//   clude size in x, y and z, total number of pixels (npix) and     //
+//   filling factor (fill), with the latter defined as the total     //
+//   number of pixels divided by the number of pixels that make up   //
+//   the rectangular bounding box. Any threshold can be set to 0 to  //
+//   disable its application altogether.                             //
 // ----------------------------------------------------------------- //
 
 
-PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, const size_t radius_x, const size_t radius_y, const size_t radius_z, const size_t min_size_x, const size_t min_size_y, const size_t min_size_z, const size_t max_size_x, const size_t max_size_y, const size_t max_size_z, const bool pos_pix, const bool pos_src, const double rms)
+PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, const size_t radius_x, const size_t radius_y, const size_t radius_z, const size_t min_size_x, const size_t min_size_y, const size_t min_size_z, const size_t min_npix, const double min_fill, const size_t max_size_x, const size_t max_size_y, const size_t max_size_z, const size_t max_npix, const double max_fill, const bool pos_pix, const bool pos_src, const double rms)
 {
 	// Sanity checks
 	check_null(self);
@@ -4350,13 +4362,17 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 	ensure(mask->data_type == 32, ERR_USER_INPUT, "Linker will only accept 32-bit integer masks.");
 	ensure(self->data_type == -32 || self->data_type == -64, ERR_USER_INPUT, "Data cube must be of floating-point type for linking.");
 	ensure(self->axis_size[0] == mask->axis_size[0] && self->axis_size[1] == mask->axis_size[1] && self->axis_size[2] == mask->axis_size[2], ERR_USER_INPUT, "Data cube and mask cube have different sizes.");
+	if(min_fill < 0.0) warning("Ignoring minimum filling factor; value is negative.");
+	if(max_fill < 0.0) warning("Ignoring maximum filling factor; value is negative.");
 	
 	// Print some information
 	message("Linker settings:");
-	message(" - Merging radii:  %zu, %zu, %zu", radius_x, radius_y, radius_z);
-	message(" - Minimum size:   %zu x %zu x %zu", min_size_x, min_size_y, min_size_z);
-	if(max_size_x || max_size_y || max_size_z) message("  - Maximum size:   %zu x %zu x %zu", max_size_x, max_size_y, max_size_z);
-	message(" - Keep negative:  %s\n", pos_src ? "no" : "yes");
+	message(" - Merging radii:   %zu, %zu, %zu", radius_x, radius_y, radius_z);
+	message(" - Minimum size:    %zu x %zu x %zu", min_size_x, min_size_y, min_size_z);
+	if(max_size_x || max_size_y || max_size_z) message(" - Maximum size:    %zu x %zu x %zu", max_size_x, max_size_y, max_size_z);
+	if(min_npix || max_npix) message(" - Min/max pixels:  %zu, %zu", min_npix, max_npix);
+	if(min_fill > 0.0 || max_fill > 0.0) message(" - Min/max fill:    %.1f%%, %.1f%%", 100.0 * min_fill, 100.0 * max_fill);
+	message(" - Keep negative:   %s\n", pos_src ? "no" : "yes");
 	
 	// Create empty linker parameter object
 	LinkerPar *lpar = LinkerPar_new(self->verbosity);
@@ -4420,6 +4436,10 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 					|| (max_size_x && LinkerPar_get_obj_size(lpar, label, 0) > max_size_x)
 					|| (max_size_y && LinkerPar_get_obj_size(lpar, label, 1) > max_size_y)
 					|| (max_size_z && LinkerPar_get_obj_size(lpar, label, 2) > max_size_z)
+					|| LinkerPar_get_npix(lpar, label) < min_npix
+					|| (max_npix && LinkerPar_get_npix(lpar, label) > max_npix)
+					|| (min_fill > 0.0 && (double)LinkerPar_get_npix(lpar, label) / (double)(LinkerPar_get_obj_size(lpar, label, 0) * LinkerPar_get_obj_size(lpar, label, 1) * LinkerPar_get_obj_size(lpar, label, 2)) < min_fill)
+					|| (max_fill > 0.0 && (double)LinkerPar_get_npix(lpar, label) / (double)(LinkerPar_get_obj_size(lpar, label, 0) * LinkerPar_get_obj_size(lpar, label, 1) * LinkerPar_get_obj_size(lpar, label, 2)) > max_fill)
 					|| (pos_src && LinkerPar_get_flux(lpar, label) < 0.0))
 					{
 						// Yes, it is -> discard source

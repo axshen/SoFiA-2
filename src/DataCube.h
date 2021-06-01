@@ -151,7 +151,7 @@ PUBLIC void       DataCube_run_scfind       (const DataCube *self, DataCube *mas
 PUBLIC void       DataCube_run_threshold    (const DataCube *self, DataCube *maskCube, const bool absolute, double threshold, const noise_stat method, const int range);
 
 // Linking
-PUBLIC LinkerPar *DataCube_run_linker       (const DataCube *self, DataCube *mask, const size_t radius_x, const size_t radius_y, const size_t radius_z, const size_t min_size_x, const size_t min_size_y, const size_t min_size_z, const size_t max_size_x, const size_t max_size_y, const size_t max_size_z, const bool pos_pix, const bool pos_src, const double rms);
+PUBLIC LinkerPar *DataCube_run_linker       (const DataCube *self, DataCube *mask, const size_t radius_x, const size_t radius_y, const size_t radius_z, const size_t min_size_x, const size_t min_size_y, const size_t min_size_z, const size_t min_npix, const double min_fill, const size_t max_size_x, const size_t max_size_y, const size_t max_size_z, const size_t max_npix, const double max_fill, const bool pos_pix, const bool pos_src, const double rms);
 
 // Parameterisation
 PUBLIC void       DataCube_parameterise     (const DataCube *self, const DataCube *mask, Catalog *cat, bool use_wcs, bool physical, const char *prefix);
