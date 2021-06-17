@@ -39,7 +39,7 @@
 // SoFiA version number
 #define SOFIA_VERSION "2.3.1"
 #define SOFIA_VERSION_FULL "SoFiA 2.3.1"
-#define SOFIA_CREATION_DATE "25-May-2021"
+#define SOFIA_CREATION_DATE "17-Jun-2021"
 
 // Define value of pi
 #ifndef M_PI

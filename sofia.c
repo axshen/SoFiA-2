@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 	message("Using:    Source Finding Application (SoFiA)");
 	message("Version:  %s (%s)", SOFIA_VERSION, SOFIA_CREATION_DATE);
 	#ifdef _OPENMP
-		message("CPU:      %d %s available", n_cpu_cores, n_cpu_cores == 1 ? "core" : "cores");
+		message("CPU:      %d %s available", n_cpu_cores, n_cpu_cores == 1 ? "thread" : "threads");
 	#else
 		message("CPU:      OpenMP disabled");
 	#endif
@@ -185,18 +185,18 @@ int main(int argc, char **argv)
 			if(n_threads < n_cpu_cores)
 			{
 				omp_set_num_threads(n_threads);
-				message("Using %d out of %d available CPU cores.\n", n_threads, n_cpu_cores);
+				message("Using %d out of %d available CPU threads.\n", n_threads, n_cpu_cores);
 			}
 			else
 			{
 				omp_set_num_threads(n_cpu_cores);
-				message("Using all %d available CPU cores.\n", n_cpu_cores);
+				message("Using all %d available CPU threads.\n", n_cpu_cores);
 			}
 		}
 		else
 		{
 			char *env_omp_num_threads = getenv("OMP_NUM_THREADS");
-			message("Number of CPU cores controlled by OMP_NUM_THREADS = %s.\n", env_omp_num_threads == NULL ? "[default]" : env_omp_num_threads);
+			message("Number of CPU threads controlled by OMP_NUM_THREADS = %s.\n", env_omp_num_threads == NULL ? "[undefined]" : env_omp_num_threads);
 		}
 	#else
 		warning("Multi-threading is currently disabled. To enable it, please re-\n         install SoFiA with the '-fopenmp' option.");
