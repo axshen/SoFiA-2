@@ -10,11 +10,21 @@ This is version 2 of the HI Source Finding Application (SoFiA). SoFiA 2 is a rei
 * SoFiA 2 currently has only a single external dependency (WCSLIB) and should therefore compile and run on any machine with a Linux or Unix operating system and the GCC compiler and WCSLIB installed.
 
 
+## Prerequisites
+
+The following software is required before SoFiA 2 can be installed:
+
+* **Linux** or **Unix** operating system (e.g. Ubuntu, Mac OS, etc.)
+* **GNU C compiler** (gcc) version 4.0 or higher (https://gcc.gnu.org/)
+* **wcslib** version 7.0 or higher (https://www.atnf.csiro.au/people/mcalabre/WCS/)
+
+Both gcc and wcslib are freely available under the GNU General Public Licence. Note that earlier versions of gcc or wsclib might work as well, but this has not been tested. In principle, other compilers that are compatible with gcc and support the C99 standard might also work, e.g. Apple’s clang compiler or the Intel C compiler, possibly with some minor tweaks.
+
+You may want to first check if wcslib is either already installed or available from your operating system’s software repository (`wcslib-dev` package on Ubuntu/Debian; `wcslib-devel` on Fedora/CentOS/Red Hat; `wcslib` on MacOS/Homebrew) before attempting to install it manually.
+
 ## Installation
 
-Please ensure that the **GNU C compiler** (GCC) and **WCSLIB** (https://www.atnf.csiro.au/people/mcalabre/WCS/) are installed on your machine, before downloading and extracting the SoFiA 2 **source code** into a directory of your choice. You may want to first check if WCSLIB is either already installed or available from your operating system’s software repository (`wcslib-dev` package on Ubuntu/Debian; `wcslib-devel` on Fedora/CentOS/Red Hat; `wcslib` on MacOS/Homebrew) before attempting to install it manually.
-
-Once WCSLIB is installed, simply execute the `compile.sh` script to compile SoFiA 2 using the GCC compiler:
+Once all prerequisites are installed and available, simply enter the SoFiA 2 base directory and execute the `compile.sh` script to compile SoFiA 2 using the GCC compiler:
 
 `./compile.sh -fopenmp`
 
