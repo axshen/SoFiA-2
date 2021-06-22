@@ -1446,13 +1446,15 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 		fprintf(fp, "%.2f %.2f %.2f %.2f %.2f %.2f ellipse\n", centre_x, centre_y, 3.0 * radius_x, 3.0 * radius_y, 180.0 * pa / M_PI, scale_factor);
 		fprintf(fp, "grestore\n");
 		
-		// Plot fmin line if possible
+		// Plot fmin and npix lines if possible
 		if(n == 2)
 		{
+			fprintf(fp, "gsave\n");
+			
+			// fmin
 			double plot_x = plot_offset_x;
 			double plot_y = (2.0 * log10(fmin) - data_min_x - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 			
-			fprintf(fp, "gsave\n");
 			fprintf(fp, "%s rgb\n", colour_fmin);
 			fprintf(fp, "[3 3] 0 setdash\n");
 			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
@@ -1466,6 +1468,56 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 			fprintf(fp, "np %zu %.zu m\n", plot_offset_x + 14, plot_offset_y + plot_size_y - 20);
 			fprintf(fp, "%s rgb\n", colour_fmin);
 			fprintf(fp, "(minSNR = %.1f) show\n", minSNR);
+			
+			// npix
+			// 10
+			plot_x = plot_offset_x;
+			plot_y = (data_min_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			
+			fprintf(fp, "0.9 0.9 0.9 rgb\n");
+			fprintf(fp, "[0.5 2] 0 setdash\n");
+			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+			
+			plot_x = plot_offset_x + plot_size_x;
+			plot_y = (data_max_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+			
+			// 100
+			plot_x = plot_offset_x;
+			plot_y = (data_min_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			
+			fprintf(fp, "0.8 0.8 0.8 rgb\n");
+			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+			
+			plot_x = plot_offset_x + plot_size_x;
+			plot_y = (data_max_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+			
+			// 1000
+			plot_x = plot_offset_x;
+			plot_y = (data_min_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			
+			fprintf(fp, "0.7 0.7 0.7 rgb\n");
+			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+			
+			plot_x = plot_offset_x + plot_size_x;
+			plot_y = (data_max_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+			
+			// 10000
+			plot_x = plot_offset_x;
+			plot_y = (data_min_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			
+			fprintf(fp, "0.6 0.6 0.6 rgb\n");
+			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+			
+			plot_x = plot_offset_x + plot_size_x;
+			plot_y = (data_max_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
 			
 			fprintf(fp, "grestore\n");
 		}
