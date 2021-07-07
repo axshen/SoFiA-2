@@ -54,6 +54,19 @@ Several useful tools have been developed to help with running SoFiA 2 or process
   Download: https://github.com/SoFiA-Admin/BusyFit
 
 
+## Citation
+
+Users are requested to cite the following two papers in any work that is based on the use of SoFiA 2:
+
+* **SoFiA: a flexible source finder for 3D spectral line data**  
+  Serra, P., Westmeier, T., Giese, N., et al., 2015, MNRAS, 448, 1922  
+  https://adsabs.harvard.edu/abs/2015MNRAS.448.1922S
+  
+* **SoFiA 2 – An automated, parallel HI source finding pipeline for the WALLABY survey**  
+  Westmeier, T., Kitaeff, S., Pallot, D., et al., 2021, MNRAS, in press  
+  https://adsabs.harvard.edu/abs/2021arXiv210615789W
+
+
 ## Feedback
 
 Should you decide to run SoFiA 2 on your own data cubes, we would welcome any feedback on how well SoFiA 2 works for you and whether any improvements could be made. If you have a GitHub account, you can directly create a new issue (https://github.com/SoFiA-Admin/SoFiA-2/issues/new) on GitHub for questions, feature requests or bug reports. Alternatively, please feel free to directly contact the project leader, Tobias Westmeier, via e-mail at `tobias.westmeier (at) uwa.edu.au` to provide feedback on your experience with SoFiA 2. Note that the main purpose of SoFiA 2 is to facilitate the processing of HI data from SKA precursor surveys, and we are unlikely to be able to accommodate requests for additional features beyond this primary scope.
