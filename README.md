@@ -7,7 +7,7 @@ This is version 2 of the HI Source Finding Application (SoFiA). SoFiA 2 is a rei
 
 * Being written in C and making extensive use of multi-threading, SoFiA 2 is much faster than SoFiA 1.x.
 * SoFiA 2 requires significantly less memory than SoFiA 1.x (down from > 5 × cube size to ~ 2.3 × cube size).
-* SoFiA 2 currently has only a single external dependency (WCSLIB) and should therefore compile and run on any machine with a Linux or Unix operating system and the GCC compiler and WCSLIB installed.
+* SoFiA 2 currently has only a single external dependency (wcslib) and should therefore compile and run on any machine with a Linux or Unix operating system and the GCC compiler and wcslib installed.
 
 
 ## Prerequisites
@@ -15,10 +15,10 @@ This is version 2 of the HI Source Finding Application (SoFiA). SoFiA 2 is a rei
 The following software is required before SoFiA 2 can be installed:
 
 * **Linux** or **Unix** operating system (e.g. Ubuntu, Mac OS, etc.)
-* **GNU C compiler** (gcc) version 4.0 or higher (https://gcc.gnu.org/)
-* **wcslib** version 7.0 or higher (https://www.atnf.csiro.au/people/mcalabre/WCS/)
+* **GNU C compiler** (gcc) version 4 or higher (https://gcc.gnu.org/)
+* **wcslib** version 7 or higher (https://www.atnf.csiro.au/people/mcalabre/WCS/)
 
-Both gcc and wcslib are freely available under the GNU General Public Licence. Note that earlier versions of gcc or wsclib might work as well, but this has not been tested. In principle, other compilers that are compatible with gcc and support the C99 standard might also work, e.g. Apple’s clang compiler or the Intel C compiler, possibly with some minor tweaks.
+Both gcc and wcslib are freely available under the GNU General Public Licence. Note that earlier versions of gcc or wcslib might work as well, but this has not been tested. In principle, other compilers that are compatible with gcc and support the C99 standard might also work, e.g. Apple’s clang compiler or the Intel C compiler, possibly with some minor tweaking of the installation script.
 
 You may want to first check if wcslib is either already installed or available from your operating system’s software repository (`wcslib-dev` package on Ubuntu/Debian; `wcslib-devel` on Fedora/CentOS/Red Hat; `wcslib` on MacOS/Homebrew) before attempting to install it manually.
 
@@ -52,6 +52,19 @@ Several useful tools have been developed to help with running SoFiA 2 or process
   Download: https://github.com/SoFiA-Admin/SpecPlot
 * **BusyFit** is a tool for fitting the Busy Function to an integrated spectrum for the purpose of accurate parameterisation.
   Download: https://github.com/SoFiA-Admin/BusyFit
+
+
+## Citation
+
+Users are requested to cite the following two papers in any work that is based on the use of SoFiA 2:
+
+* **SoFiA: a flexible source finder for 3D spectral line data**  
+  Serra, P., Westmeier, T., Giese, N., et al., 2015, MNRAS, 448, 1922  
+  https://adsabs.harvard.edu/abs/2015MNRAS.448.1922S
+  
+* **SoFiA 2 – An automated, parallel HI source finding pipeline for the WALLABY survey**  
+  Westmeier, T., Kitaeff, S., Pallot, D., et al., 2021, MNRAS, in press  
+  https://adsabs.harvard.edu/abs/2021arXiv210615789W
 
 
 ## Feedback

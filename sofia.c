@@ -314,7 +314,7 @@ int main(int argc, char **argv)
 		"         │                                                          │\n"
 		"         │ Should any of these assumptions be incorrect then the    │\n"
 		"         │ measurement of parameters such as flux or line width may │\n"
-		"         │ be wrong. Note that SoFiA will in principal not correct  │\n"
+		"         │ be wrong. Note that SoFiA will in principle not correct  │\n"
 		"         │ line widths for any form of instrumental broadening.     │\n"
 		"         └──────────────────────────────────────────────────────────┘\n");
 	}
