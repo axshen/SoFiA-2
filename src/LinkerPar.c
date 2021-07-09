@@ -46,6 +46,9 @@
 // Set to 1 if measurement of flux-weighted centroid required
 #define MEASURE_CENTROID_POSITION 0
 
+// Set to 1 if additional statistical parameters required
+#define MEASURE_ADDITIONAL_STATS  0
+
 
 
 // ----------------------------------------------------------------- //
@@ -74,6 +77,13 @@ CLASS LinkerPar
 	double *f_sum;
 	double *rel;
 	unsigned char *flags;
+	#if MEASURE_ADDITIONAL_STATS
+	double *fill;
+	double *m1;
+	double *m2;
+	double *m3;
+	double *m4;
+	#endif
 };
 
 
@@ -124,6 +134,13 @@ PUBLIC LinkerPar *LinkerPar_new(const bool verbosity)
 	self->f_sum = NULL;
 	self->rel   = NULL;
 	self->flags = NULL;
+	#if MEASURE_ADDITIONAL_STATS
+	self->fill  = NULL;
+	self->m1    = NULL;
+	self->m2    = NULL;
+	self->m3    = NULL;
+	self->m4    = NULL;
+	#endif
 	
 	return self;
 }
@@ -244,6 +261,13 @@ PUBLIC void LinkerPar_push(LinkerPar *self, const size_t label, const size_t x, 
 	self->f_sum[self->size - 1] = flux;
 	self->rel  [self->size - 1] = 0.0;  // NOTE: Must be 0 (default for neg. sources), as only pos. sources will be updated later!
 	self->flags[self->size - 1] = flag;
+	#if MEASURE_ADDITIONAL_STATS
+	self->fill[self->size - 1]  = 1;
+	self->m1[self->size - 1]    = flux;
+	self->m2[self->size - 1]    = 0.0;
+	self->m3[self->size - 1]    = 0.0;
+	self->m4[self->size - 1]    = 0.0;
+	#endif
 	
 	return;
 }
@@ -337,6 +361,19 @@ PUBLIC void LinkerPar_update(LinkerPar *self, const size_t x, const size_t y, co
 	if(flux < self->f_min[index]) self->f_min[index] = flux;
 	self->f_sum[index] += flux;
 	self->flags[index] |= flag;
+	#if MEASURE_ADDITIONAL_STATS
+	self->fill[index] = (double)(self->n_pix[index]) / (double)((self->x_max[index] - self->x_min[index] + 1) * (self->y_max[index] - self->y_min[index] + 1) * (self->z_max[index] - self->z_min[index] + 1));
+	const size_t n = self->n_pix[index];
+	const size_t n1 = self->n_pix[index] - 1;
+	const double delta = flux - self->m1[index];
+	const double delta_n = delta / n;
+	const double delta_n2 = delta_n * delta_n;
+	const double term1 = delta * delta_n * n1;
+	self->m1[index] += delta_n;
+	self->m4[index] += term1 * delta_n2 * (n * n - 3 * n + 3) + 6.0 * delta_n2 * self->m2[index] - 4.0 * delta_n * self->m3[index];
+	self->m3[index] += term1 * delta_n * (n - 2) - 3.0 * delta_n * self->m2[index];
+	self->m2[index] += term1;
+	#endif
 	
 	return;
 }
@@ -630,6 +667,17 @@ PUBLIC Catalog *LinkerPar_make_catalog(const LinkerPar *self, const Map *filter,
 			Source_add_par_flt(src, "f_sum", self->f_sum[i],                  flux_unit, "phot.flux");
 			Source_add_par_flt(src, "rel",   self->rel  [i],                  "",        "stat.probability");
 			Source_add_par_int(src, "flag",  self->flags[i],                  "",        "meta.code.qual");
+			#if MEASURE_ADDITIONAL_STATS
+			const double n = (double)(self->n_pix[i]);
+			const double variance = self->m2[i] / (n - 1.0);
+			const double skewness = sqrt(n) * self->m3[i] / pow(self->m2[i], 1.5);
+			const double kurtosis = n * self->m4[i] / (self->m2[i] * self->m2[i]) - 3.0;
+			Source_add_par_flt(src, "fill",  self->fill[i],                   "",        "stat.filling");
+			Source_add_par_flt(src, "mean",  self->m1[i],                     flux_unit, "phot.flux.density;stat.mean");
+			Source_add_par_flt(src, "std",   sqrt(variance),                  flux_unit, "phot.flux.density;stat.stdev");
+			Source_add_par_flt(src, "skew",  skewness,                        "",        "stat.param");
+			Source_add_par_flt(src, "kurt",  kurtosis,                        "",        "stat.param");
+			#endif
 			
 			// Add source to catalogue
 			Catalog_add_source(cat, src);
@@ -704,12 +752,27 @@ PUBLIC void LinkerPar_get_rel_cat(const LinkerPar *self, const char *flux_unit, 
 		Source_add_par_flt(src, "x",   (double)(self->x_max[i] + self->x_min[i]) / 2.0, "pix", "pos.cartesian.x");
 		Source_add_par_flt(src, "y",   (double)(self->y_max[i] + self->y_min[i]) / 2.0, "pix", "pos.cartesian.y");
 		Source_add_par_flt(src, "z",   (double)(self->z_max[i] + self->z_min[i]) / 2.0, "pix", "pos.cartesian.z");
+		Source_add_par_flt(src, "nx",  self->x_max[i] - self->x_min[i] + 1,             "pix", "pos.cartesian.x;arith.diff");
+		Source_add_par_flt(src, "ny",  self->y_max[i] - self->y_min[i] + 1,             "pix", "pos.cartesian.y;arith.diff");
+		Source_add_par_flt(src, "nz",  self->z_max[i] - self->z_min[i] + 1,             "pix", "pos.cartesian.z;arith.diff");
 		Source_add_par_flt(src, "rel", self->rel[i],                                    "",    "stat.probability");
 		
 		// Add relevant reliability parameters
 		Source_add_par_flt(src, "log_f_peak", is_neg ? log10(-self->f_min[i]) : log10(self->f_max[i]), flux_unit, "phot.flux.density;stat.max");
 		Source_add_par_flt(src, "log_f_sum", is_neg ? log10(-self->f_sum[i]) : log10(self->f_sum[i]), flux_unit, "phot.flux");
 		Source_add_par_flt(src, "log_f_mean", is_neg ? log10(-self->f_sum[i] / self->n_pix[i]) : log10(self->f_sum[i] / self->n_pix[i]), flux_unit, "phot.flux;stat.mean");
+		
+		// Add extra statistical parameters if requested
+		#if MEASURE_ADDITIONAL_STATS
+		const double n = (double)(self->n_pix[i]);
+		const double variance = self->m2[i] / (n - 1.0);
+		const double skewness = sqrt(n) * self->m3[i] / pow(self->m2[i], 1.5);
+		const double kurtosis = n * self->m4[i] / (self->m2[i] * self->m2[i]) - 3.0;
+		Source_add_par_flt(src, "fill",  self->fill[i],  "",        "stat.filling");
+		Source_add_par_flt(src, "std",   sqrt(variance), flux_unit, "phot.flux.density;stat.stdev");
+		Source_add_par_flt(src, "skew",  skewness,       "",        "stat.param");
+		Source_add_par_flt(src, "kurt",  kurtosis,       "",        "stat.param");
+		#endif
 		
 		// Add source to appropriate catalogue
 		Catalog_add_source(is_neg ? *cat_rel_par_neg : *cat_rel_par_pos, src);
@@ -747,9 +810,17 @@ PUBLIC void LinkerPar_print_info(const LinkerPar *self)
 	
 	// Calculate memory usage
 	#if MEASURE_CENTROID_POSITION
-	const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 7 * sizeof(double) + 1 * sizeof(char)));
+		#if MEASURE_ADDITIONAL_STATS
+			const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 12 * sizeof(double) + 1 * sizeof(char)));
+		#else
+			const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 7 * sizeof(double) + 1 * sizeof(char)));
+		#endif
 	#else
-	const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 4 * sizeof(double) + 1 * sizeof(char)));
+		#if MEASURE_ADDITIONAL_STATS
+			const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 9 * sizeof(double) + 1 * sizeof(char)));
+		#else
+			const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 4 * sizeof(double) + 1 * sizeof(char)));
+		#endif
 	#endif
 	
 	// Print size and memory information
@@ -835,6 +906,13 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 		self->f_sum = (double *)memory_realloc(self->f_sum, self->size, sizeof(double));
 		self->rel   = (double *)memory_realloc(self->rel,   self->size, sizeof(double));
 		self->flags = (unsigned char *)memory_realloc(self->flags, self->size, sizeof(unsigned char));
+		#if MEASURE_ADDITIONAL_STATS
+		self->fill  = (double *)memory_realloc(self->fill,  self->size, sizeof(double));
+		self->m1    = (double *)memory_realloc(self->m1,    self->size, sizeof(double));
+		self->m2    = (double *)memory_realloc(self->m2,    self->size, sizeof(double));
+		self->m3    = (double *)memory_realloc(self->m3,    self->size, sizeof(double));
+		self->m4    = (double *)memory_realloc(self->m4,    self->size, sizeof(double));
+		#endif
 	}
 	else
 	{
@@ -856,6 +934,13 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 		free(self->f_sum);
 		free(self->rel);
 		free(self->flags);
+		#if MEASURE_ADDITIONAL_STATS
+		free(self->fill);
+		free(self->m1);
+		free(self->m2);
+		free(self->m3);
+		free(self->m4);
+		#endif
 		
 		self->label = NULL;
 		self->n_pix = NULL;
@@ -875,6 +960,13 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 		self->f_sum = NULL;
 		self->rel   = NULL;
 		self->flags = NULL;
+		#if MEASURE_ADDITIONAL_STATS
+		self->fill  = NULL;
+		self->m1    = NULL;
+		self->m2    = NULL;
+		self->m3    = NULL;
+		self->m4    = NULL;
+		#endif
 	}
 	
 	return;
