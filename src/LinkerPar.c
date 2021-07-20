@@ -1255,20 +1255,28 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 				// Multivariate kernel density estimation for negative detections
 				double pdf_neg_sum = 0.0;
 				
-				for(double *ptr = par_neg + n_neg * dim; ptr > par_neg;)
+				for(double *ptr = par_neg; ptr < par_neg + n_neg * dim;)
 				{
 					// Set up relative position vector
-					for(int j = dim; j--;) Matrix_set_value_nocheck(vector, j, 0, *(--ptr) - par_neg[dim * i + j]);
+					for(int j = 0; j < dim; ++j)
+					{
+						Matrix_set_value_nocheck(vector, j, 0, *ptr - par_neg[dim * i + j]);
+						++ptr;
+					}
 					pdf_neg_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
 				}
 				
 				// Multivariate kernel density estimation for positive detections
 				double pdf_pos_sum = 0.0;
 				
-				for(double *ptr = par_pos + n_pos * dim; ptr > par_pos;)
+				for(double *ptr = par_pos; ptr < par_pos + n_pos * dim;)
 				{
 					// Set up relative position vector
-					for(int j = dim; j--;) Matrix_set_value_nocheck(vector, j, 0, *(--ptr) - par_neg[dim * i + j]);
+					for(int j = 0; j < dim; ++j)
+					{
+						Matrix_set_value_nocheck(vector, j, 0, *ptr - par_neg[dim * i + j]);
+						++ptr;
+					}
 					pdf_pos_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
 				}
 				

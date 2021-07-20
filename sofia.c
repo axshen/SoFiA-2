@@ -1156,7 +1156,7 @@ int main(int argc, char **argv)
 			token = strtok(NULL, ", ");
 		}
 		
-		ensure(Array_siz_get_size(rel_par_space) > 1, ERR_USER_INPUT, "Reliability parameters space has < 2 dimensions.");
+		ensure(Array_siz_get_size(rel_par_space) > 1, ERR_USER_INPUT, "Reliability parameter space has < 2 dimensions.");
 		
 		// Check if catalogue supplied
 		Table *rel_cat = NULL;
