@@ -667,6 +667,7 @@ PUBLIC void Parameter_default(Parameter *self)
 	
 	// Reliability
 	Parameter_set(self, "reliability.enable"       , "false");
+	Parameter_set(self, "reliability.parameters"   , "peak, sum, mean");
 	Parameter_set(self, "reliability.threshold"    , "0.9");
 	Parameter_set(self, "reliability.scaleKernel"  , "0.4");
 	Parameter_set(self, "reliability.minSNR"       , "3.0");

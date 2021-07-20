@@ -71,12 +71,12 @@ PUBLIC  void          Matrix_print      (const Matrix *self, const unsigned int 
 PUBLIC  double        Matrix_det        (const Matrix *self, const double scale_factor);
 PUBLIC  double        Matrix_prob_dens  (const Matrix *covar_inv, const Matrix *vector, const double scal_fact);
 PUBLIC  double        Matrix_prob_dens_nocheck(const Matrix *covar_inv, const Matrix *vector, const double scal_fact);
-PUBLIC  void          Matrix_err_ellipse(const Matrix *covar, const size_t par1, const size_t par2, double *radius__maj, double *radius_min, double *pa);
+PUBLIC  void          Matrix_err_ellipse(const Matrix *covar, const size_t par1, const size_t par2, double *radius_maj, double *radius_min, double *pa);
 
 // Private methods
 PRIVATE inline size_t Matrix_get_index  (const Matrix *self, const size_t row, const size_t col);
-PRIVATE void          Matrix_swap_rows  (Matrix *self, const size_t row1, const size_t par2);
-PRIVATE void          Matrix_add_row    (Matrix *self, const size_t row1, const size_t par2, const double factor);
+PRIVATE void          Matrix_swap_rows  (Matrix *self, const size_t row1, const size_t row2);
+PRIVATE void          Matrix_add_row    (Matrix *self, const size_t row1, const size_t row2, const double factor);
 PRIVATE void          Matrix_mul_row    (Matrix *self, const size_t row, const double factor);
 
 #endif

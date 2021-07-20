@@ -1136,6 +1136,28 @@ int main(int argc, char **argv)
 	{
 		status("Measuring reliability");
 		
+		// Extract parameter space and dimensionality
+		Array_siz *rel_par_space = Array_siz_new(0);
+		char *rel_par_str = (char *)Parameter_get_str(par, "reliability.parameters");  // (strtok() doesn't like 'const')
+		const char *token = strtok(rel_par_str, ", ");
+		
+		while(token != NULL)
+		{
+			if     (strcmp(token, "peak") == 0) Array_siz_push(rel_par_space, LINKERPAR_PEAK);
+			else if(strcmp(token, "sum")  == 0) Array_siz_push(rel_par_space, LINKERPAR_SUM);
+			else if(strcmp(token, "mean") == 0) Array_siz_push(rel_par_space, LINKERPAR_MEAN);
+			else if(strcmp(token, "chan") == 0) Array_siz_push(rel_par_space, LINKERPAR_CHAN);
+			else if(strcmp(token, "pix")  == 0) Array_siz_push(rel_par_space, LINKERPAR_PIX);
+			else if(strcmp(token, "fill") == 0) Array_siz_push(rel_par_space, LINKERPAR_FILL);
+			else if(strcmp(token, "std")  == 0) Array_siz_push(rel_par_space, LINKERPAR_STD);
+			else if(strcmp(token, "skew") == 0) Array_siz_push(rel_par_space, LINKERPAR_SKEW);
+			else if(strcmp(token, "kurt") == 0) Array_siz_push(rel_par_space, LINKERPAR_KURT);
+			else ensure(false, ERR_USER_INPUT, "Unknown reliability parameter: '%s'.", token);
+			token = strtok(NULL, ", ");
+		}
+		
+		ensure(Array_siz_get_size(rel_par_space) > 1, ERR_USER_INPUT, "Reliability parameters space has < 2 dimensions.");
+		
 		// Check if catalogue supplied
 		Table *rel_cat = NULL;
 		if(use_rel_cat)
@@ -1194,12 +1216,12 @@ int main(int argc, char **argv)
 		
 		// Calculate reliability values
 		Array_dbl *skellam = NULL;
-		Matrix *covar = LinkerPar_reliability(lpar, Parameter_get_flt(par, "reliability.scaleKernel"), rel_fmin, rel_cat, use_rel_plot ? &skellam : NULL);
+		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, Parameter_get_flt(par, "reliability.scaleKernel"), rel_fmin, rel_cat, use_rel_plot ? &skellam : NULL);
 		
 		// Create plots if requested
 		if(use_rel_plot)
 		{
-			LinkerPar_rel_plots(lpar, rel_threshold, rel_fmin, rel_snr_min, covar, Path_get(path_rel_plot), overwrite);
+			LinkerPar_rel_plots(lpar, rel_par_space, rel_threshold, rel_fmin, rel_snr_min, covar, Path_get(path_rel_plot), overwrite);
 			LinkerPar_skellam_plot(skellam, Path_get(path_skel_plot), overwrite, Parameter_get_flt(par, "reliability.scaleKernel"));
 		}
 		

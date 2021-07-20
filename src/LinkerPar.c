@@ -46,7 +46,7 @@
 // Set to 1 if measurement of flux-weighted centroid required
 #define MEASURE_CENTROID_POSITION 0
 
-// Set to 1 if additional statistical parameters required
+// Set to 1 if additional statistical parameters required in output catalogue
 #define MEASURE_ADDITIONAL_STATS  0
 
 
@@ -77,13 +77,11 @@ CLASS LinkerPar
 	double *f_sum;
 	double *rel;
 	unsigned char *flags;
-	#if MEASURE_ADDITIONAL_STATS
 	double *fill;
 	double *m1;
 	double *m2;
 	double *m3;
 	double *m4;
-	#endif
 };
 
 
@@ -134,13 +132,11 @@ PUBLIC LinkerPar *LinkerPar_new(const bool verbosity)
 	self->f_sum = NULL;
 	self->rel   = NULL;
 	self->flags = NULL;
-	#if MEASURE_ADDITIONAL_STATS
 	self->fill  = NULL;
 	self->m1    = NULL;
 	self->m2    = NULL;
 	self->m3    = NULL;
 	self->m4    = NULL;
-	#endif
 	
 	return self;
 }
@@ -261,13 +257,11 @@ PUBLIC void LinkerPar_push(LinkerPar *self, const size_t label, const size_t x, 
 	self->f_sum[self->size - 1] = flux;
 	self->rel  [self->size - 1] = 0.0;  // NOTE: Must be 0 (default for neg. sources), as only pos. sources will be updated later!
 	self->flags[self->size - 1] = flag;
-	#if MEASURE_ADDITIONAL_STATS
 	self->fill[self->size - 1]  = 1;
 	self->m1[self->size - 1]    = flux;
 	self->m2[self->size - 1]    = 0.0;
 	self->m3[self->size - 1]    = 0.0;
 	self->m4[self->size - 1]    = 0.0;
-	#endif
 	
 	return;
 }
@@ -361,7 +355,6 @@ PUBLIC void LinkerPar_update(LinkerPar *self, const size_t x, const size_t y, co
 	if(flux < self->f_min[index]) self->f_min[index] = flux;
 	self->f_sum[index] += flux;
 	self->flags[index] |= flag;
-	#if MEASURE_ADDITIONAL_STATS
 	self->fill[index] = (double)(self->n_pix[index]) / (double)((self->x_max[index] - self->x_min[index] + 1) * (self->y_max[index] - self->y_min[index] + 1) * (self->z_max[index] - self->z_min[index] + 1));
 	const size_t n = self->n_pix[index];
 	const size_t n1 = self->n_pix[index] - 1;
@@ -373,7 +366,6 @@ PUBLIC void LinkerPar_update(LinkerPar *self, const size_t x, const size_t y, co
 	self->m4[index] += term1 * delta_n2 * (n * n - 3 * n + 3) + 6.0 * delta_n2 * self->m2[index] - 4.0 * delta_n * self->m3[index];
 	self->m3[index] += term1 * delta_n * (n - 2) - 3.0 * delta_n * self->m2[index];
 	self->m2[index] += term1;
-	#endif
 	
 	return;
 }
@@ -762,8 +754,7 @@ PUBLIC void LinkerPar_get_rel_cat(const LinkerPar *self, const char *flux_unit, 
 		Source_add_par_flt(src, "log_f_sum", is_neg ? log10(-self->f_sum[i]) : log10(self->f_sum[i]), flux_unit, "phot.flux");
 		Source_add_par_flt(src, "log_f_mean", is_neg ? log10(-self->f_sum[i] / self->n_pix[i]) : log10(self->f_sum[i] / self->n_pix[i]), flux_unit, "phot.flux;stat.mean");
 		
-		// Add extra statistical parameters if requested
-		#if MEASURE_ADDITIONAL_STATS
+		// Add extra statistical parameters
 		const double n = (double)(self->n_pix[i]);
 		const double variance = self->m2[i] / (n - 1.0);
 		const double skewness = sqrt(n) * self->m3[i] / pow(self->m2[i], 1.5);
@@ -772,7 +763,6 @@ PUBLIC void LinkerPar_get_rel_cat(const LinkerPar *self, const char *flux_unit, 
 		Source_add_par_flt(src, "std",   sqrt(variance), flux_unit, "phot.flux.density;stat.stdev");
 		Source_add_par_flt(src, "skew",  skewness,       "",        "stat.param");
 		Source_add_par_flt(src, "kurt",  kurtosis,       "",        "stat.param");
-		#endif
 		
 		// Add source to appropriate catalogue
 		Catalog_add_source(is_neg ? *cat_rel_par_neg : *cat_rel_par_pos, src);
@@ -810,17 +800,9 @@ PUBLIC void LinkerPar_print_info(const LinkerPar *self)
 	
 	// Calculate memory usage
 	#if MEASURE_CENTROID_POSITION
-		#if MEASURE_ADDITIONAL_STATS
-			const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 12 * sizeof(double) + 1 * sizeof(char)));
-		#else
-			const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 7 * sizeof(double) + 1 * sizeof(char)));
-		#endif
+		const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 12 * sizeof(double) + 1 * sizeof(char)));
 	#else
-		#if MEASURE_ADDITIONAL_STATS
-			const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 9 * sizeof(double) + 1 * sizeof(char)));
-		#else
-			const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 4 * sizeof(double) + 1 * sizeof(char)));
-		#endif
+		const double memory_usage = (double)(self->size * (8 * sizeof(size_t) + 9 * sizeof(double) + 1 * sizeof(char)));
 	#endif
 	
 	// Print size and memory information
@@ -906,13 +888,11 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 		self->f_sum = (double *)memory_realloc(self->f_sum, self->size, sizeof(double));
 		self->rel   = (double *)memory_realloc(self->rel,   self->size, sizeof(double));
 		self->flags = (unsigned char *)memory_realloc(self->flags, self->size, sizeof(unsigned char));
-		#if MEASURE_ADDITIONAL_STATS
 		self->fill  = (double *)memory_realloc(self->fill,  self->size, sizeof(double));
 		self->m1    = (double *)memory_realloc(self->m1,    self->size, sizeof(double));
 		self->m2    = (double *)memory_realloc(self->m2,    self->size, sizeof(double));
 		self->m3    = (double *)memory_realloc(self->m3,    self->size, sizeof(double));
 		self->m4    = (double *)memory_realloc(self->m4,    self->size, sizeof(double));
-		#endif
 	}
 	else
 	{
@@ -934,13 +914,11 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 		free(self->f_sum);
 		free(self->rel);
 		free(self->flags);
-		#if MEASURE_ADDITIONAL_STATS
 		free(self->fill);
 		free(self->m1);
 		free(self->m2);
 		free(self->m3);
 		free(self->m4);
-		#endif
 		
 		self->label = NULL;
 		self->n_pix = NULL;
@@ -960,13 +938,11 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 		self->f_sum = NULL;
 		self->rel   = NULL;
 		self->flags = NULL;
-		#if MEASURE_ADDITIONAL_STATS
 		self->fill  = NULL;
 		self->m1    = NULL;
 		self->m2    = NULL;
 		self->m3    = NULL;
 		self->m4    = NULL;
-		#endif
 	}
 	
 	return;
@@ -980,20 +956,24 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 // Arguments:                                                        //
 //                                                                   //
 //   (1) self         - Object self-reference.                       //
-//   (2) scale_kernel - The size of the convolution kernel used in   //
+//   (2) rel_par_space- Array of parameters to be used to determine  //
+//                      the reliability of detections. These must be //
+//                      integer values corresponding to the para-    //
+//                      meters defined in the header file.           //
+//   (3) scale_kernel - The size of the convolution kernel used in   //
 //                      determining the density of positive and ne-  //
 //                      gative detections in parameter space will be //
 //                      scaled by this factor. If set to 1, the ori- //
 //                      ginal covariance matrix derived from the     //
 //                      distribution of negative sources is used.    //
-//   (3) fmin         - Value of the fmin parameter, where fmin =    //
+//   (4) fmin         - Value of the fmin parameter, where fmin =    //
 //                      sum / sqrt(N).                               //
-//   (4) rel_cat      - Table of pixel coordinates on the sky. All   //
+//   (5) rel_cat      - Table of pixel coordinates on the sky. All   //
 //                      negative detections with bounding boxes in-  //
 //                      cluding those positions will be removed be-  //
 //                      fore reliability calculation. NULL can be    //
 //                      used to disable this feature.                //
-//   (5) skellam      - Pointer to an Array of type double to hold   //
+//   (6) skellam      - Pointer to an Array of type double to hold   //
 //                      the Skellam array. Set NULL to disable.      //
 //                                                                   //
 // Return value:                                                     //
@@ -1039,14 +1019,17 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 //   be generated.                                                   //
 // ----------------------------------------------------------------- //
 
-PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel, const double fmin, const Table *rel_cat, Array_dbl **skellam)
+PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, const double scale_kernel, const double fmin, const Table *rel_cat, Array_dbl **skellam)
 {
 	// Sanity checks
 	check_null(self);
 	ensure(self->size, ERR_NO_SRC_FOUND, "No sources left after linking. Cannot proceed.");
 	
 	// Dimensionality of parameter space
-	const int dim = 3;
+	const int dim = Array_siz_get_size(rel_par_space);
+	const char *par_names[] = {"peak", "sum", "mean", "chan", "pix", "fill", "std", "skew", "kurt"};
+	message("Using %zuD parameter space:", Array_siz_get_size(rel_par_space));
+	for(size_t i = 0; i < Array_siz_get_size(rel_par_space); ++i) message(" - %s", par_names[Array_siz_get(rel_par_space, i)]);
 	
 	// Define a few parameters
 	size_t n_neg = 0;
@@ -1054,7 +1037,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 	size_t counter_neg = 0;
 	size_t counter_pos = 0;
 	const size_t threshold_warning = 50;
-	const double log_fmin_squared = 2.0 * log10(fmin);
+	const double fmin_squared = fmin * fmin;
 	
 	// Determine number of positive and negative detections
 	for(size_t i = self->size; i--;)
@@ -1074,14 +1057,17 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 	double *par_neg = (double *)memory(MALLOC, dim * n_neg, sizeof(double));
 	size_t *idx_neg = (size_t *)memory(MALLOC, n_neg, sizeof(size_t));
 	
+	// Loop over all detections
 	for(size_t i = self->size; i--;)
 	{
 		if(self->f_sum[i] < 0.0)
 		{
+			// Negative detection
 			bool include_source = true;
 			
 			if(rel_cat != NULL)
 			{
+				// Exclude positions from user-specified catalogue
 				for(size_t row = 0; row < Table_rows(rel_cat); ++row)
 				{
 					const double cat_x = Table_get(rel_cat, row, 0);
@@ -1098,19 +1084,106 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 			if(include_source)
 			{
 				ensure(self->f_min[i] < 0.0, ERR_FAILURE, "Non-negative minimum assigned to source with negative flux!");
-				par_neg[dim * counter_neg + 0] = log10(-self->f_min[i]);
-				par_neg[dim * counter_neg + 1] = log10(-self->f_sum[i]);
-				par_neg[dim * counter_neg + 2] = log10(-self->f_sum[i] / self->n_pix[i]);
+				
+				for(int j = 0; j < dim; ++j)
+				{
+					switch(Array_siz_get(rel_par_space, j))
+					{
+						case LINKERPAR_PEAK:
+							// peak
+							par_neg[dim * counter_neg + j] = log10(-self->f_min[i]);
+							break;
+						case LINKERPAR_SUM:
+							// sum
+							par_neg[dim * counter_neg + j] = log10(-self->f_sum[i]);
+							break;
+						case LINKERPAR_MEAN:
+							// mean
+							par_neg[dim * counter_neg + j] = log10(-self->f_sum[i] / self->n_pix[i]);
+							break;
+						case LINKERPAR_CHAN:
+							// n_chan
+							par_neg[dim * counter_neg + j] = self->z_max[i] - self->z_min[i] + 1;
+							break;
+						case LINKERPAR_PIX:
+							// n_pix
+							par_neg[dim * counter_neg + j] = log10(self->n_pix[i]);
+							break;
+						case LINKERPAR_FILL:
+							// filling factor
+							par_neg[dim * counter_neg + j] = log10(self->fill[i]);
+							break;
+						case LINKERPAR_STD:
+							// std. dev.
+							par_neg[dim * counter_neg + j] = sqrt(self->m2[i] / (self->n_pix[i] - 1));
+							break;
+						case LINKERPAR_SKEW:
+							// skewness
+							par_neg[dim * counter_neg + j] = sqrt(self->n_pix[i]) * self->m3[i] / pow(self->m2[i], 1.5);
+							break;
+						case LINKERPAR_KURT:
+							// kurtosis
+							par_neg[dim * counter_neg + j] = self->m4[i] * self->n_pix[i] / (self->m2[i] * self->m2[i]) - 3.0;
+							break;
+						default:
+							ensure(false, ERR_USER_INPUT, "Unknown parameter requested for reliability measurement (%d).", Array_siz_get(rel_par_space, j));
+					}
+				}
+				
 				idx_neg[counter_neg] = i;
 				++counter_neg;
 			}
 		}
 		else if(self->f_sum[i] > 0.0)
 		{
+			// Positive detection
 			ensure(self->f_max[i] > 0.0, ERR_FAILURE, "Non-positive maximum assigned to source with positive flux!");
-			par_pos[dim * counter_pos + 0] = log10(self->f_max[i]);
-			par_pos[dim * counter_pos + 1] = log10(self->f_sum[i]);
-			par_pos[dim * counter_pos + 2] = log10(self->f_sum[i] / self->n_pix[i]);
+			
+			for(int j = 0; j < dim; ++j)
+			{
+				switch(Array_siz_get(rel_par_space, j))
+				{
+					case LINKERPAR_PEAK:
+						// peak
+						par_pos[dim * counter_pos + j] = log10(self->f_max[i]);
+						break;
+					case LINKERPAR_SUM:
+						// sum
+						par_pos[dim * counter_pos + j] = log10(self->f_sum[i]);
+						break;
+					case LINKERPAR_MEAN:
+						// mean
+						par_pos[dim * counter_pos + j] = log10(self->f_sum[i] / self->n_pix[i]);
+						break;
+					case LINKERPAR_CHAN:
+						// n_chan
+						par_pos[dim * counter_pos + j] = self->z_max[i] - self->z_min[i] + 1;
+						break;
+					case LINKERPAR_PIX:
+						// n_pix
+						par_pos[dim * counter_pos + j] = log10(self->n_pix[i]);
+						break;
+					case LINKERPAR_FILL:
+						// filling factor
+						par_pos[dim * counter_pos + j] = log10(self->fill[i]);
+						break;
+					case LINKERPAR_STD:
+						// std. dev.
+						par_pos[dim * counter_pos + j] = sqrt(self->m2[i] / (self->n_pix[i] - 1));
+						break;
+					case LINKERPAR_SKEW:
+						// skewness
+						par_pos[dim * counter_pos + j] = sqrt(self->n_pix[i]) * self->m3[i] / pow(self->m2[i], 1.5);
+						break;
+					case LINKERPAR_KURT:
+						// skewness
+						par_pos[dim * counter_pos + j] = self->m4[i] * self->n_pix[i] / (self->m2[i] * self->m2[i]) - 3.0;
+						break;
+					default:
+						ensure(false, ERR_USER_INPUT, "Unknown parameter requested for reliability measurement (%d).", Array_siz_get(rel_par_space, j));
+				}
+			}
+			
 			idx_pos[counter_pos] = i;
 			++counter_pos;
 		}
@@ -1153,13 +1226,13 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 		}
 	}
 	
-	// Invert covariance matrix + sanity check
+	// Invert covariance matrix
 	Matrix *covar_inv = Matrix_invert(covar);
 	ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
 	
 	// Inverse of the square root of |2 * pi * covar| = (2 pi)^n |covar|
 	// This is the scale factor needed to calculate the PDF of the multivariate normal distribution later on.
-	// const double scal_fact = 1.0 / sqrt(Matrix_det(covar, 2.0 * M_PI));
+	//const double scal_fact = 1.0 / sqrt(Matrix_det(covar, 2.0 * M_PI));
 	const double scal_fact = 1.0;
 	// NOTE: This can be set to 1, as we don’t really care about the correct
 	//       normalisation of the Gaussian kernel, so we might as well normalise
@@ -1171,28 +1244,21 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 	{
 		*skellam = Array_dbl_new(n_neg);
 		
-		// Loop over all negative sources to derive Skellam distribution
 		#pragma omp parallel
 		{
 			Matrix *vector = Matrix_new(dim, 1);
 			
+			// Loop over all negative sources to derive Skellam distribution
 			#pragma omp for schedule(static)
 			for(size_t i = 0; i < n_neg; ++i)
 			{
-				double p1 = par_neg[dim * i];
-				double p2 = par_neg[dim * i + 1];
-				double p3 = par_neg[dim * i + 2];
-				
 				// Multivariate kernel density estimation for negative detections
 				double pdf_neg_sum = 0.0;
 				
 				for(double *ptr = par_neg + n_neg * dim; ptr > par_neg;)
 				{
 					// Set up relative position vector
-					Matrix_set_value_nocheck(vector, 2, 0, *(--ptr) - p3);
-					Matrix_set_value_nocheck(vector, 1, 0, *(--ptr) - p2);
-					Matrix_set_value_nocheck(vector, 0, 0, *(--ptr) - p1);
-					
+					for(int j = dim; j--;) Matrix_set_value_nocheck(vector, j, 0, *(--ptr) - par_neg[dim * i + j]);
 					pdf_neg_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
 				}
 				
@@ -1202,10 +1268,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 				for(double *ptr = par_pos + n_pos * dim; ptr > par_pos;)
 				{
 					// Set up relative position vector
-					Matrix_set_value_nocheck(vector, 2, 0, *(--ptr) - p3);
-					Matrix_set_value_nocheck(vector, 1, 0, *(--ptr) - p2);
-					Matrix_set_value_nocheck(vector, 0, 0, *(--ptr) - p1);
-					
+					for(int j = dim; j--;) Matrix_set_value_nocheck(vector, j, 0, *(--ptr) - par_neg[dim * i + j]);
 					pdf_pos_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
 				}
 				
@@ -1217,7 +1280,6 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 		}
 	}
 	
-	
 	// Loop over all positive detections to measure their reliability
 	const size_t cadence = (n_pos / 100) ? n_pos / 100 : 1;  // Only needed for progress bar
 	size_t progress = 0;
@@ -1227,43 +1289,41 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 	{
 		Matrix *vector = Matrix_new(dim, 1);
 		
+		// Loop over all positive detections to calculate their reliability
 		#pragma omp for schedule(static)
 		for(size_t i = 0; i < n_pos; ++i)
 		{
 			#pragma omp critical
 			if(++progress % cadence == 0 || progress == n_pos) progress_bar("Progress: ", progress, n_pos);
 			
-			const double p2 = par_pos[dim * i + 1];
-			const double p3 = par_pos[dim * i + 2];
-			
 			// Only process sources above fmin
-			if(p2 + p3 > log_fmin_squared)
+			if(self->f_sum[idx_pos[i]] * self->f_sum[idx_pos[i]] / self->n_pix[idx_pos[i]] > fmin_squared)
 			{
-				const double p1 = par_pos[dim * i];
-				
 				// Multivariate kernel density estimation for negative detections
 				double pdf_neg_sum = 0.0;
 				
-				for(double *ptr = par_neg + n_neg * dim; ptr > par_neg;)
+				for(double *ptr = par_neg; ptr < par_neg + n_neg * dim;)
 				{
 					// Set up relative position vector
-					Matrix_set_value_nocheck(vector, 2, 0, *(--ptr) - p3);
-					Matrix_set_value_nocheck(vector, 1, 0, *(--ptr) - p2);
-					Matrix_set_value_nocheck(vector, 0, 0, *(--ptr) - p1);
-					
+					for(int j = 0; j < dim; ++j)
+					{
+						Matrix_set_value_nocheck(vector, j, 0, *ptr - par_pos[dim * i + j]);
+						++ptr;
+					}
 					pdf_neg_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
 				}
 				
 				// Multivariate kernel density estimation for positive detections
 				double pdf_pos_sum = 0.0;
 				
-				for(double *ptr = par_pos + n_pos * dim; ptr > par_pos;)
+				for(double *ptr = par_pos; ptr < par_pos + n_pos * dim;)
 				{
 					// Set up relative position vector
-					Matrix_set_value_nocheck(vector, 2, 0, *(--ptr) - p3);
-					Matrix_set_value_nocheck(vector, 1, 0, *(--ptr) - p2);
-					Matrix_set_value_nocheck(vector, 0, 0, *(--ptr) - p1);
-					
+					for(int j = 0; j < dim; ++j)
+					{
+						Matrix_set_value_nocheck(vector, j, 0, *ptr - par_pos[dim * i + j]);
+						++ptr;
+					}
 					pdf_pos_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
 				}
 				
@@ -1293,13 +1353,17 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 // Arguments:                                                        //
 //                                                                   //
 //   (1) self         - Object self-reference.                       //
-//   (2) threshold    - Reliability threshold.                       //
-//   (3) fmin         - Threshold for SNR filtering.                 //
-//   (4) minSNR       - Only needed for labelling plot, while fmin   //
+//   (2) rel_par_space- Array of parameters used in determining the  //
+//                      reliability of detections. These must be in- //
+//                      teger values corresponding to the parameters //
+//                      defined in the header file.                  //
+//   (3) threshold    - Reliability threshold.                       //
+//   (4) fmin         - Threshold for SNR filtering.                 //
+//   (5) minSNR       - Only needed for labelling plot, while fmin   //
 //                      is the parameter used for drawing SNR line.  //
-//   (5) covar        - Covariance matrix.                           //
-//   (6) filename     - Name of the output EPS file.                 //
-//   (7) overwrite    - If true, overwrite output file, otherwise do //
+//   (6) covar        - Covariance matrix.                           //
+//   (7) filename     - Name of the output EPS file.                 //
+//   (8) overwrite    - If true, overwrite output file, otherwise do //
 //                      not overwrite.                               //
 //                                                                   //
 // Return value:                                                     //
@@ -1321,7 +1385,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const double scale_kernel,
 //   ready exists, the process will be terminated.                   //
 // ----------------------------------------------------------------- //
 
-PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, const double fmin, const double minSNR, const Matrix *covar, const char *filename, const bool overwrite)
+PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const Array_siz *rel_par_space, const double threshold, const double fmin, const double minSNR, const Matrix *covar, const char *filename, const bool overwrite)
 {
 	// Sanity checks
 	check_null(self);
@@ -1332,10 +1396,13 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 	}
 	ensure(filename != NULL && strlen(filename), ERR_USER_INPUT, "Empty file name for reliability plot provided.");
 	
+	// Dimensionality of parameter space
+	const int dim = Array_siz_get_size(rel_par_space);
+	const char *axis_labels[] = {"log\\(peak / rms\\)", "log\\(sum / rms\\)", "log\\(mean / rms\\)", "n_chan", "log\\(n_pix\\)", "log\\(fill_fact\\)", "std. dev.", "skewness", "kurtosis"};
+	
 	// Some settings
 	const size_t plot_size_x = 300;  // pt
 	const size_t plot_size_y = 300;  // pt
-	const size_t plot_offset_y = 50;  // pt
 	
 	const char *colour_neg = "1 0.4 0.4";
 	const char *colour_pos = "0.4 0.4 1";
@@ -1343,9 +1410,6 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 	const char *colour_kernel = "0.8 0.8 0.8";
 	const char *colour_fmin = "0.5 0.5 0.5";
 	const char *colour_axes = "0 0 0";
-	
-	const char *par_space_x[3] = {"log\\(peak / rms\\)", "log\\(peak / rms\\)", "log\\(sum / rms\\)"};
-	const char *par_space_y[3] = {"log\\(sum / rms\\)", "log\\(mean / rms\\)", "log\\(mean / rms\\)"};
 	
 	// Create arrays for parameters
 	double *data_x = (double *)memory(MALLOC, self->size, sizeof(double));
@@ -1360,291 +1424,318 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const double threshold, c
 	message("Creating postscript file: %s", strrchr(filename, '/') == NULL ? filename : strrchr(filename, '/') + 1);
 	
 	// Print PS header
-	write_eps_header(fp, "SoFiA Reliability Plots", SOFIA_VERSION_FULL, "0 10 1060 360");
+	String *bbox = String_new("0 ");
+	String_append_int(bbox, "%d ", plot_size_y + 60);
+	String_append_int(bbox, "%d ", 10 + (dim - 1) * (plot_size_x + 50));
+	String_append_int(bbox, "%d", 10 + dim * (plot_size_y + 50));
+	write_eps_header(fp, "SoFiA Reliability Plots", SOFIA_VERSION_FULL, String_get(bbox));
+	String_delete(bbox);
 	
 	// Select font
 	fprintf(fp, "roman\n");
 	
-	for(int n = 0; n < 3; ++n)
+	for(int p1 = 0; p1 < dim - 1; ++p1)
 	{
-		// Read values and determine plotting range
-		size_t plot_offset_x = 50 + n * (plot_size_x + 50);
-		
-		double data_min_x =  999.9;
-		double data_max_x = -999.9;
-		double data_min_y =  999.9;
-		double data_max_y = -999.9;
-		
-		double radius_maj, radius_min, pa;
-		if(n == 0) Matrix_err_ellipse(covar, 0, 1, &radius_maj, &radius_min, &pa);
-		else if(n == 1) Matrix_err_ellipse(covar, 0, 2, &radius_maj, &radius_min, &pa);
-		else if(n == 2) Matrix_err_ellipse(covar, 1, 2, &radius_maj, &radius_min, &pa);
-		
-		for(size_t i = 0; i < self->size; ++i)
+		for(int p2 = p1 + 1; p2 < dim; ++p2)
 		{
-			// Extract relevant parameters
-			switch(n)
+			// Read values and determine plotting range
+			size_t plot_offset_x = 50 + p1 * (plot_size_x + 50);
+			size_t plot_offset_y = 50 + p2 * (plot_size_y + 50);
+			
+			double data_min_x =  1e+30;
+			double data_max_x = -1e+30;
+			double data_min_y =  1e+30;
+			double data_max_y = -1e+30;
+			
+			double radius_maj, radius_min, pa;
+			Matrix_err_ellipse(covar, p1, p2, &radius_maj, &radius_min, &pa);
+			
+			for(size_t i = 0; i < self->size; ++i)
 			{
-				case 0:
-					if(self->f_sum[i] < 0.0)
-					{
-						data_x[i] = log10(-self->f_min[i]);
-						data_y[i] = log10(-self->f_sum[i]);
-					}
-					else
-					{
-						data_x[i] = log10(self->f_max[i]);
-						data_y[i] = log10(self->f_sum[i]);
-					}
-					break;
-				case 1:
-					if(self->f_sum[i] < 0.0)
-					{
-						data_x[i] = log10(-self->f_min[i]);
-						data_y[i] = log10(-self->f_sum[i] / self->n_pix[i]);
-					}
-					else
-					{
-						data_x[i] = log10(self->f_max[i]);
-						data_y[i] = log10(self->f_sum[i] / self->n_pix[i]);
-					}
-					break;
-				case 2:
-					if(self->f_sum[i] < 0.0)
-					{
-						data_x[i] = log10(-self->f_sum[i]);
-						data_y[i] = log10(-self->f_sum[i] / self->n_pix[i]);
-					}
-					else
-					{
-						data_x[i] = log10(self->f_sum[i]);
-						data_y[i] = log10(self->f_sum[i] / self->n_pix[i]);
-					}
-					break;
+				// Extract relevant parameters
+				// x-axis
+				switch(Array_siz_get(rel_par_space, p1))
+				{
+					case LINKERPAR_PEAK:
+						if(self->f_sum[i] < 0.0) data_x[i] = log10(-self->f_min[i]);
+						else data_x[i] = log10(self->f_max[i]);
+						break;
+					case LINKERPAR_SUM:
+						if(self->f_sum[i] < 0.0) data_x[i] = log10(-self->f_sum[i]);
+						else data_x[i] = log10(self->f_sum[i]);
+						break;
+					case LINKERPAR_MEAN:
+						if(self->f_sum[i] < 0.0) data_x[i] = log10(-self->f_sum[i] / self->n_pix[i]);
+						else data_x[i] = log10(self->f_sum[i] / self->n_pix[i]);
+						break;
+					case LINKERPAR_CHAN:
+						data_x[i] = self->z_max[i] - self->z_min[i] + 1;
+						break;
+					case LINKERPAR_PIX:
+						data_x[i] = log10(self->n_pix[i]);
+						break;
+					case LINKERPAR_FILL:
+						data_x[i] = log10(self->fill[i]);
+						break;
+					case LINKERPAR_STD:
+						data_x[i] = sqrt(self->m2[i] / (self->n_pix[i] - 1));
+						break;
+					case LINKERPAR_SKEW:
+						data_x[i] = sqrt(self->n_pix[i]) * self->m3[i] / pow(self->m2[i], 1.5);
+						break;
+					case LINKERPAR_KURT:
+						data_x[i] = self->m4[i] * self->n_pix[i] / (self->m2[i] * self->m2[i]) - 3.0;
+						break;
+					default:
+						ensure(false, ERR_USER_INPUT, "Unknown parameter requested in reliability plot (%d).", Array_siz_get(rel_par_space, p1));
+				}
+				
+				// y-axis
+				switch(Array_siz_get(rel_par_space, p2))
+				{
+					case LINKERPAR_PEAK:
+						if(self->f_sum[i] < 0.0) data_y[i] = log10(-self->f_min[i]);
+						else data_y[i] = log10(self->f_max[i]);
+						break;
+					case LINKERPAR_SUM:
+						if(self->f_sum[i] < 0.0) data_y[i] = log10(-self->f_sum[i]);
+						else data_y[i] = log10(self->f_sum[i]);
+						break;
+					case LINKERPAR_MEAN:
+						if(self->f_sum[i] < 0.0) data_y[i] = log10(-self->f_sum[i] / self->n_pix[i]);
+						else data_y[i] = log10(self->f_sum[i] / self->n_pix[i]);
+						break;
+					case LINKERPAR_CHAN:
+						data_y[i] = self->z_max[i] - self->z_min[i] + 1;
+						break;
+					case LINKERPAR_PIX:
+						data_y[i] = log10(self->n_pix[i]);
+						break;
+					case LINKERPAR_FILL:
+						data_y[i] = log10(self->fill[i]);
+						break;
+					case LINKERPAR_STD:
+						data_y[i] = sqrt(self->m2[i] / (self->n_pix[i] - 1));
+						break;
+					case LINKERPAR_SKEW:
+						data_y[i] = sqrt(self->n_pix[i]) * self->m3[i] / pow(self->m2[i], 1.5);
+						break;
+					case LINKERPAR_KURT:
+						data_y[i] = self->m4[i] * self->n_pix[i] / (self->m2[i] * self->m2[i]) - 3.0;
+						break;
+					default:
+						ensure(false, ERR_USER_INPUT, "Unknown parameter requested in reliability plot (%d).", Array_siz_get(rel_par_space, p2));
+				}
+				
+				if(data_min_x > data_x[i]) data_min_x = data_x[i];
+				if(data_max_x < data_x[i]) data_max_x = data_x[i];
+				if(data_min_y > data_y[i]) data_min_y = data_y[i];
+				if(data_max_y < data_y[i]) data_max_y = data_y[i];
 			}
 			
-			if(data_min_x > data_x[i]) data_min_x = data_x[i];
-			if(data_max_x < data_x[i]) data_max_x = data_x[i];
-			if(data_min_y > data_y[i]) data_min_y = data_y[i];
-			if(data_max_y < data_y[i]) data_max_y = data_y[i];
-		}
-		
-		double data_range_x = data_max_x - data_min_x;
-		double data_range_y = data_max_y - data_min_y;
-		
-		// Add a little bit of margin
-		data_min_x -= 0.05 * data_range_x;
-		data_max_x += 0.05 * data_range_x;
-		data_min_y -= 0.05 * data_range_y;
-		data_max_y += 0.05 * data_range_y;
-		
-		// Ensure that ranges are equal in x and y
-		/*if(data_range_x > data_range_y)
-		{
-			data_min_y -= 0.5 * (data_range_x - data_range_y);
-			data_max_y += 0.5 * (data_range_x - data_range_y);
-			data_range_y = data_max_y - data_min_y;
-		}
-		else if(data_range_x < data_range_y)
-		{
-			data_min_x -= 0.5 * (data_range_y - data_range_x);
-			data_max_x += 0.5 * (data_range_y - data_range_x);
-			data_range_x = data_max_x - data_min_x;
-		}*/
-		
-		// Determine optimal tick mark increments
-		const double tick_inc_x = auto_tick(data_max_x - data_min_x, 4);
-		const double tick_inc_y = auto_tick(data_max_y - data_min_y, 4);
-		
-		// Determine the mean of negative sources
-		double mean_x = 0.0;
-		double mean_y = 0.0;
-		size_t counter = 0;
-		
-		for(size_t i = 0; i < self->size; ++i)
-		{
-			if(self->f_sum[i] < 0.0)
+			double data_range_x = data_max_x - data_min_x;
+			double data_range_y = data_max_y - data_min_y;
+			
+			// Add a little bit of margin
+			data_min_x -= 0.05 * data_range_x;
+			data_max_x += 0.05 * data_range_x;
+			data_min_y -= 0.05 * data_range_y;
+			data_max_y += 0.05 * data_range_y;
+			
+			// Determine optimal tick mark increments
+			const double tick_inc_x = auto_tick(data_max_x - data_min_x, 4);
+			const double tick_inc_y = auto_tick(data_max_y - data_min_y, 4);
+			
+			// Determine the mean of negative sources
+			double mean_x = 0.0;
+			double mean_y = 0.0;
+			size_t counter = 0;
+			
+			for(size_t i = 0; i < self->size; ++i)
 			{
-				mean_x += data_x[i];
-				mean_y += data_y[i];
-				++counter;
+				if(self->f_sum[i] < 0.0)
+				{
+					mean_x += data_x[i];
+					mean_y += data_y[i];
+					++counter;
+				}
 			}
-		}
-		
-		mean_x /= counter;
-		mean_y /= counter;
-		
-		const double centre_x = (mean_x - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
-		const double centre_y = (mean_y - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-		const double radius_x = radius_maj * plot_size_x / (data_max_x - data_min_x);
-		const double radius_y = radius_min * plot_size_x / (data_max_x - data_min_x);
-		
-		// Determine scale factor of kernel ellipse
-		const double scale_factor = data_range_x / data_range_y;
-		
-		// Plot negative sources
-		fprintf(fp, "%s rgb\n", colour_neg);
-		fprintf(fp, "0.5 lw\n");
-		fprintf(fp, "np\n");
-		
-		for(size_t i = self->size; i--;)
-		{
-			if(self->f_sum[i] < 0.0)
+			
+			mean_x /= counter;
+			mean_y /= counter;
+			
+			const double centre_x = (mean_x - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
+			const double centre_y = (mean_y - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+			const double radius_x = radius_maj * plot_size_x / (data_max_x - data_min_x);
+			const double radius_y = radius_min * plot_size_x / (data_max_x - data_min_x);
+			
+			// Determine scale factor of kernel ellipse
+			const double scale_factor = data_range_x / data_range_y;
+			
+			// Plot negative sources
+			fprintf(fp, "%s rgb\n", colour_neg);
+			fprintf(fp, "0.5 lw\n");
+			fprintf(fp, "np\n");
+			
+			for(size_t i = self->size; i--;)
 			{
-				const double plot_x = (data_x[i] - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
-				const double plot_y = (data_y[i] - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-				
-				fprintf(fp, "%.1f %.1f 1 0 360 af\n", plot_x, plot_y);
+				if(self->f_sum[i] < 0.0)
+				{
+					const double plot_x = (data_x[i] - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
+					const double plot_y = (data_y[i] - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+					
+					fprintf(fp, "%.1f %.1f 1 0 360 af\n", plot_x, plot_y);
+				}
 			}
-		}
-		
-		// Plot unreliable positive sources
-		fprintf(fp, "%s rgb\n", colour_pos);
-		
-		for(size_t i = self->size; i--;)
-		{
-			if(self->f_sum[i] > 0.0 && self->rel[i] < threshold)
+			
+			// Plot unreliable positive sources
+			fprintf(fp, "%s rgb\n", colour_pos);
+			
+			for(size_t i = self->size; i--;)
 			{
-				const double plot_x = (data_x[i] - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
-				const double plot_y = (data_y[i] - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-				
-				fprintf(fp, "%.1f %.1f 1 0 360 af\n", plot_x, plot_y);
+				if(self->f_sum[i] > 0.0 && self->rel[i] < threshold)
+				{
+					const double plot_x = (data_x[i] - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
+					const double plot_y = (data_y[i] - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+					
+					fprintf(fp, "%.1f %.1f 1 0 360 af\n", plot_x, plot_y);
+				}
 			}
-		}
-		
-		// Plot reliable positive sources
-		fprintf(fp, "%s rgb\n", colour_rel);
-		
-		for(size_t i = self->size; i--;)
-		{
-			if(self->f_sum[i] > 0.0 && self->rel[i] >= threshold)
+			
+			// Plot reliable positive sources
+			fprintf(fp, "%s rgb\n", colour_rel);
+			
+			for(size_t i = self->size; i--;)
 			{
-				const double plot_x = (data_x[i] - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
-				const double plot_y = (data_y[i] - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-				
-				if(self->f_sum[i] / sqrt(self->n_pix[i]) > fmin) fprintf(fp, "%.1f %.1f 2 0 360 af\n", plot_x, plot_y);
-				else fprintf(fp, "%.1f %.1f 2 0 360 as\n", plot_x, plot_y);
+				if(self->f_sum[i] > 0.0 && self->rel[i] >= threshold)
+				{
+					const double plot_x = (data_x[i] - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
+					const double plot_y = (data_y[i] - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+					
+					if(self->f_sum[i] / sqrt(self->n_pix[i]) > fmin) fprintf(fp, "%.1f %.1f 2 0 360 af\n", plot_x, plot_y);
+					else fprintf(fp, "%.1f %.1f 2 0 360 as\n", plot_x, plot_y);
+				}
 			}
-		}
-		
-		// Plot kernel ellipse
-		fprintf(fp, "gsave\n");
-		fprintf(fp, "%s rgb\n", colour_kernel);
-		fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
-		fprintf(fp, "%.2f %.2f %.2f %.2f %.2f %.2f ellipse\n", centre_x, centre_y, radius_x, radius_y, 180.0 * pa / M_PI, scale_factor);
-		fprintf(fp, "[2 2] 0 setdash\n");
-		fprintf(fp, "%.2f %.2f %.2f %.2f %.2f %.2f ellipse\n", centre_x, centre_y, 2.0 * radius_x, 2.0 * radius_y, 180.0 * pa / M_PI, scale_factor);
-		fprintf(fp, "[0.5 1.5] 0 setdash\n");
-		fprintf(fp, "%.2f %.2f %.2f %.2f %.2f %.2f ellipse\n", centre_x, centre_y, 3.0 * radius_x, 3.0 * radius_y, 180.0 * pa / M_PI, scale_factor);
-		fprintf(fp, "grestore\n");
-		
-		// Plot fmin and npix lines if possible
-		if(n == 2)
-		{
+			
+			// Plot kernel ellipse
 			fprintf(fp, "gsave\n");
-			
-			// fmin
-			double plot_x = plot_offset_x;
-			double plot_y = (2.0 * log10(fmin) - data_min_x - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			
-			fprintf(fp, "%s rgb\n", colour_fmin);
-			fprintf(fp, "[3 3] 0 setdash\n");
+			fprintf(fp, "%s rgb\n", colour_kernel);
 			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
-			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
-			
-			plot_x = plot_offset_x + plot_size_x;
-			plot_y = (2.0 * log10(fmin) - data_max_x - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			
-			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
-			
-			fprintf(fp, "np %zu %.zu m\n", plot_offset_x + 14, plot_offset_y + plot_size_y - 20);
-			fprintf(fp, "%s rgb\n", colour_fmin);
-			fprintf(fp, "(minSNR = %.1f) show\n", minSNR);
-			
-			// npix
-			// 10
-			plot_x = plot_offset_x;
-			plot_y = (data_min_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			
-			fprintf(fp, "0.9 0.9 0.9 rgb\n");
-			fprintf(fp, "[0.5 2] 0 setdash\n");
-			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
-			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
-			
-			plot_x = plot_offset_x + plot_size_x;
-			plot_y = (data_max_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
-			
-			// 100
-			plot_x = plot_offset_x;
-			plot_y = (data_min_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			
-			fprintf(fp, "0.8 0.8 0.8 rgb\n");
-			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
-			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
-			
-			plot_x = plot_offset_x + plot_size_x;
-			plot_y = (data_max_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
-			
-			// 1000
-			plot_x = plot_offset_x;
-			plot_y = (data_min_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			
-			fprintf(fp, "0.7 0.7 0.7 rgb\n");
-			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
-			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
-			
-			plot_x = plot_offset_x + plot_size_x;
-			plot_y = (data_max_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
-			
-			// 10000
-			plot_x = plot_offset_x;
-			plot_y = (data_min_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			
-			fprintf(fp, "0.6 0.6 0.6 rgb\n");
-			fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
-			fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
-			
-			plot_x = plot_offset_x + plot_size_x;
-			plot_y = (data_max_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
-			
+			fprintf(fp, "%.2f %.2f %.2f %.2f %.2f %.2f ellipse\n", centre_x, centre_y, radius_x, radius_y, 180.0 * pa / M_PI, scale_factor);
+			fprintf(fp, "[2 2] 0 setdash\n");
+			fprintf(fp, "%.2f %.2f %.2f %.2f %.2f %.2f ellipse\n", centre_x, centre_y, 2.0 * radius_x, 2.0 * radius_y, 180.0 * pa / M_PI, scale_factor);
+			fprintf(fp, "[0.5 1.5] 0 setdash\n");
+			fprintf(fp, "%.2f %.2f %.2f %.2f %.2f %.2f ellipse\n", centre_x, centre_y, 3.0 * radius_x, 3.0 * radius_y, 180.0 * pa / M_PI, scale_factor);
 			fprintf(fp, "grestore\n");
+			
+			// Plot fmin and npix lines if possible
+			if(Array_siz_get(rel_par_space, p1) == LINKERPAR_SUM && Array_siz_get(rel_par_space, p2) == LINKERPAR_MEAN)
+			{
+				fprintf(fp, "gsave\n");
+				
+				// fmin
+				double plot_x = plot_offset_x;
+				double plot_y = (2.0 * log10(fmin) - data_min_x - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				
+				fprintf(fp, "%s rgb\n", colour_fmin);
+				fprintf(fp, "[3 3] 0 setdash\n");
+				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				
+				plot_x = plot_offset_x + plot_size_x;
+				plot_y = (2.0 * log10(fmin) - data_max_x - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				
+				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+				
+				fprintf(fp, "np %zu %.zu m\n", plot_offset_x + 14, plot_offset_y + plot_size_y - 20);
+				fprintf(fp, "%s rgb\n", colour_fmin);
+				fprintf(fp, "(minSNR = %.1f) show\n", minSNR);
+				
+				// npix
+				// 10
+				plot_x = plot_offset_x;
+				plot_y = (data_min_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				
+				fprintf(fp, "0.9 0.9 0.9 rgb\n");
+				fprintf(fp, "[0.5 2] 0 setdash\n");
+				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				
+				plot_x = plot_offset_x + plot_size_x;
+				plot_y = (data_max_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+				
+				// 100
+				plot_x = plot_offset_x;
+				plot_y = (data_min_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				
+				fprintf(fp, "0.8 0.8 0.8 rgb\n");
+				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				
+				plot_x = plot_offset_x + plot_size_x;
+				plot_y = (data_max_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+				
+				// 1000
+				plot_x = plot_offset_x;
+				plot_y = (data_min_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				
+				fprintf(fp, "0.7 0.7 0.7 rgb\n");
+				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				
+				plot_x = plot_offset_x + plot_size_x;
+				plot_y = (data_max_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+				
+				// 10000
+				plot_x = plot_offset_x;
+				plot_y = (data_min_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				
+				fprintf(fp, "0.6 0.6 0.6 rgb\n");
+				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				
+				plot_x = plot_offset_x + plot_size_x;
+				plot_y = (data_max_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+				
+				fprintf(fp, "grestore\n");
+			}
+			
+			// Plot frame
+			fprintf(fp, "%s rgb\n", colour_axes);
+			fprintf(fp, "[] 0 setdash\n");
+			fprintf(fp, "np\n");
+			fprintf(fp, "%zu %zu m\n", plot_offset_x, plot_offset_y);
+			fprintf(fp, "%zu %zu l\n", plot_offset_x + plot_size_x, plot_offset_y);
+			fprintf(fp, "%zu %zu l\n", plot_offset_x + plot_size_x, plot_offset_y + plot_size_y);
+			fprintf(fp, "%zu %zu l\n", plot_offset_x, plot_offset_y + plot_size_y);
+			fprintf(fp, "cp s\n");
+			
+			// Plot tick marks
+			for(double tm = ceil(data_min_x / tick_inc_x) * tick_inc_x; tm <= data_max_x; tm += tick_inc_x)
+			{
+				if(fabs(tm) < 0.001) tm = 0.0;
+				const double plot_x = (tm - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
+				fprintf(fp, "np %.2f %zu m %.2f %zu l s\n", plot_x, plot_offset_y, plot_x, plot_offset_y + 5);
+				fprintf(fp, "np %.2f %zu m (%.1f) dup stringwidth pop 2 div neg 0 rmoveto show\n", plot_x, plot_offset_y - 14, tm);
+			}
+			
+			for(double tm = ceil(data_min_y / tick_inc_y) * tick_inc_y; tm <= data_max_y; tm += tick_inc_y)
+			{
+				if(fabs(tm) < 0.001) tm = 0.0;
+				const double plot_y = (tm - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				fprintf(fp, "np %zu %.2f m %zu %.2f l s\n", plot_offset_x, plot_y, plot_offset_x + 5, plot_y);
+				fprintf(fp, "np %zu %.2f m (%.1f) dup stringwidth pop neg 0 rmoveto show\n", plot_offset_x - 4, plot_y - 4.0, tm);
+			}
+			
+			// Print labels
+			fprintf(fp, "np %zu %zu m (%s) dup stringwidth pop 2 div neg 0 rmoveto show\n", plot_offset_x + plot_size_x / 2, plot_offset_y - 30, axis_labels[Array_siz_get(rel_par_space, p1)]);
+			
+			fprintf(fp, "np %zu %zu m gsave 90 rotate (%s) dup stringwidth pop 2 div neg 0 rmoveto show grestore\n", plot_offset_x - 34, plot_offset_y + plot_size_y / 2, axis_labels[Array_siz_get(rel_par_space, p2)]);
 		}
-		
-		// Plot frame
-		fprintf(fp, "%s rgb\n", colour_axes);
-		fprintf(fp, "[] 0 setdash\n");
-		fprintf(fp, "np\n");
-		fprintf(fp, "%zu %zu m\n", plot_offset_x, plot_offset_y);
-		fprintf(fp, "%zu %zu l\n", plot_offset_x + plot_size_x, plot_offset_y);
-		fprintf(fp, "%zu %zu l\n", plot_offset_x + plot_size_x, plot_offset_y + plot_size_y);
-		fprintf(fp, "%zu %zu l\n", plot_offset_x, plot_offset_y + plot_size_y);
-		fprintf(fp, "cp s\n");
-		
-		// Plot tick marks
-		for(double tm = ceil(data_min_x / tick_inc_x) * tick_inc_x; tm <= data_max_x; tm += tick_inc_x)
-		{
-			if(fabs(tm) < 0.001) tm = 0.0;
-			const double plot_x = (tm - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x;
-			fprintf(fp, "np %.2f %zu m %.2f %zu l s\n", plot_x, plot_offset_y, plot_x, plot_offset_y + 5);
-			fprintf(fp, "np %.2f %zu m (%.1f) dup stringwidth pop 2 div neg 0 rmoveto show\n", plot_x, plot_offset_y - 14, tm);
-		}
-		
-		for(double tm = ceil(data_min_y / tick_inc_y) * tick_inc_y; tm <= data_max_y; tm += tick_inc_y)
-		{
-			if(fabs(tm) < 0.001) tm = 0.0;
-			const double plot_y = (tm - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-			fprintf(fp, "np %zu %.2f m %zu %.2f l s\n", plot_offset_x, plot_y, plot_offset_x + 5, plot_y);
-			fprintf(fp, "np %zu %.2f m (%.1f) dup stringwidth pop neg 0 rmoveto show\n", plot_offset_x - 4, plot_y - 4.0, tm);
-		}
-		
-		// Print labels
-		fprintf(fp, "np %zu 20 m (%s) dup stringwidth pop 2 div neg 0 rmoveto show\n", plot_offset_x + plot_size_x / 2, par_space_x[n]);
-		
-		fprintf(fp, "np %zu %zu m gsave 90 rotate (%s) dup stringwidth pop 2 div neg 0 rmoveto show grestore\n", plot_offset_x - 34, plot_offset_y + plot_size_y / 2, par_space_y[n]);
 	}
 	
 	// Print EPS footer

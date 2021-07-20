@@ -869,8 +869,50 @@ PUBLIC double Matrix_det(const Matrix *self, const double scale_factor)
 			-   Matrix_get_value(self, 0, 0) * Matrix_get_value(self, 1, 2) * Matrix_get_value(self, 2, 1));
 	}
 	
-	warning("Determinant calculation for N > 3 not yet implemented.");
-	return 0.0;
+	//warning("Determinant calculation for N > 3 not yet implemented.");
+	//return 0.0;
+	
+	// General case for N x N matrix
+	// ALERT: THIS ALGORITHM HAS NOT BEEN TESTED YET!
+	double det = 1.0;
+	Matrix *matrix = Matrix_copy(self);  // Create a copy to work on
+	
+	for(size_t i = 0; i < matrix->rows; ++i)
+	{
+		double pivot = Matrix_get_value(matrix, i, i);
+		size_t pivot_row = i;
+		
+		for(size_t row = i + 1; row < matrix->rows; ++row)
+		{
+			if(fabs(Matrix_get_value(matrix, row, i)) > fabs(pivot))
+			{
+				pivot = Matrix_get_value(matrix, row, i);
+				pivot_row = row;
+			}
+		}
+		
+		if(pivot == 0.0) return 0.0;
+		
+		if(pivot_row != i)
+		{
+			Matrix_swap_rows(matrix, i, pivot_row);
+			det *= -1.0;
+		}
+		
+		det *= pivot;
+		
+		for(size_t row = i + 1; row < matrix->rows; ++row)
+		{
+			for(size_t col = i + 1; col < matrix->cols; ++col)
+			{
+				Matrix_add_value(matrix, row, col, -Matrix_get_value(matrix, row, i) * Matrix_get_value(matrix, i, col) / pivot);
+			}
+		}
+	}
+	
+	Matrix_delete(matrix);
+	
+	return det;
 }
 
 
@@ -887,7 +929,7 @@ PUBLIC double Matrix_det(const Matrix *self, const double scale_factor)
 //                   to be returned.                                 //
 //   (3) scal_fact - Scale factor of 1 divided by the square root of //
 //                   the determinant of 2 pi times the covariance    //
-//                   matrix, 1 / SQRT(|2 pi covar|).                 //
+//                   matrix, 1 / SQRT(|2 pi COV|).                   //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -901,12 +943,12 @@ PUBLIC double Matrix_det(const Matrix *self, const double scale_factor)
 //   to the mean). For this to work, the covariance matrix must be   //
 //   square and invertible, and the vector must be in column form    //
 //   with a size equal to that of the covariance matrix. The vector  //
-//   entries must be relative to the centroid, (x - <x>) such that 0 //
+//   entries must be relative to the centroid (x - <x>) such that 0  //
 //   corresponds to the peak of the PDF. The PDF will be correctly   //
 //   normalised such that the integral over the entire n-dimensional //
-//   space is 1.                                                     //
+//   space is 1 if the correct scale factor is supplied.             //
 //   NOTE that det(f * M) = f^n * det(M), hence the scale factor is  //
-//   such that 1 / SQRT(|2 pi covar|) = 1 / SQRT((2 pi)^n |covar|),  //
+//   such that 1 / SQRT(|2 pi COV|) = 1 / SQRT((2 pi)^n |COV|),      //
 //   which is the correct normalisation factor of the multivariate   //
 //   normal distribution in n dimensions.                            //
 // ----------------------------------------------------------------- //
@@ -917,7 +959,7 @@ PUBLIC double Matrix_prob_dens(const Matrix *covar_inv, const Matrix *vector, co
 	check_null(covar_inv);
 	check_null(vector);
 	ensure(covar_inv->rows == covar_inv->cols, ERR_USER_INPUT, "Covariance matrix must be square.");
-	ensure(covar_inv->rows == vector->rows && vector->cols == 1, ERR_USER_INPUT, "Vector size does not match covariance matrix.");
+	ensure(covar_inv->rows == vector->rows && vector->cols == 1, ERR_USER_INPUT, "Vector size does not match covariance matrix size.");
 	
 	// Return PDF = exp(-0.5 v^T C^-1 v) / SQRT((2 pi)^n |C|) of multivariate normal distribution
 	return scal_fact * exp(-0.5 * Matrix_vMv_nocheck(covar_inv, vector));
