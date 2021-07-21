@@ -1227,6 +1227,7 @@ int main(int argc, char **argv)
 		
 		// Clean up
 		Array_dbl_delete(skellam);
+		Array_siz_delete(rel_par_space);
 		Matrix_delete(covar);
 		Table_delete(rel_cat);
 		
