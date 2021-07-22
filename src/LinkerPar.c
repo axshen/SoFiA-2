@@ -47,7 +47,7 @@
 #define MEASURE_CENTROID_POSITION 0
 
 // Set to 1 if additional statistical parameters required in output catalogue
-#define MEASURE_ADDITIONAL_STATS  0
+#define MEASURE_ADDITIONAL_STATS  1
 
 
 
