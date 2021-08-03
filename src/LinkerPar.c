@@ -1,33 +1,43 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (LinkerPar.c) - Source Finding Application               ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+/****************************************************************************
+ *                                                                          *
+ * SoFiA 2.3.1 (LinkerPar.c) - Source Finding Application                   *
+ * Copyright (C) 2021 Tobias Westmeier                                      *
+ * ____________________________________________________________________     *
+ *                                                                          *
+ * Address:  Tobias Westmeier                                               *
+ *           ICRAR M468                                                     *
+ *           The University of Western Australia                            *
+ *           35 Stirling Highway                                            *
+ *           Crawley WA 6009                                                *
+ *           Australia                                                      *
+ *                                                                          *
+ * E-mail:   tobias.westmeier [at] uwa.edu.au                               *
+ * ____________________________________________________________________     *
+ *                                                                          *
+ * This program is free software: you can redistribute it and/or modify     *
+ * it under the terms of the GNU General Public License as published by     *
+ * the Free Software Foundation, either version 3 of the License, or        *
+ * (at your option) any later version.                                      *
+ *                                                                          *
+ * This program is distributed in the hope that it will be useful,          *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the             *
+ * GNU General Public License for more details.                             *
+ *                                                                          *
+ * You should have received a copy of the GNU General Public License        *
+ * along with this program. If not, see http://www.gnu.org/licenses/.       *
+ *                                                                          *
+ ****************************************************************************/
+
+
+/**
+ * @file LinkerPar.c
+ * @author Tobias Westmeier
+ * @date 03/08/2021
+ * @brief Class definition and functions for SoFiA-2 Linker
+ *
+ */
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -949,6 +959,48 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 }
 
 
+/**
+ * @brief Determine reliability of detections
+ *
+ * Public method for measuring the reliability of all the sources in the specified @p LinkerPar object. 
+ * This will set the rel property of the object, but not yet filter out unreliable sources. Reliability 
+ * measurement works by comparing the density of positive and negative detections in an N-dimensional parameter 
+ * space. For this purpose, the covariance matrix of the distribution of negative sources in parameter space 
+ * is first calculated. The covariance matrix is assumed to describe the multivariate normal distribution of 
+ * the Gaussian noise of the data. Next, the sum of the probability density functions of all positive and negative 
+ * sources is evaluated at the location of each positive detection (multivariate Gaussian kernel density estimation). 
+ * From this, the reliability is estimated as
+ * 
+ * R = (P - N) / N,
+ * 
+ * where @p P is the sum of the PDFs of the positive sources, and @p N is the sum of the PDFs of the negative sources. 
+ * If <tt>N > P</tt>, @p R is set to 0 to ensure that the resulting reliability is always in the range of 0 to 1. Note that 
+ * the reliability will only be determined for positive sources above the @p fmin threshold, where @p fmin is the summed
+ * flux divided by the square root of the number of pixels contributing to a source. In order to be able to 
+ * exclude certain negative artefacts from affecting the reliability calculation, the user has the option of 
+ * specifying a table of (x, y) pixel positions using the parameter @p rel_cat. All negative detections the (x, y) 
+ * bounding box of which contains one of those positions will be excluded from the reliability calculation. 
+ * @p rel_cat must contain exactly two columns (x and y in pixels). If set to @p NULL, this feature will be disabled altogether. 
+ * This method can also create a Skellam array to assist with the optimisation of the kernel scale. This can be 
+ * controlled using the @p skellam parameter. If set to @p NULL, no Skellam array will be generated.       
+ *  
+ * @param self Object self-reference.
+ * @param rel_par_space Array of parameters to be used to determine the reliability of detections. 
+ * These must be integer values corresponding to the parameters defined in the header file.
+ * @param scale_kernel The size of the convolution kernel used in determining the density of positive 
+ * and negative detections in parameter space will be scaled by this factor. If set to 1, the original 
+ * covariance matrix derived from the distribution of negative sources is used. Set NULL to use auto-kernel 
+ * feature. 
+ * @param fmin Value of the fmin parameter, where fmin = sum / sqrt(N).
+ * @param rel_cat Table of pixel coordinates on the sky. All negative detections with bounding boxes 
+ * including those positions will be removed before reliability calculation. NULL can be used to disable 
+ * this feature.
+ * @param skellam Pointer to an Array of type double to hold the Skellam array. Set NULL to disable. 
+ * 
+ * @return Covariance matrix from the negative detections. 
+ * 
+ * @note Auto-kernel feature makes some assumptions...
+ */
 
 // ----------------------------------------------------------------- //
 // Determine reliability of detections                               //
@@ -1056,6 +1108,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	if(n_neg < threshold_warning) warning("Only %zu negative %s found.\n         Reliability calculation may not be accurate.", n_neg, n_neg > 1 ? "detections" : "detection");
 	
 	// Extract relevant parameters
+	// Arrays of parameters and indices for associated positive and negative detections
 	double *par_pos = (double *)memory(MALLOC, dim * n_pos, sizeof(double));
 	size_t *idx_pos = (size_t *)memory(MALLOC, n_pos, sizeof(size_t));
 	double *par_neg = (double *)memory(MALLOC, dim * n_neg, sizeof(double));
