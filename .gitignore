@@ -2,9 +2,10 @@
 *.out
 *.fits
 sofia
+unittest
 
 Analysis
 Docs
 
-test*
 html*
+.vscode

@@ -29,6 +29,10 @@ SRC = src/Array_dbl.c \
 
 OBJ = $(SRC:.c=.o)
 
+TEST = tests/test_LinkerPar_reliability.c
+
+TEST_OBJ = $(TEST:.c=.o)
+
 # OPENMP = -fopenmp
 OMP     =
 OPT     = --std=c99 --pedantic -Wall -Wextra -Wshadow -Wno-unknown-pragmas -Wno-unused-function -Wfatal-errors -O3
@@ -41,5 +45,11 @@ all:	sofia
 sofia:	$(OBJ)
 	$(CC) $(CFLAGS) -o sofia sofia.c $(OBJ) $(LIBS)
 
+debug:	$(OBJ)
+	$(CC) $(CFLAGS) -g -O0 -o sofia sofia.c $(OBJ) $(LIBS)
+
+unittest:	$(OBJ) $(TEST_OBJ)
+	$(CC) $(CFLAGS) -o unittest tests/unittest.c $(TEST_OBJ) $(OBJ) $(LIBS) `pkg-config --cflags --libs check`
+
 clean:
-	rm -rf $(OBJ)
+	rm -rf $(OBJ) $(TEST_OBJ)
