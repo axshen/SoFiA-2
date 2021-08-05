@@ -1257,32 +1257,21 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 		idx_neg = (size_t *)memory_realloc(idx_neg, n_neg, sizeof(size_t));
 	}
 	else message("Retaining all negative detections.");
+
+	// TODO(austin): Branch here for scale_kernel. Should it be scale_kernel = 0.0 or NULL?
+	if (scale_kernel == 0.0) {
+		// Implement autokernel
+
+	} else {
+		// Use existing method
+
+	}
 	
 	// Determine covariance matrix from negative detections
 	Matrix *covar = Matrix_new(dim, dim);
-	double mean[dim];
-	
-	// Calculate mean values first
-	for(size_t i = dim; i--;)
-	{
-		mean[i] = 0.0;
-		for(size_t j = 0; j < n_neg; ++j) mean[i] += par_neg[dim * j + i];
-		mean[i] /= n_neg;
-	}
-	
-	// Then calculate the covariance matrix
-	for(size_t i = dim; i--;)
-	{
-		for(size_t j = dim; j--;)
-		{
-			for(size_t k = 0; k < dim * n_neg; k += dim)
-			{
-				Matrix_add_value(covar, i, j, (par_neg[k + i] - mean[i]) * (par_neg[k + j] - mean[j]));
-			}
-			Matrix_mul_value(covar, i, j, scale_kernel * scale_kernel / n_neg);  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
-		}
-	}
-	
+	Matrix_covariance(covar, par_neg, dim, n_neg);
+	Matrix_mul_scalar(covar, scale_kernel * scale_kernel);  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
+
 	// Invert covariance matrix
 	Matrix *covar_inv = Matrix_invert(covar);
 	ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
@@ -1344,6 +1333,8 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			Matrix_delete(vector);
 		}
 	}
+
+	// Calculate average skellam value
 	
 	// Loop over all positive detections to measure their reliability
 	const size_t cadence = (n_pos / 100) ? n_pos / 100 : 1;  // Only needed for progress bar

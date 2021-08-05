@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "test_LinkerPar_reliability.h"
+#include "test_LinkerPar.h"
 
 // Run unittest suite
 int main(void) {
@@ -7,7 +7,7 @@ int main(void) {
     Suite *s;                            
     SRunner *runner;                     
 
-    s = LinkerPar_reliability_suite();                   
+    s = LinkerPar_test_suite();                   
     runner = srunner_create(s);          
 
     srunner_run_all(runner, CK_NORMAL);  
