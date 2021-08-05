@@ -1290,9 +1290,6 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	{
 		LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
 	}
-
-	// TODO(austin): use skellam mean to increment scale_kernel
-	double skellam_mean = Array_dbl_mean(*skellam);
 	
 	// Loop over all positive detections to measure their reliability
 	const size_t cadence = (n_pos / 100) ? n_pos / 100 : 1;  // Only needed for progress bar

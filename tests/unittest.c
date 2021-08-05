@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "test_LinkerPar.h"
-#include "test_Array_dbl.h"
 
 // Run unittest suite
 int main(void) {
@@ -11,7 +10,6 @@ int main(void) {
     s = suite_create("SoFiA-2");
     runner = srunner_create(s);
     srunner_add_suite(runner, LinkerPar_test_suite());
-    srunner_add_suite(runner, Array_dbl_test_suite());
 
     srunner_run_all(runner, CK_NORMAL);  
     no_failed = srunner_ntests_failed(runner); 

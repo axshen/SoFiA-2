@@ -452,26 +452,3 @@ PUBLIC Array_dbl *Array_dbl_sort(Array_dbl *self)
 	
 	return self;
 }
-
-
-/**
- * @brief Calculate mean value for @p Array_dbl values
- *  
- * @param self Pointer to @p Array_dbl object.
- * 
- * @return Mean value of values in @p Array_dbl
- * 
- */
-
-PUBLIC double Array_dbl_mean(const Array_dbl *self)
-{
-	check_null(self);
-
-	double mean = 0;
-	for (size_t i=0; i<self->size; i++) 
-	{
-		mean += self->values[i];
-	}
-	mean /= self->size;
-	return mean;
-}

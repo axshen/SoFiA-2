@@ -30,8 +30,7 @@ SRC = src/Array_dbl.c \
 
 OBJ = $(SRC:.c=.o)
 
-TEST = tests/test_LinkerPar.c \
-       tests/test_Array_dbl.c
+TEST = tests/test_LinkerPar.c
 
 TEST_OBJ = $(TEST:.c=.o)
 
