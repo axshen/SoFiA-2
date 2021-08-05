@@ -89,6 +89,7 @@ PUBLIC  void       LinkerPar_rel_plots    (const LinkerPar *self, const Array_si
 // Private methods
 PRIVATE size_t     LinkerPar_get_index    (const LinkerPar *self, const size_t label);
 PRIVATE void       LinkerPar_reallocate_memory(LinkerPar *self);
+PRIVATE void       LinkerPar_calculate_skellam(Array_dbl **skellam, const Matrix *covar_inv, double pos[], double neg[], const int dim, const size_t n_pos, const size_t n_neg, const double scale);
 
 // Public functions
 PUBLIC  void       LinkerPar_skellam_plot (Array_dbl *skellam, const char *filename, const bool overwrite, const double kernelScale);

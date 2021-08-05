@@ -1288,53 +1288,11 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	// Create Skellam array if requested
 	if(skellam != NULL)
 	{
-		*skellam = Array_dbl_new(n_neg);
-		
-		#pragma omp parallel
-		{
-			Matrix *vector = Matrix_new(dim, 1);
-			
-			// Loop over all negative sources to derive Skellam distribution
-			#pragma omp for schedule(static)
-			for(size_t i = 0; i < n_neg; ++i)
-			{
-				// Multivariate kernel density estimation for negative detections
-				double pdf_neg_sum = 0.0;
-				
-				for(double *ptr = par_neg; ptr < par_neg + n_neg * dim;)
-				{
-					// Set up relative position vector
-					for(int j = 0; j < dim; ++j)
-					{
-						Matrix_set_value_nocheck(vector, j, 0, *ptr - par_neg[dim * i + j]);
-						++ptr;
-					}
-					pdf_neg_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
-				}
-				
-				// Multivariate kernel density estimation for positive detections
-				double pdf_pos_sum = 0.0;
-				
-				for(double *ptr = par_pos; ptr < par_pos + n_pos * dim;)
-				{
-					// Set up relative position vector
-					for(int j = 0; j < dim; ++j)
-					{
-						Matrix_set_value_nocheck(vector, j, 0, *ptr - par_neg[dim * i + j]);
-						++ptr;
-					}
-					pdf_pos_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scal_fact);
-				}
-				
-				// Determine normalised Skellam parameter S = (P - N) / SQRT(P + N)
-				Array_dbl_set(*skellam, i, (pdf_pos_sum - pdf_neg_sum) / sqrt(pdf_pos_sum + pdf_neg_sum));
-			}
-			
-			Matrix_delete(vector);
-		}
+		LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
 	}
 
-	// Calculate average skellam value
+	// TODO(austin): use skellam mean to increment scale_kernel
+	double skellam_mean = Array_dbl_mean(*skellam);
 	
 	// Loop over all positive detections to measure their reliability
 	const size_t cadence = (n_pos / 100) ? n_pos / 100 : 1;  // Only needed for progress bar
@@ -2019,5 +1977,76 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 	// Close output file
 	fclose(fp);
 	
+	return;
+}
+
+/**
+ * @brief Calculate array of normalised Skellam values.
+ *
+ * Function for computing the skellam array from positive and negative detections. Skellam value given by
+ * 
+ * S = (P - N) / SQRT(P + N)
+ * 
+ * where P and N are kernel density estimations for positive and negative detections respectively.
+ * This function updates the provided @p Array_dbl @p skellam pointer with calculated values.
+ *  
+ * @param skellam Pointer to skellam array pointer
+ * @param covar_inv Pointer to covariance matrix inverse
+ * @param pos Array of positive detections
+ * @param neg Array of negative detections
+ * @param dim Value of the fmin parameter, where fmin = sum / sqrt(N).
+ * @param n_pos Number of positive detections
+ * @param n_neg Number of negative detections
+ * @param scale Scale factor for normalisation
+ * 
+ */
+
+PRIVATE void LinkerPar_calculate_skellam(Array_dbl **skellam, const Matrix *covar_inv, double pos[], double neg[], const int dim, const size_t n_pos, const size_t n_neg, const double scale)
+{
+	// Calculate skellam
+	*skellam = Array_dbl_new(n_neg);
+	
+	#pragma omp parallel
+	{
+		Matrix *vector = Matrix_new(dim, 1);
+		
+		// Loop over all negative sources to derive Skellam distribution
+		#pragma omp for schedule(static)
+		for(size_t i = 0; i < n_neg; ++i)
+		{
+			// Multivariate kernel density estimation for negative detections
+			double pdf_neg_sum = 0.0;
+			
+			for(double *ptr = neg; ptr < neg + n_neg * dim;)
+			{
+				// Set up relative position vector
+				for(int j = 0; j < dim; ++j)
+				{
+					Matrix_set_value_nocheck(vector, j, 0, *ptr - neg[dim * i + j]);
+					++ptr;
+				}
+				pdf_neg_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scale);
+			}
+			
+			// Multivariate kernel density estimation for positive detections
+			double pdf_pos_sum = 0.0;
+			
+			for(double *ptr = pos; ptr < pos + n_pos * dim;)
+			{
+				// Set up relative position vector
+				for(int j = 0; j < dim; ++j)
+				{
+					Matrix_set_value_nocheck(vector, j, 0, *ptr - neg[dim * i + j]);
+					++ptr;
+				}
+				pdf_pos_sum += Matrix_prob_dens_nocheck(covar_inv, vector, scale);
+			}
+			
+			// Determine normalised Skellam parameter S = (P - N) / SQRT(P + N)
+			Array_dbl_set(*skellam, i, (pdf_pos_sum - pdf_neg_sum) / sqrt(pdf_pos_sum + pdf_neg_sum));
+		}
+		
+		Matrix_delete(vector);
+	}
 	return;
 }
