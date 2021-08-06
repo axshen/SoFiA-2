@@ -2010,7 +2010,7 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
  * 
  */
 
-PRIVATE void LinkerPar_calculate_skellam(Array_dbl **skellam, const Matrix *covar_inv, double pos[], double neg[], const int dim, const size_t n_pos, const size_t n_neg, const double scale)
+PUBLIC void LinkerPar_calculate_skellam(Array_dbl **skellam, const Matrix *covar_inv, double pos[], double neg[], const int dim, const size_t n_pos, const size_t n_neg, const double scale)
 {
 	// Calculate skellam
 	*skellam = Array_dbl_new(n_neg);

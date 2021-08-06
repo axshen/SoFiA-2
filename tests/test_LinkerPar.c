@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include "test_LinkerPar.h"
+
+#include "../src/LinkerPar.h"
+#include "../src/Array_dbl.h"
 #include "../src/Matrix.h"
 
 /**
@@ -118,26 +121,74 @@ START_TEST (matrix_scaled_covar)
 } 
 END_TEST
 
-// Test the covariance matrix scaling calculations
-START_TEST (covariance_scaling)
-{
-    int x = 0;
-    ck_assert_int_eq(x, 0);
-} 
-END_TEST
-
 // Test generation of skellam array
 START_TEST (skellam_array)
 {
-    int x = 0;
-    ck_assert_int_eq(x, 0);
+    // Mock values
+    int dim = 3;
+    size_t n_pos = 10;
+    size_t n_neg = 18;
+    double scale_kernel = 0.4;
+    double par_pos[] = {
+        0.479672, 2.638437, 0.123890,
+        1.229855, 3.960470, 0.426698,
+        0.516049, 2.820342, 0.020313,
+        1.623343, 5.079663, 0.469003,
+        0.560312, 2.006760, 0.404700,
+        0.594624, 2.137338, 0.095945,
+        0.493680, 1.715739, 0.373316,
+        0.626984, 2.137091, 0.421087,
+        0.583238, 2.228457, 0.246186,
+        1.197869, 4.108119, 0.119605
+    };
+    double par_neg[] = {
+        0.565177, 1.984872, 0.268868,
+        0.650231, 2.531438, 0.183133,
+        0.635017, 1.838638, 0.476910,
+        0.608428, 2.498141, 0.128925,
+        0.502900, 2.568780, 0.013686,
+        0.598281, 2.816818, 0.037221,
+        0.591695, 3.119744, -0.074493, 
+        0.542738, 3.077445, -0.055454, 
+        0.516489, 2.914339, -0.076000,
+        0.502908, 2.093995, 0.267920,
+        0.657908, 3.315991, 0.020424,
+        0.673569, 3.199827, 0.014284,
+        0.627123, 3.177527, -0.085161,
+        0.464713, 1.907204, 0.217008, 
+        0.613266, 2.393899, 0.270048,
+        0.631925, 2.314303, 0.405818,
+        0.541647, 3.541295, -0.095594,
+        0.595598, 2.631868, 0.090289
+    };
+    Matrix *covar = Matrix_new(dim, dim);
+	Matrix_covariance(covar, par_neg, dim, n_neg);
+	Matrix_mul_scalar(covar, scale_kernel * scale_kernel);
+	Matrix *covar_inv = Matrix_invert(covar);
+
+    // Calculate skellam
+    Array_dbl *skellam = NULL;
+    LinkerPar_calculate_skellam(&skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, 1.0);
+
+    // Assert calculated value within tolerance of known value
+    double values[] = {
+        -0.842377, -1.084190, -0.963147, -1.291496, -1.096478, -1.431883, -1.201856, -0.761948, -1.109428, -0.779085, -1.010966, -1.017142, -1.100934, -0.993204, -0.884591, -0.732973, -0.999984, -1.435549
+    };
+    double tol = 0.0001;
+    for (size_t i=0; i<n_neg; i++) {
+        ck_assert(Array_dbl_get(skellam, i) - values[i] < tol);
+    }
+    
+    // Cleanup
+    Matrix_delete(covar);
+    Matrix_delete(covar_inv);
 } 
 END_TEST
 
 // LinkerPar reliability suite
 Suite *LinkerPar_test_suite(void) {
     Suite *s;
-    TCase *tc_matrix_covar_calculation, *tc_matrix_scaled_covar;
+    TCase *tc_matrix_covar_calculation, *tc_matrix_scaled_covar, *tc_skellam_array;
 
     // Create test suite
     s = suite_create("LinkerPar");
@@ -145,12 +196,15 @@ Suite *LinkerPar_test_suite(void) {
     // Create test cases
     tc_matrix_covar_calculation = tcase_create("matrix_covar_calculation");
     tc_matrix_scaled_covar = tcase_create("matrix_scaled_covar");
+    tc_skellam_array = tcase_create("skellam_array");
 
     // Add test cases to test suite
     tcase_add_test(tc_matrix_covar_calculation, matrix_covar_calculation);
     tcase_add_test(tc_matrix_scaled_covar, matrix_scaled_covar);
+    tcase_add_test(tc_skellam_array, skellam_array);
     suite_add_tcase(s, tc_matrix_covar_calculation);
     suite_add_tcase(s, tc_matrix_scaled_covar);
+    suite_add_tcase(s, tc_skellam_array);
     
     return s;
 }
