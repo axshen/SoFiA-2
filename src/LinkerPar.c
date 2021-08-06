@@ -1258,24 +1258,11 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	}
 	else message("Retaining all negative detections.");
 
-	// TODO(austin): Branch here for scale_kernel. Should it be scale_kernel = 0.0 or NULL?
-	if (scale_kernel == 0.0) {
-		// Implement autokernel
-
-	} else {
-		// Use existing method
-
-	}
-	
-	// Determine covariance matrix from negative detections
+	// Create covariance and inverse matrix
 	Matrix *covar = Matrix_new(dim, dim);
 	Matrix_covariance(covar, par_neg, dim, n_neg);
-	Matrix_mul_scalar(covar, scale_kernel * scale_kernel);  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
+	Matrix *covar_inv;
 
-	// Invert covariance matrix
-	Matrix *covar_inv = Matrix_invert(covar);
-	ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
-	
 	// Inverse of the square root of |2 * pi * covar| = (2 pi)^n |covar|
 	// This is the scale factor needed to calculate the PDF of the multivariate normal distribution later on.
 	//const double scal_fact = 1.0 / sqrt(Matrix_det(covar, 2.0 * M_PI));
@@ -1284,13 +1271,38 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	//       normalisation of the Gaussian kernel, so we might as well normalise
 	//       the amplitude to 1 rather than the integral. The normalisation factor 
 	//       does matter for the Skellam parameter, though.
-	
-	// Create Skellam array if requested
-	if(skellam != NULL)
-	{
-		LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+
+	// TODO(austin): Autokernel progress bar
+	// Autokernel if scale_kernel value was not provided
+	if (scale_kernel == 0.0) {
+		// Autokernel loop to decide correct scale_kernel value
+		// Determine covariance matrix from negative detections
+		Matrix_mul_scalar(covar, scale_kernel * scale_kernel);  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
+
+		// Invert covariance matrix
+		covar_inv = Matrix_invert(covar);
+		ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
+		
+		// Create Skellam array if requested
+		if(skellam != NULL)
+		{
+			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+		}
+	} else {
+		// Determine covariance matrix from negative detections
+		Matrix_mul_scalar(covar, scale_kernel * scale_kernel);  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
+
+		// Invert covariance matrix
+		covar_inv = Matrix_invert(covar);
+		ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
+		
+		// Create Skellam array if requested
+		if(skellam != NULL)
+		{
+			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+		}
 	}
-	
+
 	// Loop over all positive detections to measure their reliability
 	const size_t cadence = (n_pos / 100) ? n_pos / 100 : 1;  // Only needed for progress bar
 	size_t progress = 0;
