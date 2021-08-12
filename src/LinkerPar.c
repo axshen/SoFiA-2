@@ -968,12 +968,14 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 //                      distribution of negative sources is used.    //
 //   (4) fmin         - Value of the fmin parameter, where fmin =    //
 //                      sum / sqrt(N).                               //
-//   (5) rel_cat      - Table of pixel coordinates on the sky. All   //
+//   (5) minpix       - Minimum number of pixels for a source to be  //
+//                      considered reliable.                         //
+//   (6) rel_cat      - Table of pixel coordinates on the sky. All   //
 //                      negative detections with bounding boxes in-  //
 //                      cluding those positions will be removed be-  //
 //                      fore reliability calculation. NULL can be    //
 //                      used to disable this feature.                //
-//   (6) skellam      - Pointer to an Array of type double to hold   //
+//   (7) skellam      - Pointer to an Array of type double to hold   //
 //                      the Skellam array. Set NULL to disable.      //
 //                                                                   //
 // Return value:                                                     //
@@ -1004,7 +1006,9 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 //   the range of 0 to 1. Note that the reliability will only be de- //
 //   termined for positive sources above the fmin threshold, where   //
 //   fmin is the summed flux divided by the square root of the num-  //
-//   ber of pixels contributing to a source.                         //
+//   ber of pixels contributing to a source. Likewise, sources with  //
+//   fewer than minpix pixels will also be considered as unreliable  //
+//   by default.                                                     //
 //   In order to be able to exclude certain negative artefacts from  //
 //   affecting the reliability calculation, the user has the option  //
 //   of specifying a table of (x, y) pixel positions using the para- //
@@ -1019,7 +1023,7 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 //   be generated.                                                   //
 // ----------------------------------------------------------------- //
 
-PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, const double scale_kernel, const double fmin, const Table *rel_cat, Array_dbl **skellam)
+PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, const double scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam)
 {
 	// Sanity checks
 	check_null(self);
@@ -1304,8 +1308,8 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			#pragma omp critical
 			if(++progress % cadence == 0 || progress == n_pos) progress_bar("Progress: ", progress, n_pos);
 			
-			// Only process sources above fmin
-			if(self->f_sum[idx_pos[i]] * self->f_sum[idx_pos[i]] / self->n_pix[idx_pos[i]] > fmin_squared)
+			// Only process sources above fmin and minpix
+			if(self->f_sum[idx_pos[i]] * self->f_sum[idx_pos[i]] / self->n_pix[idx_pos[i]] > fmin_squared && self->n_pix[idx_pos[i]] > minpix)
 			{
 				// Multivariate kernel density estimation for negative detections
 				double pdf_neg_sum = 0.0;

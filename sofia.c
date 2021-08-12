@@ -252,6 +252,7 @@ int main(int argc, char **argv)
 	const double thresh_mom      = Parameter_get_flt(par, "output.thresholdMom12");
 	const double rel_threshold   = Parameter_get_flt(par, "reliability.threshold");
 	const double rel_snr_min     = Parameter_get_flt(par, "reliability.minSNR");
+	const size_t rel_min_pix     = Parameter_get_int(par, "reliability.minPix");
 	
 	unsigned int autoflag_mode = 0;
 	if     (strcmp(Parameter_get_str(par, "flag.auto"), "channels") == 0) autoflag_mode = 1;
@@ -1216,7 +1217,7 @@ int main(int argc, char **argv)
 		
 		// Calculate reliability values
 		Array_dbl *skellam = NULL;
-		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, Parameter_get_flt(par, "reliability.scaleKernel"), rel_fmin, rel_cat, use_rel_plot ? &skellam : NULL);
+		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, Parameter_get_flt(par, "reliability.scaleKernel"), rel_fmin, rel_min_pix, rel_cat, use_rel_plot ? &skellam : NULL);
 		
 		// Create plots if requested
 		if(use_rel_plot)
