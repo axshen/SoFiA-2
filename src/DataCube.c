@@ -1720,8 +1720,8 @@ PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat sta
 	grid_spec += 1 - grid_spec % 2;
 	
 	// Print adopted grid and window sizes
-	message("  Grid size:    %zu x %zu", grid_spat, grid_spec);
-	message("  Window size:  %zu x %zu\n", window_spat, window_spec);
+	message("- Grid size:    %zu x %zu", grid_spat, grid_spec);
+	message("- Window size:  %zu x %zu\n", window_spat, window_spec);
 	
 	// Divide grid and window sizes by 2 to get radii
 	const size_t radius_grid_spat = grid_spat / 2;
