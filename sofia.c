@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 	const double thresh_mom      = Parameter_get_flt(par, "output.thresholdMom12");
 	const double rel_threshold   = Parameter_get_flt(par, "reliability.threshold");
 	const double rel_snr_min     = Parameter_get_flt(par, "reliability.minSNR");
-	const size_t rel_min_pix     = Parameter_get_int(par, "reliability.minPix");
+	const size_t rel_min_pix     = Parameter_get_int(par, "reliability.minPixels");
 	
 	unsigned int autoflag_mode = 0;
 	if     (strcmp(Parameter_get_str(par, "flag.auto"), "channels") == 0) autoflag_mode = 1;
