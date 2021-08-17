@@ -104,7 +104,7 @@ CLASS DataCube
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //
 //                                                                   //
-//   (1) verbosity - Verbosity of new object.                        //
+//   (1) verbosity - Verbosity level of the new object.              //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -198,11 +198,12 @@ PUBLIC DataCube *DataCube_copy(const DataCube *source)
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //
 //                                                                   //
-//   (1) nx     - Size of first axis of data array.                  //
-//   (2) ny     - Size of second axis of data array.                 //
-//   (3) nz     - Size of third axis of data array.                  //
-//   (4) type   - Standard FITS data type (-64, -32, 8, 16, 32, 64). //
-//   (5) verbosity - Verbosity of new object.                        //
+//   (1) nx        - Size of first axis of data array.               //
+//   (2) ny        - Size of second axis of data array.              //
+//   (3) nz        - Size of third axis of data array.               //
+//   (4) type      - Standard FITS data type (-64, -32, 8, 16, 32,   //
+//                   or 64).                                         //
+//   (5) verbosity - Verbosity level of the new object.              //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //

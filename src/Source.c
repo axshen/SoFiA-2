@@ -71,7 +71,7 @@ CLASS Source
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //
 //                                                                   //
-//   No arguments.                                                   //
+//   (1) verbosity - Verbosity level of the new object.              //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
