@@ -833,8 +833,8 @@ PUBLIC void Matrix_print(const Matrix *self, const unsigned int width, const uns
 //                                                                   //
 //   Public method for returning the determinant of the specified    //
 //   matrix. The determinant for matrices of size <= 3 is calculated //
-//   analytically, while the determinant of larger matrices is not   //
-//   yet implemented.                                                //
+//   analytically, while the determinant of larger matrices will be  //
+//   calculated numerically.                                         //
 //   The purpose of the scale factor is to be able to make use of    //
 //   the fact that det(f * M) = f^n * det(M). By setting the scale   //
 //   factor to a value != 1, one can efficiently calculate the pro-  //
