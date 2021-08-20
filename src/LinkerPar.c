@@ -991,6 +991,7 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
  * and negative detections in parameter space will be scaled by this factor. If set to 1, the original 
  * covariance matrix derived from the distribution of negative sources is used. Set NULL to use auto-kernel 
  * feature. 
+ * @param minpix Minimum number of pixels for a source to be considered reliable. 
  * @param fmin Value of the fmin parameter, where fmin = sum / sqrt(N).
  * @param rel_cat Table of pixel coordinates on the sky. All negative detections with bounding boxes 
  * including those positions will be removed before reliability calculation. NULL can be used to disable 
@@ -1075,7 +1076,7 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 //   be generated.                                                   //
 // ----------------------------------------------------------------- //
 
-PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, const double scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam)
+PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, double *scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam)
 {
 	// Sanity checks
 	check_null(self);
@@ -1273,10 +1274,10 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	//       does matter for the Skellam parameter, though.
 
 	// Scale kernel provided
-	if (scale_kernel != 0.0)
+	if (*scale_kernel != 0.0)
 	{
 		// scale_kernel defined so use this
-		Matrix_mul_scalar(covar, scale_kernel * scale_kernel);  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
+		Matrix_mul_scalar(covar, pow(*scale_kernel, 2));  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
 
 		// Invert covariance matrix
 		covar_inv = Matrix_invert(covar);
@@ -1293,13 +1294,15 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	{	
 		message("Using auto-kernel feature");
 
+		size_t size;
 		double skel_med, skel_med_new, d_skel_med, scale_hold;
+
+		// TODO(austin): Refactor and set these as sofia parameters?
 		double step = 0.05;
 		double scale = 0.5;
 		double scale_new = 0.51;
 		double tolerance = 0.01;
 		int iter = 0;
-		size_t size;
 
 		// Initial scale covariance matrix
 		Matrix_mul_scalar(covar, scale * scale);
@@ -1351,6 +1354,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			iter++;
 		}
 
+		*scale_kernel = scale_new;
 		message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale_new, iter);
 	}
 	
