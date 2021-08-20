@@ -1291,6 +1291,8 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	// Run auto-kernel using gradient descent
 	else 
 	{	
+		message("Using auto-kernel feature");
+
 		double skel_med, skel_med_new, d_skel_med, scale_hold;
 		double step = 0.05;
 		double scale = 0.5;
@@ -1349,10 +1351,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			iter++;
 		}
 
-		// TODO(austin): Pretty-print autokernel output
-		// 6. Print
-		printf("%f\n", scale_new);
-		printf("Iterations: %i\n", iter);
+		message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale_new, iter);
 	}
 	
 	// Loop over all positive detections to measure their reliability
