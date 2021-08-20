@@ -5,7 +5,7 @@
 #   make OMP=-fopenmp                  for GCC or Clang with OpenMP
 #   make CC=icc OPT=-O3 OMP=-openmp    for Intel C Compiler with OpenMP (not tested)
 #   make clean                         remove object files after compilation
-#   make DEBUG=1                       for debug mode
+#   make DEBUG=1                       for debug mode (no compiler optimisations)
 
 
 SRC = src/Array_dbl.c \

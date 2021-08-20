@@ -1258,10 +1258,10 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	}
 	else message("Retaining all negative detections.");
 
-	// Create covariance and inverse matrix
+	// Determine covariance matrix from negative detections
 	Matrix *covar = Matrix_new(dim, dim);
-	Matrix_covariance(covar, par_neg, dim, n_neg);
 	Matrix *covar_inv;
+	Matrix_covariance(covar, par_neg, dim, n_neg);
 
 	// Inverse of the square root of |2 * pi * covar| = (2 pi)^n |covar|
 	// This is the scale factor needed to calculate the PDF of the multivariate normal distribution later on.
@@ -1272,24 +1272,10 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	//       the amplitude to 1 rather than the integral. The normalisation factor 
 	//       does matter for the Skellam parameter, though.
 
-	// TODO(austin): Autokernel progress bar
-	// Autokernel if scale_kernel value was not provided
-	if (scale_kernel == 0.0) {
-		// Autokernel loop to decide correct scale_kernel value
-		// Determine covariance matrix from negative detections
-		Matrix_mul_scalar(covar, scale_kernel * scale_kernel);  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
-
-		// Invert covariance matrix
-		covar_inv = Matrix_invert(covar);
-		ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
-		
-		// Create Skellam array if requested
-		if(skellam != NULL)
-		{
-			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
-		}
-	} else {
-		// Determine covariance matrix from negative detections
+	// Scale kernel provided
+	if (scale_kernel != 0.0)
+	{
+		// scale_kernel defined so use this
 		Matrix_mul_scalar(covar, scale_kernel * scale_kernel);  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
 
 		// Invert covariance matrix
@@ -1302,7 +1288,73 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
 		}
 	}
+	// Run auto-kernel using gradient descent
+	else 
+	{	
+		double skel_med, skel_med_new, d_skel_med, scale_hold;
+		double step = 0.05;
+		double scale = 0.5;
+		double scale_new = 0.51;
+		double tolerance = 0.01;
+		int iter = 0;
+		size_t size;
 
+		// Initial scale covariance matrix
+		Matrix_mul_scalar(covar, scale * scale);
+		covar_inv = Matrix_invert(covar);
+		ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
+		
+		// Create Skellam array if requested
+		if(skellam != NULL)
+		{
+			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+		}
+
+		// Median of skellam distribution
+		size = Array_dbl_get_size(*skellam);
+		Array_dbl_sort(*skellam);
+		skel_med = fabs(IS_ODD(size) ? Array_dbl_get(*skellam, size / 2) : 0.5 * (Array_dbl_get(*skellam, size / 2 - 1) + Array_dbl_get(*skellam, size / 2)));
+
+		// Gradient descent loop
+		while (true)
+		{	
+			// Scale covariance
+			Matrix_mul_scalar(covar, pow(scale_new / scale, 2));
+			covar_inv = Matrix_invert(covar);
+			ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
+			
+			// Calculate skellam array median
+			if(skellam != NULL)
+			{
+				LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+			}
+			size = Array_dbl_get_size(*skellam);
+			Array_dbl_sort(*skellam);
+			skel_med_new = fabs(IS_ODD(size) ? Array_dbl_get(*skellam, size / 2) : 0.5 * (Array_dbl_get(*skellam, size / 2 - 1) + Array_dbl_get(*skellam, size / 2)));
+
+			// 3. Compute derivative
+			d_skel_med = (skel_med_new - skel_med) / (scale_new - scale);
+			scale_hold = scale_new - d_skel_med * step;
+
+			// 4. Break condition
+			if (fabs(skel_med_new) < tolerance) {
+				break;
+			}
+
+			// 5. Update parameters
+			scale = scale_new;
+			scale_new = scale_hold;
+			skel_med = skel_med_new;
+
+			iter++;
+		}
+
+		// TODO(austin): Pretty-print autokernel output
+		// 6. Print
+		printf("%f\n", scale_new);
+		printf("Iterations: %i\n", iter);
+	}
+	
 	// Loop over all positive detections to measure their reliability
 	const size_t cadence = (n_pos / 100) ? n_pos / 100 : 1;  // Only needed for progress bar
 	size_t progress = 0;
