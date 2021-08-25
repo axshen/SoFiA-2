@@ -63,10 +63,9 @@ CLASS String
 //                                                                   //
 // Description:                                                      //
 //                                                                   //
-//   Standard constructor. Will create a new and empty String ob-    //
-//   ject. Note that the destructor will have to be called explicit- //
-//   ly once the object is no longer required to release its memory  //
-//   again.                                                          //
+//   Standard constructor. Will create a new String object. Note     //
+//   that the destructor will have to be called explicitly once the  //
+//   object is no longer required to release its memory again.       //
 // ----------------------------------------------------------------- //
 
 PUBLIC String *String_new(const char *string)
