@@ -54,8 +54,8 @@ CLASS String
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //
 //                                                                   //
-//   string - String to be assigned to the new String object. Use "" //
-//            to create an empty string.                             //
+//   (1) string - String to be assigned to the new String object.    //
+//                Use "" to create an empty string.                  //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
@@ -95,7 +95,7 @@ PUBLIC String *String_new(const char *string)
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //
 //                                                                   //
-//   string - String object to be copied.                            //
+//   (1) string - String object to be copied.                        //
 //                                                                   //
 // Return value:                                                     //
 //                                                                   //
