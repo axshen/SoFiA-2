@@ -48,7 +48,7 @@
 // new array can either be of a given size and empty (using the      //
 // standard constructor) or provided with a list of comma-separated  //
 // values that will be stored in the array and used to determine its //
-// size using the alternative constructor).                          //
+// size (using the alternative constructor).                         //
 // ----------------------------------------------------------------- //
 
 typedef CLASS Array_dbl Array_dbl;
