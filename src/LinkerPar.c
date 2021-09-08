@@ -989,7 +989,7 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
  * These must be integer values corresponding to the parameters defined in the header file.
  * @param scale_kernel The size of the convolution kernel used in determining the density of positive 
  * and negative detections in parameter space will be scaled by this factor. If set to 1, the original 
- * covariance matrix derived from the distribution of negative sources is used. Set NULL to use auto-kernel 
+ * covariance matrix derived from the distribution of negative sources is used. Set 0.0 to use auto-kernel 
  * feature. 
  * @param minpix Minimum number of pixels for a source to be considered reliable. 
  * @param fmin Value of the fmin parameter, where fmin = sum / sqrt(N).
@@ -1289,73 +1289,48 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
 		}
 	}
-	// Run auto-kernel using gradient descent
+	// Run auto-kernel by incrementally increasing scale.
 	else 
 	{	
 		message("Using auto-kernel feature");
 
+		// TODO(austin): allow these to be set as initial parameters
 		size_t size;
-		double skel_med, skel_med_new, d_skel_med, scale_hold;
-
-		// TODO(austin): Refactor and set these as sofia parameters?
-		double step = 0.05;
-		double scale = 0.5;
-		double scale_new = 0.51;
-		double tolerance = 0.01;
 		int iter = 0;
+		double scale = 0.1;
+		double scale_old = 1.0;
+		double skellam_med = 1e5;
+		double skellam_tol = 0.05;
+		double d_scale = 0.02;
 
-		// Initial scale covariance matrix
-		Matrix_mul_scalar(covar, scale * scale);
-		covar_inv = Matrix_invert(covar);
-		ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
-		
-		// Create Skellam array if requested
-		if(skellam != NULL)
-		{
-			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
-		}
-
-		// Median of skellam distribution
-		size = Array_dbl_get_size(*skellam);
-		Array_dbl_sort(*skellam);
-		skel_med = fabs(IS_ODD(size) ? Array_dbl_get(*skellam, size / 2) : 0.5 * (Array_dbl_get(*skellam, size / 2 - 1) + Array_dbl_get(*skellam, size / 2)));
-
-		// Gradient descent loop
-		while (true)
-		{	
-			// Scale covariance
-			Matrix_mul_scalar(covar, pow(scale_new / scale, 2));
+		do {
+			// Calculate skellam array
+			Matrix_mul_scalar(covar, pow(scale / scale_old, 2));  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
 			covar_inv = Matrix_invert(covar);
 			ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
-			
-			// Calculate skellam array median
 			if(skellam != NULL)
 			{
 				LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
 			}
+
+			// Calculate new median
 			size = Array_dbl_get_size(*skellam);
 			Array_dbl_sort(*skellam);
-			skel_med_new = fabs(IS_ODD(size) ? Array_dbl_get(*skellam, size / 2) : 0.5 * (Array_dbl_get(*skellam, size / 2 - 1) + Array_dbl_get(*skellam, size / 2)));
+			skellam_med = fabs(IS_ODD(size) ? Array_dbl_get(*skellam, size / 2) : 0.5 * (Array_dbl_get(*skellam, size / 2 - 1) + Array_dbl_get(*skellam, size / 2)));
+			
 
-			// 3. Compute derivative
-			d_skel_med = (skel_med_new - skel_med) / (scale_new - scale);
-			scale_hold = scale_new - d_skel_med * step;
+			// Update with larger scale change far from target
+			scale_old = scale;
+			if (skellam_med < 10 * skellam_tol)  { scale += d_scale * 2; } 
+			else if (skellam_med < 30 * skellam_tol) { scale += d_scale * 5; }
+			else if (skellam_med < 50 * skellam_tol) { scale += d_scale * 10; }
+			else { scale += d_scale; }
 
-			// 4. Break condition
-			if (fabs(skel_med_new) < tolerance) {
-				break;
-			}
+			iter ++;
+		} while (skellam_med > skellam_tol);
 
-			// 5. Update parameters
-			scale = scale_new;
-			scale_new = scale_hold;
-			skel_med = skel_med_new;
-
-			iter++;
-		}
-
-		*scale_kernel = scale_new;
-		message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale_new, iter);
+		*scale_kernel = scale;
+		message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale, iter);
 	}
 	
 	// Loop over all positive detections to measure their reliability
