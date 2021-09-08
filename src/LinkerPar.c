@@ -1297,8 +1297,10 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 		// TODO(austin): allow these to be set as initial parameters
 		size_t size;
 		int iter = 0;
+		int max_iter = 30;
 		double scale = 0.1;
 		double scale_old = 1.0;
+		double scale_default = 0.4;
 		double skellam_med = 1e5;
 		double skellam_tol = 0.05;
 		double d_scale = 0.02;
@@ -1317,7 +1319,6 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			size = Array_dbl_get_size(*skellam);
 			Array_dbl_sort(*skellam);
 			skellam_med = fabs(IS_ODD(size) ? Array_dbl_get(*skellam, size / 2) : 0.5 * (Array_dbl_get(*skellam, size / 2 - 1) + Array_dbl_get(*skellam, size / 2)));
-			
 
 			// Update with larger scale change far from target
 			scale_old = scale;
@@ -1326,11 +1327,28 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			else if (skellam_med < 50 * skellam_tol) { scale += d_scale * 10; }
 			else { scale += d_scale; }
 
+			// Break condition (use hard-coded default)
+			if (iter > max_iter) {
+				scale = scale_default;
+
+				Matrix_mul_scalar(covar, pow(scale / scale_old, 2));
+				covar_inv = Matrix_invert(covar);
+				ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
+				if(skellam != NULL)
+				{
+					LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+				}
+				message("Auto-kernel failed, defaulting to scale_kernel = %f.", scale);		
+			}
+
 			iter ++;
 		} while (skellam_med > skellam_tol);
 
-		*scale_kernel = scale;
-		message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale, iter);
+		// Successful auto-kernel
+		if (skellam_med < skellam_tol) {
+			*scale_kernel = scale;
+			message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale, iter);	
+		}
 	}
 	
 	// Loop over all positive detections to measure their reliability
