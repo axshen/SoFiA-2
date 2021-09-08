@@ -60,10 +60,10 @@
 #define MEASURE_ADDITIONAL_STATS  1
 
 
-
-// ----------------------------------------------------------------- //
-// Declaration of properties of class LinkerPar                      //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Declaration of properties of class LinkerPar
+ * 
+ */
 
 CLASS LinkerPar
 {
@@ -95,27 +95,19 @@ CLASS LinkerPar
 };
 
 
-
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) verbosity - Verbosity level of the new object.              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created LinkerPar object.                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new and empty LinkerPar ob- //
-//   ject and return a pointer to the newly created object. No me-   //
-//   mory will be allocated other than for the object itself. Note   //
-//   that the destructor will need to be called explicitly once the  //
-//   object is no longer required to release any memory allocated    //
-//   during the lifetime of the object.                              //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Standard constructor
+ * 
+ * Will create a new and empty LinkerPar object and return a pointer to the newly created object. 
+ * No memory will be allocated other than for the object itself. Note that the destructor will need
+ * to be called explicitly once the object is no longer required to release any memory allocated
+ * during the lifetime of the object.
+ *  
+ * @param verbosity 	Verbosity level of the new object.
+ * 
+ * @return Pointer to newly created LinkerPar object.
+ * 
+ */
 
 PUBLIC LinkerPar *LinkerPar_new(const bool verbosity)
 {
@@ -152,24 +144,15 @@ PUBLIC LinkerPar *LinkerPar_new(const bool verbosity)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Destructor
+ *
+ * Note that the destructor must be called explicitly if the object is no longer required. 
+ * This will release the memory occupied by the object.
+ *  
+ * @param self 	Object self-reference
+ * 
+ */
 
 PUBLIC void LinkerPar_delete(LinkerPar *self)
 {
@@ -184,23 +167,16 @@ PUBLIC void LinkerPar_delete(LinkerPar *self)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Return number of sources in LinkerPar object                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of sources stored in LinkerPar object.                   //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the size of the LinkerPar object,   //
-//   i.e. the number of sources it currently contains.               //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Return number of sources in LinkerPar object  
+ *
+ * Public method for returning the size of the @p LinkerPar object, i.e. the number of sources it currently contains.
+ *  
+ * @param self Object self-reference.
+ * 
+ * @return Number of sources stored in LinkerPar object.
+ * 
+ */
 
 PUBLIC size_t LinkerPar_get_size(const LinkerPar *self)
 {
@@ -208,34 +184,22 @@ PUBLIC size_t LinkerPar_get_size(const LinkerPar *self)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Insert a new object at the end of the current list                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) label    - Label of the new object.                         //
-//   (3) x        - x-position of the new object.                    //
-//   (4) y        - y-position of the new object.                    //
-//   (5) z        - z-position of the new object.                    //
-//   (6) flux     - Flux value of the new object.                    //
-//   (7) flag     - Flag values to be set; 1 = spatial edge;         //
-//                  2 = spectral edge; 4 = blanked pixels; 8 = other //
-//                  sources.                                         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding a new object to the end of the current //
-//   list pointed to by 'self'. The label will be set to 'label',    //
-//   the number of pixels to 1, and the (x, y, z) position will be   //
-//   used as the initial x_min, x_max, etc. The memory allocation of //
-//   the object will automatically be expanded if necessary.         //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Insert a new object at the end of the current list
+ *
+ * Public method for adding a new object to the end of the list pointed to by @p self. The label will be set to @p label', the number of pixels to 1, 
+ * and the (x, y, z) position will be used as the initial @p x_min, @p x_max, etc. 
+ * The memory allocation of the object will automatically be expanded if necessary.
+ * 
+ * @param self  	Object self-reference.
+ * @param label 	Label of the new object.
+ * @param x     	x-position of the new object.
+ * @param y     	y-position of the new object.
+ * @param z     	z-position of the new object.
+ * @param flux  	Flux value of the new object.
+ * @param flag  	Flag values to be set; 1 = spatial edge; 2 = spectral edge; 4 = blanked pixels; 8 = other sources. 
+ * 
+ */
 
 PUBLIC void LinkerPar_push(LinkerPar *self, const size_t label, const size_t x, const size_t y, const size_t z, const double flux, const unsigned char flag)
 {
@@ -277,24 +241,15 @@ PUBLIC void LinkerPar_push(LinkerPar *self, const size_t label, const size_t x, 
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Remove last object from list                                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for removing the most recently added object from  //
-//   the list. The process will be terminated if the original list   //
-//   is empty.                                                       //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Remove last object from list
+ *
+ * Public method for removing the most recently added object from the list. 
+ * The process will be terminated if the original list is empty.
+ *  
+ * @param self Object self-reference.
+ * 
+ */
 
 PUBLIC void LinkerPar_pop(LinkerPar *self)
 {
@@ -312,33 +267,21 @@ PUBLIC void LinkerPar_pop(LinkerPar *self)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Add another pixel to the last object in the list                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) x        - x-position of the new pixel.                     //
-//   (3) y        - y-position of the new pixel.                     //
-//   (4) z        - z-position of the new pixel.                     //
-//   (5) flux     - Flux value of the new pixel.                     //
-//   (6) flag     - Flag values to be set; 1 = spatial edge;         //
-//                  2 = spectral edge; 4 = blanked pixels; 8 = other //
-//                  sources.                                         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding another pixel to the last object in    //
-//   the current linker list. The object's x_min, x_max, y_min, etc. //
-//   values will be checked against the newly added pixel and up-    //
-//   dated if necessary. The programme will terminate if the list is //
-//   found to be empty.                                              //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Add another pixel to the last object in the list
+ *
+ * Public method for adding another pixel to the last object in the current linker list. 
+ * The object's @p x_min, @p x_max, @p y_min, etc. values will be checked against the newly added pixel and updated if necessary. 
+ * The programme will terminate if the list is found to be empty. 
+ *  
+ * @param self 	Object self-reference.
+ * @param x 	x-position of the new pixel.
+ * @param y 	y-position of the new pixel.
+ * @param z 	z-position of the new pixel.
+ * @param flux 	Flux value of the new pixel.
+ * @param flag 	Flag values to be set; 1 = spatial edge; 2 = spectral edge; 4 = blanked pixels; 8 = other sources.
+ * 
+ */
 
 PUBLIC void LinkerPar_update(LinkerPar *self, const size_t x, const size_t y, const size_t z, const double flux, const unsigned char flag)
 {
@@ -381,7 +324,6 @@ PUBLIC void LinkerPar_update(LinkerPar *self, const size_t x, const size_t y, co
 }
 
 // Same, but only the flag will get updated
-
 PUBLIC void LinkerPar_update_flag(LinkerPar *self, const unsigned char flag)
 {
 	// Sanity checks
@@ -395,27 +337,19 @@ PUBLIC void LinkerPar_update_flag(LinkerPar *self, const unsigned char flag)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Get the size of an object in x, y or z                            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) label    - Index of the object to be retrieved.             //
-//   (3) axis     - Axis for which size should be returned; 0 = x,   //
-//                  1 = y, and 2 = z.                                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Size of the object in pixels along the specified axis.          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the size of the specified object    //
-//   along the specified axis. The programme will terminate if the   //
-//   axis or label are out of range.                                 //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Get the size of an object in x, y or z 
+ *
+ * Public method for returning the size of the specified object along the specified axis. 
+ * The programme will terminate if the @p axis or @p label are out of range. 
+ *  
+ * @param self 	Object self-reference.  
+ * @param label Index of the object to be retrieved.
+ * @param axis 	Axis for which size should be returned; 0 = x, 1 = y, and 2 = z.
+ * 
+ * @return Size of the object in pixels along the specified axis.
+ * 
+ */
 
 PUBLIC size_t LinkerPar_get_obj_size(const LinkerPar *self, const size_t label, const int axis)
 {
@@ -432,25 +366,18 @@ PUBLIC size_t LinkerPar_get_obj_size(const LinkerPar *self, const size_t label, 
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Get the number of pixels of an object                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) label    - Index of the object to be retrieved.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of pixels of the specified object.                       //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the number of pixels that have been //
-//   recorded for the specified object. The programme will terminate //
-//   if the label is out of range.                                   //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Get the number of pixels of an object
+ *
+ * Public method for returning the number of pixels that have been recorded for the specified object.
+ * The programme will terminate if the label is out of range.
+ *  
+ * @param self 	Object self-reference.
+ * @param label	Index of the object to be retrieved.
+ * 
+ * @return Number of pixels of the specified object.
+ * 
+ */
 
 PUBLIC size_t LinkerPar_get_npix(const LinkerPar *self, const size_t label)
 {
@@ -459,25 +386,18 @@ PUBLIC size_t LinkerPar_get_npix(const LinkerPar *self, const size_t label)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Get the total flux of an object                                   //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) label    - Label of the object to be retrieved.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Total flux of the specified object.                             //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the total flux of the object speci- //
-//   fied by 'label'. The programme will terminate if the label is   //
-//   out of range.                                                   //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Get the total flux of an object
+ * 
+ * Public method for returning the total flux of the object specified by @p label. 
+ * The programme will terminate if the label is out of range. 
+ *  
+ * @param self 	Object self-reference.
+ * @param label	Index of the object to be retrieved.
+ * 
+ * @return Total flux of the specified object.
+ * 
+ */
 
 PUBLIC double LinkerPar_get_flux(const LinkerPar *self, const size_t label)
 {
@@ -486,25 +406,18 @@ PUBLIC double LinkerPar_get_flux(const LinkerPar *self, const size_t label)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Get the reliability of an object                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) label    - Label of the object to be retrieved.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Reliability of the specified object.                            //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the reliability of the object spe-  //
-//   cified by 'label'. The programme will terminate if the label is //
-//   out of range.                                                   //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Get the reliability of an object
+ * 
+ * Public method for returning the reliability of the object specified by @p label. 
+ * The programme will terminate if the label is out of range.   
+ *  
+ * @param self 	Object self-reference.
+ * @param label	Index of the object to be retrieved.
+ * 
+ * @return Reliability of the specified object.
+ * 
+ */
 
 PUBLIC double LinkerPar_get_rel(const LinkerPar *self, const size_t label)
 {
@@ -513,25 +426,18 @@ PUBLIC double LinkerPar_get_rel(const LinkerPar *self, const size_t label)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Get the label of an object by index                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the object to be retrieved.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Reliability of the specified object.                            //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the label of the object with the    //
-//   specified index. The programme will terminate if the index is   //
-//   out of range.                                                   //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Get the label of an object by index   
+ *
+ * Public method for returning the label of the object with the specified @p index. 
+ * The programme will terminate if the @p index is out of range.  
+ *  
+ * @param self 	Object self-reference.
+ * @param label	Index of the object to be retrieved.
+ * 
+ * @return Reliability of the specified object.
+ * 
+ */
 
 PUBLIC size_t LinkerPar_get_label(const LinkerPar *self, const size_t index)
 {
@@ -543,28 +449,22 @@ PUBLIC size_t LinkerPar_get_label(const LinkerPar *self, const size_t index)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Get bounding box of an object                                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) label    - Label of the object for which the bounding box   //
-//                  is to be retrieved.                              //
-//   (3)-(8) x_min, x_max, y_min, y_max, z_min, z_max                //
-//                - Pointer for holding the bounding box values.     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for retrieving the bounding box of the object     //
-//   with the specified label. The process will be terminated if the //
-//   label does not exist.                                           //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Get bounding box of an object
+ * 
+ * Public method for retrieving the bounding box of the object with the specified label. 
+ * The process will be terminated if the label does not exist.      
+ *  
+ * @param self 	Object self-reference.
+ * @param label	Index of the object to be retrieved.
+ * @param x_min Pointer for holding the bounding box x_min value.
+ * @param x_max Pointer for holding the bounding box x_max value.
+ * @param y_mix Pointer for holding the bounding box y_min value.
+ * @param y_max Pointer for holding the bounding box y_max value.
+ * @param z_min Pointer for holding the bounding box z_min value.
+ * @param z_max Pointer for holding the bounding box z_max value.
+ * 
+ */
 
 PUBLIC void LinkerPar_get_bbox(const LinkerPar *self, const size_t label, size_t *x_min, size_t *x_max, size_t *y_min, size_t *y_max, size_t *z_min, size_t *z_max)
 {
@@ -586,35 +486,25 @@ PUBLIC void LinkerPar_get_bbox(const LinkerPar *self, const size_t label, size_t
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Create source catalogue from LinkerPar object                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) filter    - Map object containing old and new label pairs   //
-//                   of only those sources considered as reliable.   //
-//   (3) flux_unit - String containing the flux unit of the data.    //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created catalogue.                             //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for generating a source catalogue from the speci- //
-//   fied LinkerPar object. A pointer to the newly created catalogue //
-//   will be returned. Note that the user will assume ownership of   //
-//   the catalogue and will be responsible for explicitly calling    //
-//   the destructor if the catalogue is no longer required.          //
-//   Unreliable sources can be excluded from the catalogue by provi- //
-//   ding a non-empty filter object that contains the old and new    //
-//   labels of all sources deemed reliable. The old labels will be   //
-//   replaced by the new ones in the source ID column of the cata-   //
-//   logue. If filter is NULL or empty, all sources will be copied   //
-//   into the catalogue without filtering.                           //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Create source catalogue from LinkerPar object
+ *
+ * Public method for generating a source catalogue from the specified @p LinkerPar object. 
+ * A pointer to the newly created catalogue will be returned. Note that the user will assume 
+ * ownership of the catalogue and will be responsible for explicitly calling the destructor if 
+ * the catalogue is no longer required. Unreliable sources can be excluded from the catalogue by
+ * providing a non-empty filter object that contains the old and new labels of all sources deemed reliable. 
+ * 
+ * The old labels will be replaced by the new ones in the source ID column of the catalogue. 
+ * If filter is @p NULL or empty, all sources will be copied into the catalogue without filtering.  
+ *  
+ * @param self 		Object self-reference.
+ * @param filter	Map object containing old and new label pairs of only those sources considered as reliable.
+ * @param flux_unit String containing the flux unit of the data.
+ * 
+ * @return Pointer to newly created catalogue.
+ * 
+ */
 
 PUBLIC Catalog *LinkerPar_make_catalog(const LinkerPar *self, const Map *filter, const char *flux_unit)
 {
@@ -694,35 +584,27 @@ PUBLIC Catalog *LinkerPar_make_catalog(const LinkerPar *self, const Map *filter,
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Create reliability parameter catalogues from LinkerPar object     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self            - Object self-reference.                    //
-//   (2) flux_unit       - String holding the flux unit of the data. //
-//   (3) cat_rel_par_neg - Pointer to catalogue that will hold the   //
-//                         reliability parameters of all negative    //
-//                         detections.                               //
-//   (4) cat_rel_par_pos - Pointer to catalogue that will hold the   //
-//                         reliability parameters of all positive    //
-//                         detections.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for generating catalogues of relevant reliability //
-//   parameters of all negative and positive detections for debug-   //
-//   ging purposes. These include the source ID, geometric centroid  //
-//   (x, y, z), reliability and the three parameters used in the re- //
-//   liability calculation: log(f_max), log(f_sum) and log(f_mean).  //
-//   Two pointers to empty catalogues must be provided; they will be //
-//   holding the negative and positive detections, respectively.     //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Create reliability parameter catalogues from LinkerPar object
+ * 
+ * Public method for generating catalogues of relevant reliability
+ * parameters of all negative and positive detections for debugging
+ * purposes. These include the source ID, geometric centroid (x, y, z), 
+ * reliability and the three parameters used in the reliability 
+ * calculation: log(f_max), log(f_sum) and log(f_mean). Two pointers 
+ * to empty catalogues must be provided; they will be holding
+ * the negative and positive detections, respectively.    
+ *  
+ * @param self            	Object self-reference.                    
+ * @param flux_unit       	String holding the flux unit of the data. 
+ * @param cat_rel_par_neg 	Pointer to catalogue that will hold the   
+ *                       	reliability parameters of all negative    
+ *                       	detections.                               
+ * @param cat_rel_par_pos 	Pointer to catalogue that will hold the   
+ *                       	reliability parameters of all positive    
+ *                       	detections.      
+ * 
+ */
 
 PUBLIC void LinkerPar_get_rel_cat(const LinkerPar *self, const char *flux_unit, Catalog **cat_rel_par_neg, Catalog **cat_rel_par_pos)
 {
@@ -785,23 +667,14 @@ PUBLIC void LinkerPar_get_rel_cat(const LinkerPar *self, const char *flux_unit, 
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Print some basic information about the LinkerPar object           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for printing some basic information on the size   //
-//   and memory usage of the LinkerPar object pointed to by 'self'.  //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Print some basic information about the LinkerPar object
+ *
+ * Public method for printing some basic information on the size and memory usage of the @p LinkerPar object pointed to by @p self. 
+ *  
+ * @param self 	Object self-reference.
+ * 
+ */
 
 PUBLIC void LinkerPar_print_info(const LinkerPar *self)
 {
@@ -825,26 +698,19 @@ PUBLIC void LinkerPar_print_info(const LinkerPar *self)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Return the index of the element identified by label               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) label    - Label of the element the index of which is to be //
-//                  returned.                                        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Index of the element identified by 'label'.                     //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for finding and returning the index of the ele-  //
-//   ment with the specified label. The process will be terminated   //
-//   if the requested label does not exist.                          //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Calculate array of normalised Skellam values.
+ * 
+ * Private method for finding and returning the index of the element
+ * with the specified label. The process will be terminated if the 
+ * requested label does not exist.
+ *  
+ * @param self 	Object self-reference.
+ * @param label Label of the element the index of which is to be returned.
+ * 
+ * @return Index of the element identified with @p label
+ * 
+ */
 
 PRIVATE size_t LinkerPar_get_index(const LinkerPar *self, const size_t label)
 {
@@ -855,25 +721,17 @@ PRIVATE size_t LinkerPar_get_index(const LinkerPar *self, const size_t label)
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Reallocate memory for LinkerPar object                            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for reallocating the memory requirements of the  //
-//   specified LinkerPar object, e.g. as necessitated by a change in //
-//   size. If the new size is 0, all memory will be de-allocated and //
-//   the pointers will be set to NULL.                               //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Reallocate memory for LinkerPar object
+ *
+ * Private method for reallocating the memory requirements of the 
+ * specified @p LinkerPar object, e.g. as necessitated by a change in
+ * size. If the new size is 0, all memory will be de-allocated and
+ * the pointers will be set to @p NULL.
+ *  
+ * @param self 	Object self-reference.
+ * 
+ */
 
 PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 {
@@ -984,97 +842,30 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
  * This method can also create a Skellam array to assist with the optimisation of the kernel scale. This can be 
  * controlled using the @p skellam parameter. If set to @p NULL, no Skellam array will be generated.       
  *  
- * @param self Object self-reference.
- * @param rel_par_space Array of parameters to be used to determine the reliability of detections. 
- * These must be integer values corresponding to the parameters defined in the header file.
- * @param scale_kernel The size of the convolution kernel used in determining the density of positive 
- * and negative detections in parameter space will be scaled by this factor. If set to 1, the original 
- * covariance matrix derived from the distribution of negative sources is used. Set 0.0 to use auto-kernel 
- * feature. 
- * @param minpix Minimum number of pixels for a source to be considered reliable. 
- * @param fmin Value of the fmin parameter, where fmin = sum / sqrt(N).
- * @param rel_cat Table of pixel coordinates on the sky. All negative detections with bounding boxes 
- * including those positions will be removed before reliability calculation. NULL can be used to disable 
- * this feature.
- * @param skellam Pointer to an Array of type double to hold the Skellam array. Set NULL to disable. 
+ * @param self 			Object self-reference.
+ * @param rel_par_space Array of parameters to be used to determine the 
+ * 						reliability of detections. These must be integer 
+ * 						values corresponding to the parameters defined 
+ * 						in the header file.
+ * @param scale_kernel 	The size of the convolution kernel used in determining
+ * 						the density of positive and negative detections in 
+ * 						parameter space will be scaled by this factor. If set to 1, 
+ * 						the original covariance matrix derived from the distribution 
+ * 						of negative sources is used. Set 0.0 to use auto-kernel feature. 
+ * @param minpix 		Minimum number of pixels for a source to be considered reliable. 
+ * @param fmin 			Value of the fmin parameter, where fmin = sum / sqrt(N).
+ * @param rel_cat 		Table of pixel coordinates on the sky. All negative detections 
+ * 						with bounding boxes including those positions will be removed 
+ * 						before reliability calculation. NULL can be used to disable 
+ * 						this feature.
+ * @param skellam 		Pointer to an Array of type double to hold the Skellam array. 
+ * 						Set NULL to disable. 
  * 
  * @return Covariance matrix from the negative detections. 
  * 
- * @note Auto-kernel feature makes some assumptions...
+ * @note Auto-kernel feature will start at a low @p scale_kernel = 0.1, and will incrementally increase it
+ * based on the distance to the target. 
  */
-
-// ----------------------------------------------------------------- //
-// Determine reliability of detections                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self         - Object self-reference.                       //
-//   (2) rel_par_space- Array of parameters to be used to determine  //
-//                      the reliability of detections. These must be //
-//                      integer values corresponding to the para-    //
-//                      meters defined in the header file.           //
-//   (3) scale_kernel - The size of the convolution kernel used in   //
-//                      determining the density of positive and ne-  //
-//                      gative detections in parameter space will be //
-//                      scaled by this factor. If set to 1, the ori- //
-//                      ginal covariance matrix derived from the     //
-//                      distribution of negative sources is used.    //
-//   (4) fmin         - Value of the fmin parameter, where fmin =    //
-//                      sum / sqrt(N).                               //
-//   (5) minpix       - Minimum number of pixels for a source to be  //
-//                      considered reliable.                         //
-//   (6) rel_cat      - Table of pixel coordinates on the sky. All   //
-//                      negative detections with bounding boxes in-  //
-//                      cluding those positions will be removed be-  //
-//                      fore reliability calculation. NULL can be    //
-//                      used to disable this feature.                //
-//   (7) skellam      - Pointer to an Array of type double to hold   //
-//                      the Skellam array. Set NULL to disable.      //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Covariance matrix from the negative detections.                 //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for measuring the reliability of all the sources  //
-//   in the specified LinkerPar object. This will set the rel pro-   //
-//   perty of the object, but not yet filter out unreliable sources. //
-//   Reliability measurement works by comparing the density of posi- //
-//   tive and negative detections in an N-dimensional parameter      //
-//   space. For this purpose, the covariance matrix of the distribu- //
-//   tion of negative sources in parameter space is first calcula-   //
-//   ted. The covariance matrix is assumed to describe the multi-    //
-//   variate normal distribution of the Gaussian noise of the data.  //
-//   Next, the sum of the probability density functions of all posi- //
-//   tive and negative sources is evaluated at the location of each  //
-//   positive detection (multivariate Gaussian kernel density esti-  //
-//   mation). From this, the reliability is estimated as             //
-//                                                                   //
-//      R = (P - N) / N,                                             //
-//                                                                   //
-//   where P is the sum of the PDFs of the positive sources, and N   //
-//   is the sum of the PDFs of the negative sources. If N > P, R is  //
-//   set to 0 to ensure that the resulting reliability is always in  //
-//   the range of 0 to 1. Note that the reliability will only be de- //
-//   termined for positive sources above the fmin threshold, where   //
-//   fmin is the summed flux divided by the square root of the num-  //
-//   ber of pixels contributing to a source. Likewise, sources with  //
-//   fewer than minpix pixels will also be considered as unreliable  //
-//   by default.                                                     //
-//   In order to be able to exclude certain negative artefacts from  //
-//   affecting the reliability calculation, the user has the option  //
-//   of specifying a table of (x, y) pixel positions using the para- //
-//   meter rel_cat. All negative detections the (x, y) bounding box  //
-//   of which contains one of those positions will be excluded from  //
-//   the reliability calculation. rel_cat must contain exactly two   //
-//   columns (x and y in pixels). If set to NULL, this feature will  //
-//   be disabled altogether.                                         //
-//   This method can also create a Skellam array to assist with the  //
-//   optimisation of the kernel scale. This can be controlled using  //
-//   the 'skellam' parameter. If set to NULL, no Skellam array will  //
-//   be generated.                                                   //
-// ----------------------------------------------------------------- //
 
 PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, double *scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam)
 {
@@ -1417,44 +1208,27 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Create reliability diagnostic plots                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self         - Object self-reference.                       //
-//   (2) rel_par_space- Array of parameters used in determining the  //
-//                      reliability of detections. These must be in- //
-//                      teger values corresponding to the parameters //
-//                      defined in the header file.                  //
-//   (3) threshold    - Reliability threshold.                       //
-//   (4) fmin         - Threshold for SNR filtering.                 //
-//   (5) minSNR       - Only needed for labelling plot, while fmin   //
-//                      is the parameter used for drawing SNR line.  //
-//   (6) covar        - Covariance matrix.                           //
-//   (7) filename     - Name of the output EPS file.                 //
-//   (8) overwrite    - If true, overwrite output file, otherwise do //
-//                      not overwrite.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for creating a diagnostic plot for the reliabili- //
-//   ty measurement. The method will generate an Encapsulated Post-  //
-//   Script (EPS) file that shows the distribution of negative and   //
-//   positive sources in 2-D projections of the parameter space and  //
-//   highlight the ones that do or don't fulfil the reliability      //
-//   threshold or fmin requirements. In addition, the location of    //
-//   fmin will be plotted, and the Gaussian smoothing kernel used in //
-//   the reliability measurement will be overplotted as an ellipse   //
-//   based on the provided covariance matrix.                        //
-//   Note that if overwrite is set the false and the output file al- //
-//   ready exists, the process will be terminated.                   //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Create reliability diagnostic plots
+ * 
+ * Public method for creating a diagnostic plot for the reliability measurement. The method will generate an Encapsulated PostScript (EPS) file
+ * that shows the distribution of negative and positive sources in 2-D projections of the parameter space and highlight the ones that do or don't
+ * fulfil the reliability threshold or @p fmin requirements. In addition, the location of @p fmin will be plotted, and the Gaussian smoothing kernel 
+ * used in the reliability measurement will be overplotted as an ellipse based on the provided covariance matrix. 
+ * 
+ * Note that if overwrite is set the false and the output file already exists, the process will be terminated.
+ *  
+ * @param self  		Object self-reference.                      
+ * @param rel_par_space Array of parameters used in determining the reliability of detections. 
+ * 						These must be integer values corresponding to the parameters defined in the header file.                 
+ * @param threshold    	Reliability threshold.                      
+ * @param fmin         	Threshold for SNR filtering.                
+ * @param minSNR       	Only needed for labelling plot, while @p fmin is the parameter used for drawing SNR line. 
+ * @param covar        	Covariance matrix.                          
+ * @param filename     	Name of the output EPS file.                
+ * @param overwrite    	If @p true, overwrite output file, otherwise do not overwrite. 
+ * 
+ */
 
 PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const Array_siz *rel_par_space, const double threshold, const double fmin, const double minSNR, const Matrix *covar, const char *filename, const bool overwrite)
 {
@@ -1823,29 +1597,20 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const Array_siz *rel_par_
 }
 
 
-
-// ----------------------------------------------------------------- //
-// Create Skellam diagnostic plot                                    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) skellam      - Array of (P - N) / sqrt(P + N) values.       //
-//   (2) filename     - Output file name for plot.                   //
-//   (3) overwrite    - If true, overwrite existing file.            //
-//   (4) kernelScale  - Kernel scale factor, for labelling only.     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public function for generating a Skellam diagnostic plot show-  //
-//   ing the cumulative distribution of values in the Array called   //
-//   'skellam' which must contain values of (P - N) / sqrt(P + N)    //
-//   generated by the reliability module. The resulting plot will be //
-//   written to an EPS file with the specified file name.            //
-// ----------------------------------------------------------------- //
+/**
+ * @brief Create Skellam diagnostic plot
+ *
+ * Public function for generating a Skellam diagnostic plot showing the cumulative distribution of 
+ * values in the Array called 'skellam' which must contain values of (P - N) / sqrt(P + N) 
+ * generated by the reliability module. 
+ * The resulting plot will be written to an EPS file with the specified file name.
+ *  
+ * @param skellam 		Array of (P - N) / sqrt(P + N) values
+ * @param filename 		Output file name for plot.
+ * @param overwrite 	If true, overwrite existing file. 
+ * @param kernelScale 	Kernel scale factor, for labelling only. 
+ * 
+ */
 
 PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, const bool overwrite, const double kernelScale)
 {
@@ -2047,14 +1812,14 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
  * where P and N are kernel density estimations for positive and negative detections respectively.
  * This function updates the provided @p Array_dbl @p skellam pointer with calculated values.
  *  
- * @param skellam Pointer to skellam array pointer
+ * @param skellam 	Pointer to skellam array pointer
  * @param covar_inv Pointer to covariance matrix inverse
- * @param pos Array of positive detections
- * @param neg Array of negative detections
- * @param dim Value of the fmin parameter, where fmin = sum / sqrt(N).
- * @param n_pos Number of positive detections
- * @param n_neg Number of negative detections
- * @param scale Scale factor for normalisation
+ * @param pos 		Array of positive detections
+ * @param neg 		Array of negative detections
+ * @param dim 		Value of the fmin parameter, where fmin = sum / sqrt(N).
+ * @param n_pos 	Number of positive detections
+ * @param n_neg 	Number of negative detections
+ * @param scale 	Scale factor for normalisation
  * 
  */
 
