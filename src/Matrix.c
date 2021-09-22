@@ -660,7 +660,8 @@ PUBLIC Matrix *Matrix_invert(const Matrix *self)
 		// Calculate and check determinant
 		const double det = Matrix_det(self, 1.0);
 		if(det == 0.0)
-		{
+		{	
+			// TODO(austin): Why a warning here and not an ensure?
 			warning("Matrix is not invertible.");
 			return NULL;
 		}
@@ -806,7 +807,7 @@ PUBLIC void Matrix_print(const Matrix *self, const unsigned int width, const uns
 	
 	for(size_t row = 0; row < self->rows; ++row)
 	{
-		for(size_t col = 0; col < self->cols; ++col) printf("%*.*f", width, decimals, Matrix_get_value(self, row, col));
+		for(size_t col = 0; col < self->cols; ++col) printf("%*.*f ", width, decimals, Matrix_get_value(self, row, col));
 		printf("\n");
 	}
 	
@@ -1176,5 +1177,46 @@ PUBLIC void Matrix_err_ellipse(const Matrix *covar, const size_t par1, const siz
 	Matrix_delete(eigenvalues);
 	Matrix_delete(eigenvectors);
 	
+	return;
+}
+
+/**
+ * @brief Calculate covariance matrix from a flattened array of values.
+ *
+ * Compute the covariance matrix from an array of values. Will update
+ * the values in place for provided matrix.
+ *  
+ * @param values[] Flattened array of values.
+ * @param dim Number of columns in the array prior to flattening (number of variables).
+ * @param length Number of rows in the array prior to flattening (number of examples).
+ */
+
+PUBLIC void Matrix_covariance(Matrix *self, const double values[], const size_t dim, const size_t length)
+{
+	ensure(self->cols == dim, ERR_USER_INPUT, "Dimensions must equal covariance matrix dimensions");
+	ensure(self->rows == self->cols, ERR_USER_INPUT, "Covariance matrix must be square.");
+
+	// Calculate mean values
+	double mean[dim];
+	for(size_t i = dim; i--;)
+	{
+		mean[i] = 0.0;
+		for(size_t j = 0; j < length; ++j) mean[i] += values[dim * j + i];
+		mean[i] /= length;
+	}
+
+	// Then calculate the covariance matrix
+	for(size_t i = dim; i--;)
+	{
+		for(size_t j = dim; j--;)
+		{
+			for(size_t k = 0; k < dim * length; k += dim)
+			{
+				Matrix_add_value(self, i, j, (values[k + i] - mean[i]) * (values[k + j] - mean[j]));
+			}
+			Matrix_mul_value(self, i, j, 1.0 / length);
+		}
+	}
+
 	return;
 }
