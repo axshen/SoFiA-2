@@ -1216,14 +1216,15 @@ int main(int argc, char **argv)
 		const double rel_fmin = rel_snr_min * sqrt_beam_area;
 		
 		// Calculate reliability values
+		double scale_kernel = Parameter_get_flt(par, "reliability.scaleKernel");
 		Array_dbl *skellam = NULL;
-		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, Parameter_get_flt(par, "reliability.scaleKernel"), rel_fmin, rel_min_pix, rel_cat, use_rel_plot ? &skellam : NULL);
+		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, &scale_kernel, rel_fmin, rel_min_pix, rel_cat, use_rel_plot ? &skellam : NULL);
 		
 		// Create plots if requested
 		if(use_rel_plot)
 		{
 			LinkerPar_rel_plots(lpar, rel_par_space, rel_threshold, rel_fmin, rel_snr_min, covar, Path_get(path_rel_plot), overwrite);
-			LinkerPar_skellam_plot(skellam, Path_get(path_skel_plot), overwrite, Parameter_get_flt(par, "reliability.scaleKernel"));
+			LinkerPar_skellam_plot(skellam, Path_get(path_skel_plot), overwrite, scale_kernel);
 		}
 		
 		// Clean up
