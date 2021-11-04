@@ -1246,7 +1246,7 @@ int main(int argc, char **argv)
 		
 		// Check if any reliable sources left
 		ensure(Map_get_size(rel_filter), ERR_NO_SRC_FOUND, "No reliable sources found. Terminating pipeline.");
-		message("%zu reliable sources found.", Map_get_size(rel_filter));
+		message("%zu reliable %s found.", Map_get_size(rel_filter), Map_get_size(rel_filter) > 1 ? "sources" : "source");
 		
 		// Apply filter to mask cube, so unreliable sources are removed
 		// and reliable ones relabelled in consecutive order

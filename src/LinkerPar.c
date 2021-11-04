@@ -1049,12 +1049,12 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 		idx_neg = (size_t *)memory_realloc(idx_neg, n_neg, sizeof(size_t));
 	}
 	else message("Retaining all negative detections.");
-
+	
 	// Determine covariance matrix from negative detections
 	Matrix *covar = Matrix_new(dim, dim);
 	Matrix *covar_inv;
 	Matrix_covariance(covar, par_neg, dim, n_neg);
-
+	
 	// Inverse of the square root of |2 * pi * covar| = (2 pi)^n |covar|
 	// This is the scale factor needed to calculate the PDF of the multivariate normal distribution later on.
 	//const double scal_fact = 1.0 / sqrt(Matrix_det(covar, 2.0 * M_PI));
@@ -1063,82 +1063,72 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	//       normalisation of the Gaussian kernel, so we might as well normalise
 	//       the amplitude to 1 rather than the integral. The normalisation factor 
 	//       does matter for the Skellam parameter, though.
-
-	// Scale kernel provided
-	if (*scale_kernel != 0.0)
+	
+	// Check if kernel scale factor provided
+	if(*scale_kernel != 0.0)
 	{
-		// scale_kernel defined so use this
+		// Yes -> use fixed kernel scale factor
 		Matrix_mul_scalar(covar, pow(*scale_kernel, 2));  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
-
+		
 		// Invert covariance matrix
 		covar_inv = Matrix_invert(covar);
 		ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
 		
 		// Create Skellam array if requested
-		if(skellam != NULL)
-		{
-			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
-		}
+		if(skellam != NULL) LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
 	}
-	// Run auto-kernel by incrementally increasing scale.
-	else 
-	{	
-		message("Using auto-kernel feature");
-
+	else
+	{
+		// No -> run auto-kernel by incrementally increasing scale
+		message("Using auto-kernel feature.");
+		
 		// TODO(austin): allow these to be set as initial parameters
-		size_t size;
 		int iter = 0;
-		int max_iter = 30;
+		const int iter_max = 30;
 		double scale = 0.1;
 		double scale_old = 1.0;
-		double scale_default = 0.4;
+		const double scale_default = 0.4;
 		double skellam_med = 1e5;
-		double skellam_tol = 0.05;
-		double d_scale = 0.02;
-
-		do {
+		const double skellam_tol = 0.05;
+		const double d_scale = 0.02;
+		
+		while(iter < iter_max && skellam_med > skellam_tol)
+		{
 			// Calculate skellam array
 			Matrix_mul_scalar(covar, pow(scale / scale_old, 2));  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
 			covar_inv = Matrix_invert(covar);
 			ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
-			if(skellam != NULL)
-			{
-				LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
-			}
-
+			if(skellam != NULL) LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+			
 			// Calculate new median
-			size = Array_dbl_get_size(*skellam);
-			Array_dbl_sort(*skellam);
-			skellam_med = fabs(IS_ODD(size) ? Array_dbl_get(*skellam, size / 2) : 0.5 * (Array_dbl_get(*skellam, size / 2 - 1) + Array_dbl_get(*skellam, size / 2)));
-
+			skellam_med = fabs(median_safe_dbl(Array_dbl_get_ptr(*skellam), Array_dbl_get_size(*skellam), false));
+			
 			// Update with larger scale change far from target
 			scale_old = scale;
-			if (skellam_med < 10 * skellam_tol)  { scale += d_scale * 2; } 
-			else if (skellam_med < 30 * skellam_tol) { scale += d_scale * 5; }
-			else if (skellam_med < 50 * skellam_tol) { scale += d_scale * 10; }
-			else { scale += d_scale; }
-
-			// Break condition (use hard-coded default)
-			if (iter > max_iter) {
-				scale = scale_default;
-
-				Matrix_mul_scalar(covar, pow(scale / scale_old, 2));
-				covar_inv = Matrix_invert(covar);
-				ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
-				if(skellam != NULL)
-				{
-					LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
-				}
-				message("Auto-kernel failed, defaulting to scale_kernel = %f.", scale);		
-			}
-
+			if(skellam_med < 10.0 * skellam_tol) scale += d_scale * 2.0;
+			else if(skellam_med < 30.0 * skellam_tol) scale += d_scale * 5.0;
+			else if(skellam_med < 50.0 * skellam_tol) scale += d_scale * 10.0;
+			else scale += d_scale;
+			
 			iter ++;
-		} while (skellam_med > skellam_tol);
-
-		// Successful auto-kernel
-		if (skellam_med < skellam_tol) {
+			message("  Iter. %d: kernel = %.3f, median = %f", iter, scale, skellam_med);
+		}
+		
+		// Check if algorithm converged
+		if(skellam_med <= skellam_tol)
+		{
 			*scale_kernel = scale;
-			message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale, iter);	
+			message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale, iter);
+		}
+		else
+		{
+			*scale_kernel = scale_default;
+			
+			Matrix_mul_scalar(covar, pow(*scale_kernel / scale_old, 2));
+			covar_inv = Matrix_invert(covar);
+			ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
+			if(skellam != NULL) LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+			warning("Auto-kernel failed to converge, defaulting to kernel scale of %.3f.", *scale_kernel);
 		}
 	}
 	
@@ -1605,10 +1595,10 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const Array_siz *rel_par_
  * generated by the reliability module. 
  * The resulting plot will be written to an EPS file with the specified file name.
  *  
- * @param skellam 		Array of (P - N) / sqrt(P + N) values
- * @param filename 		Output file name for plot.
- * @param overwrite 	If true, overwrite existing file. 
- * @param kernelScale 	Kernel scale factor, for labelling only. 
+ * @param skellam       Array of (P - N) / sqrt(P + N) values
+ * @param filename      Output file name for plot.
+ * @param overwrite     If true, overwrite existing file. 
+ * @param kernelScale   Kernel scale factor, for labelling only. 
  * 
  */
 
