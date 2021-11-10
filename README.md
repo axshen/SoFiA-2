@@ -1,13 +1,14 @@
 # SoFiA 2
 
-This is version 2 of the HI Source Finding Application (SoFiA). SoFiA 2 is a reimplementation of the original SoFiA pipeline in the C programming language. It is intended for use in HI data analysis pipelines and will be developed and maintained in parallel to SoFiA 1.x. While SoFiA 2 is still under active development, a **stable release** is already available at this point in time and can be used in production mode. In addition, users will be able to continue using **SoFiA 1.x** (https://github.com/SoFiA-Admin/SoFiA) for processing their data.
+This is version 2 of the HI Source Finding Application (SoFiA), a **source finding pipeline** originally designed to detect and characterise galaxies in 3D extragalctic HI data cubes. SoFiA 2 is a reimplementation of the original SoFiA pipeline in the C programming language and provides most of the functionality of SoFiA 1.x. While some development is still happening, SoFiA 2 is stable and can be used in production mode at this point. Although we strongly recommend switching to SoFiA 2, users will be able to continue using **SoFiA 1.x** (https://github.com/SoFiA-Admin/SoFiA) for processing their data.
 
 
 ## Improvements in SoFiA 2
 
-* Being written in C and making extensive use of multi-threading, SoFiA 2 is much faster than SoFiA 1.x.
-* SoFiA 2 requires significantly less memory than SoFiA 1.x (down from > 5 × cube size to ~ 2.3 × cube size).
-* SoFiA 2 currently has only a single external dependency (wcslib) and should therefore compile and run on any machine with a Linux or Unix operating system and the GCC compiler and wcslib installed.
+* Being written in C and making extensive use of **multi-threading**, SoFiA 2 is much faster than SoFiA 1.x.
+* SoFiA 2 requires significantly **less memory** than SoFiA 1.x (down from > 5 × cube size to ~ 2.3 × cube size).
+* SoFiA 2 currently has only a **single external dependency** (wcslib) and should therefore compile and run on any machine with a Linux or Unix operating system and the GCC compiler and wcslib installed.
+* A wrapper called **SoFiA-X** (https://github.com/AusSRC/SoFiAX) is available for distributed processing on multiple HPC nodes.
 
 
 ## Prerequisites
