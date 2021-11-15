@@ -61,11 +61,11 @@ Users are requested to cite the following two papers in any work that is based o
 
 * **SoFiA: a flexible source finder for 3D spectral line data**  
   Serra, P., Westmeier, T., Giese, N., et al., 2015, MNRAS, 448, 1922  
-  https://adsabs.harvard.edu/abs/2015MNRAS.448.1922S
+  https://ui.adsabs.harvard.edu/abs/2015MNRAS.448.1922S
 
 * **SoFiA 2 – An automated, parallel HI source finding pipeline for the WALLABY survey**  
   Westmeier, T., Kitaeff, S., Pallot, D., et al., 2021, MNRAS, 506, 3962  
-  https://adsabs.harvard.edu/abs/2021MNRAS.506.3962W
+  https://ui.adsabs.harvard.edu/abs/2021MNRAS.506.3962W
 
 
 ## Feedback
