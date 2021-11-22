@@ -49,6 +49,7 @@ typedef CLASS Matrix Matrix;
 PUBLIC  Matrix       *Matrix_new        (const size_t rows, const size_t cols);  // Standard constructor
 PUBLIC  Matrix       *Matrix_copy       (const Matrix *source);                  // Copy constructor
 PUBLIC  Matrix       *Matrix_identity   (const size_t size);                     // Constructor for square identity matrix
+PUBLIC  Matrix       *Matrix_covar      (const size_t size, const size_t samples, const double *values); // Constructor for covariance matrix
 PUBLIC  void          Matrix_delete     (Matrix *self);
 
 // Public methods
@@ -72,7 +73,7 @@ PUBLIC  double        Matrix_det        (const Matrix *self, const double scale_
 PUBLIC  double        Matrix_prob_dens  (const Matrix *covar_inv, const Matrix *vector, const double scal_fact);
 PUBLIC  double        Matrix_prob_dens_nocheck(const Matrix *covar_inv, const Matrix *vector, const double scal_fact);
 PUBLIC  void          Matrix_err_ellipse(const Matrix *covar, const size_t par1, const size_t par2, double *radius_maj, double *radius_min, double *pa);
-PUBLIC  void          Matrix_covariance (Matrix *self, const double values[], const size_t dim, const size_t length);
+//PUBLIC  void          Matrix_covariance (Matrix *self, const double values[], const size_t dim, const size_t length);
 
 // Private methods
 PRIVATE inline size_t Matrix_get_index  (const Matrix *self, const size_t row, const size_t col);

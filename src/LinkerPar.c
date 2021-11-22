@@ -1065,9 +1065,8 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	else message("Retaining all negative detections.");
 	
 	// Determine covariance matrix from negative detections
-	Matrix *covar = Matrix_new(dim, dim);
-	Matrix *covar_inv;
-	Matrix_covariance(covar, par_neg, dim, n_neg);
+	Matrix *covar = Matrix_covar(dim, n_neg, par_neg);
+	Matrix *covar_inv = NULL;
 	
 	// Inverse of the square root of |2 * pi * covar| = (2 pi)^n |covar|
 	// This is the scale factor needed to calculate the PDF of the multivariate normal distribution later on.
@@ -1100,7 +1099,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 		int iter = 0;
 		const int iter_max = 30;
 		double scale = 0.1;
-		double scale_old = 1.0;
+		double scale_old = 1.0;  // Must be initialised with 1!
 		const double scale_default = 0.4;
 		double skellam_med = 1e5;
 		const double skellam_tol = 0.05;
@@ -1112,27 +1111,28 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			Matrix_mul_scalar(covar, pow(scale / scale_old, 2));  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
 			covar_inv = Matrix_invert(covar);
 			ensure(covar_inv != NULL, ERR_FAILURE, "Covariance matrix is not invertible; cannot measure reliability.\n       Ensure that there are enough negative detections.");
-			if(skellam != NULL) LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
+			LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
 			
 			// Calculate new median
-			skellam_med = fabs(median_safe_dbl(Array_dbl_get_ptr(*skellam), Array_dbl_get_size(*skellam), false));
+			skellam_med = fabs(median_dbl((double *)Array_dbl_get_ptr(*skellam), Array_dbl_get_size(*skellam), false));
+			// NOTE: Casting constness away, as median needs to partially sort array.
 			
 			// Update with larger scale change far from target
 			scale_old = scale;
-			if(skellam_med < 10.0 * skellam_tol) scale += d_scale * 2.0;
-			else if(skellam_med < 30.0 * skellam_tol) scale += d_scale * 5.0;
-			else if(skellam_med < 50.0 * skellam_tol) scale += d_scale * 10.0;
+			if(skellam_med < 10.0 * skellam_tol) scale += 2.0 * d_scale;
+			else if(skellam_med < 30.0 * skellam_tol) scale +=  5.0 * d_scale;
+			else if(skellam_med < 50.0 * skellam_tol) scale += 10.0 * d_scale;
 			else scale += d_scale;
 			
-			iter ++;
-			message("  Iter. %d: kernel = %.3f, median = %f", iter, scale, skellam_med);
+			++iter;
+			message("  Iter. %*d: kernel = %.3f, median = %.3f", 2, iter, scale_old, skellam_med);
 		}
 		
 		// Check if algorithm converged
 		if(skellam_med <= skellam_tol)
 		{
 			*scale_kernel = scale;
-			message("Auto-kernel calculated scale_kernel = %f in %i loops.", scale, iter);
+			message("Converged to scale_kernel = %.3f after %d iterations.", scale, iter);
 		}
 		else
 		{

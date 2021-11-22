@@ -34,6 +34,7 @@
 #include <string.h>
 #include <math.h>
 #include "Matrix.h"
+#include "Array_dbl.h"
 
 
 
@@ -158,6 +159,60 @@ PUBLIC Matrix *Matrix_identity(const size_t size)
 	for(size_t i = 0; i < size; ++i) self->values[Matrix_get_index(self, i, i)] = 1.0;
 	
 	return self;
+}
+
+
+/**
+ * @brief Constructor for covariance matrix
+ *
+ * Variant of the standard constructor that will create the covariance
+ * matrix from a flattened array of values specified by the user. A
+ * pointer to the newly created covariance will be returned. Note that
+ * the destructor will need to be called on the matrix if it is no
+ * longer required to release its memory.
+ *
+ * The specified array of values must be a flattened array of @p size
+ * columns representing the different variables or parameters for which
+ * the covariance matrix is to be calculated and @p samples rows which
+ * represent the list of samples supplied to the covariance calculation.
+ * Hence, the array of @p values must be of length @p size * @p samples.
+ *
+ * @param size      Size of covariance matrix. Must be equal to the number
+ *                  of columns in the array prior to flattening (i.e.
+ *                  number of variables or dimensions).
+ * @param samples   Number of rows in the array prior to flattening, i.e.
+ *                  the number of samples.
+ * @param values[]  Flattened array of values. Must be of length @p size
+ *                  times @p samples.
+ */
+
+PUBLIC Matrix *Matrix_covar(const size_t size, const size_t samples, const double *values)
+{
+	// Create empty square matrix
+	Matrix *covar = Matrix_new(size, size);
+	
+	// Calculate mean values
+	Array_dbl *mean = Array_dbl_new(size);
+	for(size_t i = size; i--;)
+	{
+		for(size_t j = 0; j < samples; ++j) Array_dbl_add(mean, i, values[size * j + i]);
+		Array_dbl_mul(mean, i, 1.0 / samples);
+	}
+	
+	// Then calculate the covariance matrix
+	for(size_t i = size; i--;)
+	{
+		for(size_t j = size; j--;)
+		{
+			for(size_t k = 0; k < size * samples; k += size) Matrix_add_value(covar, i, j, (values[k + i] - Array_dbl_get(mean, i)) * (values[k + j] - Array_dbl_get(mean, j)));
+			Matrix_mul_value(covar, i, j, 1.0 / samples);
+		}
+	}
+	
+	// Clean up
+	Array_dbl_delete(mean);
+	
+	return covar;
 }
 
 
@@ -638,9 +693,11 @@ PUBLIC Matrix *Matrix_transpose(const Matrix *self)
 //   purpose, unless the matrix size is <= 3, in which case the so-  //
 //   lution is calculated analytically. The inverted matrix will be  //
 //   returned. If the matrix is not invertible, a NULL pointer will  //
-//   instead be returned. NOTE that the Gauss-Jordan elimination al- //
-//   gorithm can be numerically unstable, and integer numbers might  //
-//   get represented as non-integer values.                          //
+//   instead be returned. The user is responsible for calling the    //
+//   destructor once the matrix is no longer needed. NOTE that the   //
+//   Gauss-Jordan elimination algorithm can be numerically unstable, //
+//   and integer numbers might get represented as non-integer        //
+//   values.                                                         //
 // ----------------------------------------------------------------- //
 
 PUBLIC Matrix *Matrix_invert(const Matrix *self)
@@ -1177,46 +1234,5 @@ PUBLIC void Matrix_err_ellipse(const Matrix *covar, const size_t par1, const siz
 	Matrix_delete(eigenvalues);
 	Matrix_delete(eigenvectors);
 	
-	return;
-}
-
-/**
- * @brief Calculate covariance matrix from a flattened array of values.
- *
- * Compute the covariance matrix from an array of values. Will update
- * the values in place for provided matrix.
- *  
- * @param values[] Flattened array of values.
- * @param dim Number of columns in the array prior to flattening (number of variables).
- * @param length Number of rows in the array prior to flattening (number of examples).
- */
-
-PUBLIC void Matrix_covariance(Matrix *self, const double values[], const size_t dim, const size_t length)
-{
-	ensure(self->cols == dim, ERR_USER_INPUT, "Dimensions must equal covariance matrix dimensions");
-	ensure(self->rows == self->cols, ERR_USER_INPUT, "Covariance matrix must be square.");
-
-	// Calculate mean values
-	double mean[dim];
-	for(size_t i = dim; i--;)
-	{
-		mean[i] = 0.0;
-		for(size_t j = 0; j < length; ++j) mean[i] += values[dim * j + i];
-		mean[i] /= length;
-	}
-
-	// Then calculate the covariance matrix
-	for(size_t i = dim; i--;)
-	{
-		for(size_t j = dim; j--;)
-		{
-			for(size_t k = 0; k < dim * length; k += dim)
-			{
-				Matrix_add_value(self, i, j, (values[k + i] - mean[i]) * (values[k + j] - mean[j]));
-			}
-			Matrix_mul_value(self, i, j, 1.0 / length);
-		}
-	}
-
 	return;
 }

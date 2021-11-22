@@ -383,6 +383,35 @@ PUBLIC Array_siz *Array_siz_add(Array_siz *self, const size_t index, const size_
 
 
 // ----------------------------------------------------------------- //
+// Multiply array element by value                                   //
+// ----------------------------------------------------------------- //
+// Arguments:                                                        //
+//                                                                   //
+//   (1) self     - Object self-reference.                           //
+//   (2) index    - Index of the element to be set.                  //
+//   (3) value    - Value to be multiplied by.                       //
+//                                                                   //
+// Return value:                                                     //
+//                                                                   //
+//   Pointer to modified array.                                      //
+//                                                                   //
+// Description:                                                      //
+//                                                                   //
+//   Public method for multiplying the array element at the speci-   //
+//   fied index by the specified value.                              //
+// ----------------------------------------------------------------- //
+
+PUBLIC Array_siz *Array_siz_mul(Array_siz *self, const size_t index, const size_t value)
+{
+	check_null(self);
+	ensure(index < self->size, ERR_INDEX_RANGE, "Array index out of range.");
+	self->values[index] *= value;
+	return self;
+}
+
+
+
+// ----------------------------------------------------------------- //
 // Concatenate two arrays                                            //
 // ----------------------------------------------------------------- //
 // Arguments:                                                        //

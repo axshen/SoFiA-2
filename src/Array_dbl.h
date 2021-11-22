@@ -66,6 +66,7 @@ PUBLIC Array_dbl    *Array_dbl_push     (Array_dbl *self, const double value);
 PUBLIC double        Array_dbl_get      (const Array_dbl *self, const size_t index);
 PUBLIC Array_dbl    *Array_dbl_set      (Array_dbl *self, const size_t index, const double value);
 PUBLIC Array_dbl    *Array_dbl_add      (Array_dbl *self, const size_t index, const double value);
+PUBLIC Array_dbl    *Array_dbl_mul      (Array_dbl *self, const size_t index, const double value);
 PUBLIC Array_dbl    *Array_dbl_cat      (Array_dbl *self, const Array_dbl *source);
 PUBLIC Array_dbl    *Array_dbl_sort     (Array_dbl *self);
 
