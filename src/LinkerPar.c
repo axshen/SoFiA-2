@@ -886,6 +886,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	// Sanity checks
 	check_null(self);
 	ensure(self->size, ERR_NO_SRC_FOUND, "No sources left after linking. Cannot proceed.");
+	ensure(skellam != NULL || *scale_kernel != 0.0, ERR_USER_INPUT, "If auto-kernel scaling is enabled skellam must not be NULL.");
 	
 	// Dimensionality of parameter space
 	const int dim = Array_siz_get_size(rel_par_space);
