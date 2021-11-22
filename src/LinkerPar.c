@@ -1133,7 +1133,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 		if(skellam_med <= skellam_tol)
 		{
 			*scale_kernel = scale_old;
-			message("Converged to scale_kernel = %.3f after %d iterations.", scale, iter);
+			message("Converged to scale_kernel = %.3f after %d iterations.", scale_old, iter);
 		}
 		else
 		{
