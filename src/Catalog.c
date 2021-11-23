@@ -1,33 +1,39 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (Catalog.c) - Source Finding Application                 ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.3.1 (Catalog.c) - Source Finding Application                 //
+// Copyright (C) 2021 Tobias Westmeier                                  //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   Catalog.c
+/// @author Tobias Westmeier
+/// @date   23/11/2021
+/// @brief  Class for storing source catalogues.
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -39,38 +45,30 @@
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Catalog                        //
-// ----------------------------------------------------------------- //
+/// @brief Class for handling SoFiA source catalogues
+///
+/// The purpose of this class is to provide a structure for storing
+/// and handling source catalogues as a simple list of objects of
+/// class Source.
 
 CLASS Catalog
 {
-	size_t size;
-	Source **sources;
+	size_t size;       ///< Number of sources in catalogue.
+	Source **sources;  ///< Pointer to the array of Source objects stored in the catalogue.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   No arguments.                                                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Catalog object.                        //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new and empty Catalog ob-   //
-//   ject and return a pointer to the newly created object. No memo- //
-//   ry will be allocated other than for the object itself. Note     //
-//   that the destructor will need to be called explicitly once the  //
-//   object is no longer required to release any memory allocated    //
-//   during the lifetime of the object.                              //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new and empty Catalog object
+/// and return a pointer to the newly created object. No memory will
+/// be allocated other than for the object itself. Note that the
+/// destructor will need to be called explicitly once the object is
+/// no longer required to release any memory allocated during the
+/// lifetime of the object.
+///
+/// @return Pointer to newly created Catalog object.
 
 PUBLIC Catalog *Catalog_new(void)
 {
@@ -86,27 +84,18 @@ PUBLIC Catalog *Catalog_new(void)
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-//   NOTE that the destructor will explicitly call the destructor on //
-//   all source objects stored in the catalogue. Hence, deleting a   //
-//   catalogue will automatically delete all sources associated with //
-//   that catalogue!                                                 //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the
+/// memory occupied by the object.
+///
+/// @param self  Object self-reference.
+///
+/// @note The destructor will explicitly call the destructor on all
+/// source objects stored in the catalogue. Hence, deleting a
+/// catalogue will automatically delete all sources associated with
+/// that catalogue.
 
 PUBLIC void Catalog_delete(Catalog *self)
 {
@@ -131,25 +120,15 @@ PUBLIC void Catalog_delete(Catalog *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Add a new source to a catalogue                                   //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) src      - Pointer to the source to be added                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding a new source to the specified cata-    //
-//   logue. Note that the function does not check if a source with   //
-//   the same name already exists; a new source will always be added //
-//   to the existing source list.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Add a new source to a catalogue
+///
+/// Public method for adding a new source to the specified catalogue.
+/// Note that the function does not check if a source with the same
+/// name already exists; a new source will always be added to the
+/// existing source list.
+///
+/// @param self  Object self-reference.
+/// @param src   Pointer to the source to be added.
 
 PUBLIC void Catalog_add_source(Catalog *self, Source *src)
 {
@@ -166,27 +145,19 @@ PUBLIC void Catalog_add_source(Catalog *self, Source *src)
 
 
 
-// ----------------------------------------------------------------- //
-// Get source index                                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) src      - Pointer to the source to be checked              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the index (i.e. row number) of the source within the    //
-//   catalogue if the source was found. Otherwise, SIZE_MAX will be  //
-//   returned.                                                       //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for checking if the specified source is included  //
-//   in the catalogue. If so, the function will return the row num-  //
-//   ber of the source in the catalogue (starting with 0). If the    //
-//   source is not found, the function will return SIZE_MAX.         //
-// ----------------------------------------------------------------- //
+/// @brief Get source index
+///
+/// Public method for checking if the specified source is included in the
+/// catalogue. If so, the function will return the row number of the
+/// source in the catalogue (starting with 0). If the source is not
+/// found, the function will return @p SIZE_MAX.
+///
+/// @param self  Object self-reference.
+/// @param src   Pointer to the source to be checked.
+///
+/// @return Returns the index (i.e. row number) of the source within
+///         the catalogue if the source was found. Otherwise, @p SIZE_MAX
+///         will be returned.
 
 PUBLIC size_t Catalog_get_index(const Catalog *self, const Source *src)
 {
@@ -204,30 +175,22 @@ PUBLIC size_t Catalog_get_index(const Catalog *self, const Source *src)
 
 
 
-// ----------------------------------------------------------------- //
-// Check if source exists in catalogue                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) src      - Pointer to the source to be checked              //
-//   (3) index    - Pointer to index variable that will be set to    //
-//                  the catalogue index of the source.               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns true if the source is included in the catalogue and     //
-//   false otherwise.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for checking if the specified source is included  //
-//   in the catalogue. If so, the function will return true, other-  //
-//   wise false. If the source is found, the variable 'index' will   //
-//   be set to the catalogue index of the source. Otherwise, it will //
-//   be left untouched. If no index is required, a NULL pointer can  //
-//   instead be provided.
-// ----------------------------------------------------------------- //
+/// @brief Check if source exists in catalogue
+///
+/// Public method for checking if the specified source is included
+/// in the catalogue. If so, the function will return @p true,
+/// otherwise @p false. If the source is found, the variable @p index
+/// will be set to the catalogue index of the source. Otherwise, it
+/// will be left untouched. If no index is required, a @p NULL pointer
+/// can instead be provided.
+///
+/// @param self   Object self-reference.
+/// @param src    Pointer to the source to be checked.
+/// @param index  Pointer to index variable that will be set to the
+///               catalogue index of the source.
+///
+/// @return Returns true if the source is included in the catalogue
+///         and false otherwise.
 
 PUBLIC bool Catalog_source_exists(const Catalog *self, const Source *src, size_t *index)
 {
@@ -249,25 +212,19 @@ PUBLIC bool Catalog_source_exists(const Catalog *self, const Source *src, size_t
 
 
 
-// ----------------------------------------------------------------- //
-// Retrieve a source from the catalogue by index                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//   (2) index      - Index of requested source.                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns a pointer to the requested source.                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for extracting a specific source from the cata-   //
-//   logue by its index. A pointer to the source will be returned.   //
-//   NOTE that the returned pointer must not be freed or deleted, as //
-//   it is still owned by the Catalog object.                        //
-// ----------------------------------------------------------------- //
+/// @brief Retrieve a source from the catalogue by index
+///
+/// Public method for extracting a specific source from the catalogue
+/// by its index. A pointer to the source will be returned.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of requested source.
+///
+/// @return Returns a pointer to the requested source.
+///
+/// @note The returned pointer must not be freed or deleted, as
+/// it is still owned by the Catalog object. It will automatically
+/// get deleted when the destructor is called on the catalogue.
 
 PUBLIC Source *Catalog_get_source(const Catalog *self, const size_t index)
 {
@@ -280,23 +237,15 @@ PUBLIC Source *Catalog_get_source(const Catalog *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Return size of catalogue                                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self - Object self-reference.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the current size of the catalogue pointed to by 'self'. //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Returns the size of the catalogue, i.e. the number of sources   //
-//   it contains. For empty catalogues a value of zero will be re-   //
-//   turned.                                                         //
-// ----------------------------------------------------------------- //
+/// @brief Return size of catalogue
+///
+/// Returns the size of the catalogue, i.e. the number of sources it
+/// contains. For empty catalogues a value of zero will be returned.
+///
+/// @param self  Object self-reference.
+///
+/// @return Returns the current size of the catalogue pointed to
+///         by @p self.
 
 PUBLIC size_t Catalog_get_size(const Catalog *self)
 {
@@ -305,31 +254,21 @@ PUBLIC size_t Catalog_get_size(const Catalog *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Save catalogue to file                                            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) filename  - Full path to the output file.                   //
-//   (3) format    - Output format; can be CATALOG_FORMAT_ASCII for  //
-//                   plain text ASCII files, CATALOG_FORMAT_XML for  //
-//                   VOTable format or CATALOG_FORMAT_SQL for SQL    //
-//                   table format.                                   //
-//   (4) overwrite - Overwrite existing file (true) or not (false)?  //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for saving the current catalogue under the speci- //
-//   fied name in the specified file format. The file name will be   //
-//   relative to the process execution directory unless the full     //
-//   path to the output directory is specified. Available formats    //
-//   are plain text ASCII, VOTable XML format and SQL format.        //
-// ----------------------------------------------------------------- //
+/// @brief Save catalogue to file
+///
+/// Public method for saving the current catalogue under the specified
+/// name in the specified file format. The file name will be relative to
+/// the process execution directory unless the full path to the output
+/// directory is specified. Available formats are plain text ASCII,
+/// VOTable XML format and SQL format.
+///
+/// @param self       Object self-reference.
+/// @param filename   Full path to the output file.
+/// @param format     Output format; can be @p CATALOG_FORMAT_ASCII for
+///                   plain text ASCII files, @p CATALOG_FORMAT_XML for
+///                   VOTable format or @p CATALOG_FORMAT_SQL for SQL
+///                   table format.
+/// @param overwrite  Overwrite existing file (@p true) or not (@p false)?
 
 PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_format format, const bool overwrite)
 {
@@ -526,26 +465,16 @@ PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_f
 
 
 
-// ----------------------------------------------------------------- //
-// Reallocate memory for one additional source                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for allocating additional memory for one more    //
-//   source in the specified catalogue. Note that this will not cre- //
-//   ate a new source yet, but just allocate the memory needed to    //
-//   append a source at the end of the catalogue. The function       //
-//   should be called from public member functions that will add     //
-//   sources to a catalogue prior to inserting the new source.       //
-// ----------------------------------------------------------------- //
+/// @brief Reallocate memory for one additional source
+///
+/// Private method for allocating additional memory for one more
+/// source in the specified catalogue. Note that this will not
+/// create a new source yet, but just allocate the memory needed
+/// to append a source at the end of the catalogue. The function
+/// should be called from public member functions that will add
+/// sources to a catalogue prior to inserting the new source.
+///
+/// @param self  Object self-reference.
 
 PRIVATE void Catalog_append_memory(Catalog *self)
 {

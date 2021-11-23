@@ -1,71 +1,69 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (Map.c) - Source Finding Application                     ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.3.1 (Map.c) - Source Finding Application                     //
+// Copyright (C) 2021 Tobias Westmeier                                  //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   Map.c
+/// @author Tobias Westmeier
+/// @date   23/11/2021
+/// @brief  Container class for storing key-value pairs of type @p size_t.
+
 
 #include <stdlib.h>
 #include "Map.h"
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Map                            //
-// ----------------------------------------------------------------- //
+/// @brief Container class for storing key-value pairs of type @p size_t.
+///
+/// The purpose of this class is to provide a structure for storing
+/// and updating source parameters handled by the linker implemented
+/// in the class DataCube.
 
 CLASS Map
 {
-	size_t  size;
-	size_t *keys;
-	size_t *values;
+	size_t  size;    ///< Number of key-value pairs stored.
+	size_t *keys;    ///< Pointer to array of keys.
+	size_t *values;  ///< Pointer to array of values.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   No arguments.                                                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Map object.                            //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new, empty Map object and   //
-//   return a pointer to the newly created object. Note that the de- //
-//   structor will need to be called explicitly once the object is   //
-//   no longer required to release any memory allocated during the   //
-//   lifetime of the object.                                         //
-// ----------------------------------------------------------------- //
+/// Standard constructor
+///
+/// Standard constructor. Will create a new, empty Map object and
+/// return a pointer to the newly created object. Note that the
+/// destructor will need to be called explicitly once the object is
+/// no longer required to release any memory allocated during the
+/// lifetime of the object.
+///
+/// @return Pointer to newly created Map object.
 
 PUBLIC Map *Map_new(void)
 {
@@ -80,23 +78,13 @@ PUBLIC Map *Map_new(void)
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the
+/// memory occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void Map_delete(Map *self)
 {
@@ -112,26 +100,16 @@ PUBLIC void Map_delete(Map *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Push new key-value pair onto map                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Key to be created.                               //
-//   (3) value    - Value to be added.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for pushing a new key-value pair onto the speci-  //
-//   fied map. Note that there will be no check as to whether the    //
-//   key already exists, and it is therefore possible to create more //
-//   than one entry with the same key.                               //
-// ----------------------------------------------------------------- //
+/// @brief Push new key-value pair onto map
+///
+/// Public method for pushing a new key-value pair onto the specified
+/// map. Note that there will be no check as to whether the key
+/// already exists, and it is therefore possible to create more than
+/// one entry with the same key.
+///
+/// @param self   Object self-reference.
+/// @param key    Key to be created.
+/// @param value  Value to be added.
 
 PUBLIC void Map_push(Map *self, const size_t key, const size_t value)
 {
@@ -151,25 +129,18 @@ PUBLIC void Map_push(Map *self, const size_t key, const size_t value)
 
 
 
-// ----------------------------------------------------------------- //
-// Retrieve value by key                                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Key to be retrieved.                             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Value belonging to key.                                         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for retrieving the value associated with the spe- //
-//   cified key. If the same key exists more than once, the last oc- //
-//   currence will be retrieved. The process will be terminated of   //
-//   the specified map is empty or the key is not found.             //
-// ----------------------------------------------------------------- //
+/// @brief Retrieve value by key
+///
+/// Public method for retrieving the value associated with the
+/// specified key. If the same key exists more than once, the
+/// last occurrence will be retrieved. The process will be
+/// terminated of the specified map is empty or the key is not
+/// found.
+///
+/// @param self  Object self-reference.
+/// @param key   Key to be retrieved.
+///
+/// @return Value belonging to @p key.
 
 PUBLIC size_t Map_get_value(const Map *self, const size_t key)
 {
@@ -188,24 +159,16 @@ PUBLIC size_t Map_get_value(const Map *self, const size_t key)
 
 
 
-// ----------------------------------------------------------------- //
-// Return size of map                                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Current size of map, i.e. number of entries.                    //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the current size of the specified   //
-//   map. i.e. the number of key-value pairs currently stored. If    //
-//   same key exists multiple times, it will also be counted repea-  //
-//   tedly.                                                          //
-// ----------------------------------------------------------------- //
+/// @brief Return size of map
+///
+/// Public method for returning the current size of the specified
+/// map, i.e. the number of key-value pairs currently stored. If
+/// the same key exists multiple times, it will also be counted
+/// repeatedly.
+///
+/// @param self  Object self-reference.
+///
+/// @return Current size of map, i.e. number of entries.
 
 PUBLIC size_t Map_get_size(const Map *self)
 {
@@ -215,24 +178,16 @@ PUBLIC size_t Map_get_size(const Map *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Check if key exists                                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Key to be checked.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   True if key exists, false otherwise.                            //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for checking if the specified key exists. The     //
-//   method will return true if the key is found and false other-    //
-//   wise.                                                           //
-// ----------------------------------------------------------------- //
+/// @brief Check if key exists
+///
+/// Public method for checking if the specified key exists. The
+/// method will return @p true if the key is found and @p false
+/// otherwise.
+///
+/// @param self  Object self-reference.
+/// @param key   Key to be checked.
+///
+/// @return Returns @p true if key exists, @p false otherwise.
 
 PUBLIC bool Map_key_exists(const Map *self, const size_t key)
 {
