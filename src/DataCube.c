@@ -1,6 +1,6 @@
 // ____________________________________________________________________ //
 //                                                                      //
-// SoFiA 2.4.0 (DataCube.c) - Source Finding Application                //
+// SoFiA 2.4.1 (DataCube.c) - Source Finding Application                //
 // Copyright (C) 2021 The SoFiA 2 Authors                               //
 // ____________________________________________________________________ //
 //                                                                      //

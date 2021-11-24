@@ -1,6 +1,6 @@
 /// ____________________________________________________________________ ///
 ///                                                                      ///
-/// SoFiA 2.4.0 (Stack.h) - Source Finding Application                   ///
+/// SoFiA 2.4.1 (Stack.h) - Source Finding Application                   ///
 /// Copyright (C) 2021 The SoFiA 2 Authors                               ///
 /// ____________________________________________________________________ ///
 ///                                                                      ///

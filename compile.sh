@@ -1,7 +1,7 @@
 #!/bin/sh
 # ____________________________________________________________________ #
 #                                                                      #
-# SoFiA 2.4.0 (compile.sh) - Source Finding Application                #
+# SoFiA 2.4.1 (compile.sh) - Source Finding Application                #
 # Copyright (C) 2021 The SoFiA 2 Authors                               #
 # ____________________________________________________________________ #
 #                                                                      #
