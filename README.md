@@ -1,6 +1,6 @@
 # SoFiA 2
 
-This is version 2 of the HI Source Finding Application (SoFiA), a **source finding pipeline** originally designed to detect and characterise galaxies in 3D extragalctic HI data cubes. SoFiA 2 is a reimplementation of the original SoFiA pipeline in the C programming language and provides most of the functionality of SoFiA 1.x. While some development is still happening, SoFiA 2 is stable and can be used in production mode at this point. Although we strongly recommend switching to SoFiA 2, users will be able to continue using **SoFiA 1.x** (https://github.com/SoFiA-Admin/SoFiA) for processing their data.
+This is version 2 of the HI Source Finding Application (SoFiA), a **source finding pipeline** originally designed to detect and characterise galaxies in 3D extragalctic HI data cubes. SoFiA 2 is a reimplementation of the original SoFiA pipeline in the C programming language and provides most of the functionality of SoFiA 1.x. While some development is still happening, SoFiA 2 is stable and can be used in production mode at this point. Although we strongly recommend switching to SoFiA 2, users will still be able to use **SoFiA 1.x** (https://github.com/SoFiA-Admin/SoFiA) for processing their data.
 
 
 ## Improvements in SoFiA 2
@@ -33,7 +33,7 @@ Note that the `-fopenmp` parameter is optional and will enable **multi-threading
 
 As an alternative, we provide a `Makefile` for those who prefer to use `make` to install SoFiA 2. The `Makefile` itself contains a few examples of how to invoke it with different compilers (with or without OpenMP support). Note that if you prefer to use `make`, you may still want to create a symbolic link or alias to the `sofia` executable file in the end to make SoFiA 2 easily accessible across your system.
 
-**NOTE:** Others may have created alternative ways of downloading and installing SoFiA 2. As we have no control over such third-party distributions, we cannot provide support for installation methods other than the ones described here. If you have installed SoFiA 2 through a third-party repository, please contact the administrator of that package in the case of installation issues.
+**NOTE:** Others may have created alternative ways of downloading and installing SoFiA 2. As we have no control over such third-party distributions or packages, we cannot provide any support for installation methods other than the one described here. If you have installed SoFiA 2 through a third-party repository, please contact the administrator of that package in the case of installation issues.
 
 
 ## Documentation
@@ -75,7 +75,7 @@ Should you decide to run SoFiA 2 on your own data cubes, we would welcome any fe
 
 ## Copyright and licence
 
-Copyright (C) 2021 Tobias Westmeier
+Copyright (C) 2021 The SoFiA 2 Authors
 
 SoFiA 2 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

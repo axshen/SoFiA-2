@@ -1,7 +1,7 @@
 /// ____________________________________________________________________ ///
 ///                                                                      ///
-/// SoFiA 2.3.1 (Path.h) - Source Finding Application                    ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
+/// SoFiA 2.4.0 (Path.h) - Source Finding Application                    ///
+/// Copyright (C) 2021 The SoFiA 2 Authors                               ///
 /// ____________________________________________________________________ ///
 ///                                                                      ///
 /// Address:  Tobias Westmeier                                           ///

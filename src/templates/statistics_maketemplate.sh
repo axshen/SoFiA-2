@@ -1,8 +1,8 @@
 #!/bin/tcsh
 ### ____________________________________________________________________ ###
 ###                                                                      ###
-### SoFiA 2.3.1 (statistics_maketemplate.sh) - Source Finding Applicat.  ###
-### Copyright (C) 2021 Tobias Westmeier                                  ###
+### SoFiA 2.4.0 (statistics_maketemplate.sh) - Source Finding Applicat.  ###
+### Copyright (C) 2021 The SoFiA 2 Authors                               ###
 ### ____________________________________________________________________ ###
 ###                                                                      ###
 ### Address:  Tobias Westmeier                                           ###

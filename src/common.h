@@ -1,7 +1,7 @@
 // ____________________________________________________________________ //
 //                                                                      //
-// SoFiA 2.3.1 (common.h) - Source Finding Application                  //
-// Copyright (C) 2021 Tobias Westmeier                                  //
+// SoFiA 2.4.0 (common.h) - Source Finding Application                  //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
 // ____________________________________________________________________ //
 //                                                                      //
 // Address:  Tobias Westmeier                                           //
@@ -37,9 +37,9 @@
 #include <time.h>
 
 // SoFiA version number
-#define SOFIA_VERSION "2.3.1"
-#define SOFIA_VERSION_FULL "SoFiA 2.3.1"
-#define SOFIA_CREATION_DATE "12-Aug-2021"
+#define SOFIA_VERSION "2.4.0"
+#define SOFIA_VERSION_FULL "SoFiA 2.4.0"
+#define SOFIA_CREATION_DATE "24-Nov-2021"
 
 // Define value of pi
 #ifndef M_PI
