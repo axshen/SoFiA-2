@@ -563,7 +563,7 @@ PUBLIC double Matrix_vMv_nocheck(const Matrix *self, const Matrix *vector)
 ///
 /// Public method for transposing the specified matrix. The transposed
 /// matrix will be returned. The user will be responsible for calling
-//  the destructor on the transposed matrix once it is no longer needed.
+///  the destructor on the transposed matrix once it is no longer needed.
 ///
 /// @param self  Object self-reference.
 ///
@@ -1076,7 +1076,7 @@ PRIVATE void Matrix_swap_rows(Matrix *self, const size_t row1, const size_t row2
 
 /// @brief Add @p factor * @p row2 to @p row1
 ///
-/// Private method for multiplying @p row2 by @P factor and adding
+/// Private method for multiplying @p row2 by @p factor and adding
 /// the result to @p row1 of the specified matrix. This method is
 /// needed for the Gauss-Jordan elimination algorithm.
 ///

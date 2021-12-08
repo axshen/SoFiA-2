@@ -1,33 +1,39 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.4.1 (String.c) - Source Finding Application                  ///
-/// Copyright (C) 2021 The SoFiA 2 Authors                               ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (String.c) - Source Finding Application                  //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   String.c
+/// @author Tobias Westmeier
+/// @date   25/11/2021
+/// @brief  Container class for handling strings.
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -37,36 +43,32 @@
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class String                         //
-// ----------------------------------------------------------------- //
+/// @brief Container class for handling strings.
+///
+/// This class provides a convenient structure for storing and handling
+/// strings. These strings are dynamic, meaning that they adjust
+/// their memory allocation automatically and dynamically as needed,
+/// removing the restrictions imposed by the static nature of native
+/// C strings.
 
 CLASS String
 {
-	size_t size;   // String size WITHOUT terminating null character!
-	char *string;
+	size_t size;   ///< String size @b without the terminating null character.
+	char *string;  ///< C string containing the string value, including @p '\0'.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) string - String to be assigned to the new String object.    //
-//                Use "" to create an empty string.                  //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created String object.                         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new String object. Note     //
-//   that the destructor will have to be called explicitly once the  //
-//   object is no longer required to release its memory again.       //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new String object. Note
+/// that the destructor will have to be called explicitly once the
+/// object is no longer required to release its memory again.
+///
+/// @param string  String to be assigned to the new String object.
+///                Use @p "" to create an empty string.
+///
+/// @return Pointer to newly created String object.
 
 PUBLIC String *String_new(const char *string)
 {
@@ -89,24 +91,16 @@ PUBLIC String *String_new(const char *string)
 
 
 
-// ----------------------------------------------------------------- //
-// Copy constructor                                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) string - String object to be copied.                        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created String object.                         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Copy constructor. Will create a copy of the specified String    //
-//   object. Note that this copy constructor has only been included  //
-//   for semantic reasons, as its sole job is to call the standard   //
-//   constructor.                                                    //
-// ----------------------------------------------------------------- //
+/// @brief Copy constructor
+///
+/// Copy constructor. Will create a copy of the specified String
+/// object. Note that this copy constructor has only been included
+/// for semantic reasons, as its sole job is to call the standard
+/// constructor.
+///
+/// @param string  String object to be copied.
+///
+/// @return Pointer to newly created String object.
 
 PUBLIC String *String_copy(const String *string)
 {
@@ -115,23 +109,13 @@ PUBLIC String *String_copy(const String *string)
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release all me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release all
+/// memory occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void String_delete(String *self)
 {
@@ -142,22 +126,14 @@ PUBLIC void String_delete(String *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Return string size                                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Size of the string without the terminating null character.      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the size of the string excluding    //
-//   the terminating null character.                                 //
-// ----------------------------------------------------------------- //
+/// @brief Return string size
+///
+/// Public method for returning the size of the string excluding
+/// the terminating null character.
+///
+/// @param self  Object self-reference.
+///
+/// @return Size of the string without the terminating null character.
 
 PUBLIC size_t String_size(const String *self)
 {
@@ -166,22 +142,15 @@ PUBLIC size_t String_size(const String *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Return pointer to C string                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to C string of self, or NULL is self is NULL.           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning a pointer to the C string stored in //
-//   self. If self is NULL, a NULL pointer will instead be returned. //
-// ----------------------------------------------------------------- //
+/// @brief Return pointer to C string
+///
+/// Public method for returning a pointer to the C string stored in
+/// @p self. If @p self is @p NULL, then a @p NULL pointer will instead
+/// be returned.
+///
+/// @param self  Object self-reference.
+///
+/// @return Pointer to C string of @p self, or @p NULL if @p self is @p NULL.
 
 PUBLIC const char *String_get(const String *self)
 {
@@ -190,24 +159,16 @@ PUBLIC const char *String_get(const String *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract character at specified index                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the character to be extracted.          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Character at the specified index.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the character at the specified in-  //
-//   dex. The process will be terminated if the index is found to be //
-//   out of range.                                                   //
-// ----------------------------------------------------------------- //
+/// @brief Extract character at specified index
+///
+/// Public method for returning the character at the specified index.
+/// The process will be terminated if the index is found to be out
+/// of range.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the character to be extracted.
+///
+/// @return Character at the specified index.
 
 PUBLIC char String_at(const String *self, const size_t index)
 {
@@ -220,24 +181,16 @@ PUBLIC char String_at(const String *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Compare two strings                                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) string   - C string to compare with.                        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   True if strings are equal, false otherwise.                     //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for checking if two strings are equal, i.e. if    //
-//   they contain the same character sequence. The method will re-   //
-//   turn true if the strings are equal and false otherwise.         //
-// ----------------------------------------------------------------- //
+/// @brief Compare two strings
+///
+/// Public method for checking if two strings are equal, i.e. if 
+/// they contain the same character sequence. The method will return
+/// @p true if the strings are equal and @p false otherwise.
+///
+/// @param self    Object self-reference.
+/// @param string  C string to compare with.
+///
+/// @return @p true if strings are equal, @p false otherwise.
 
 PUBLIC bool String_compare(const String *self, const char *string)
 {
@@ -250,24 +203,16 @@ PUBLIC bool String_compare(const String *self, const char *string)
 
 
 
-// ----------------------------------------------------------------- //
-// Set string                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) string   - String value to be set.                          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting a string to the specified value. The  //
-//   string will be cleared if the specified value is an empty       //
-//   string or a NULL pointer.                                       //
-// ----------------------------------------------------------------- //
+/// @brief Set string
+///
+/// Public method for setting a string to the specified value. The
+/// string will be cleared if the specified value is an empty
+/// string or a @p NULL pointer.
+///
+/// @param self    Object self-reference.
+/// @param string  C string value to be set.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_set(String *self, const char *string)
 {
@@ -291,25 +236,17 @@ PUBLIC String *String_set(String *self, const char *string)
 
 
 
-// ----------------------------------------------------------------- //
-// Set character at specified index                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the character to be set.                //
-//   (3) c        - Character.                                       //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the character at the specified index  //
-//   position to the value of c. The method will terminate if the    //
-//   index is out of range.                                          //
-// ----------------------------------------------------------------- //
+/// @brief Set character at specified index
+///
+/// Public method for setting the character at the specified index
+/// position to the value of @p c. The method will terminate if the
+/// index is out of range.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the character to be set.
+/// @param c      Character.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_set_char(String *self, const size_t index, const char c)
 {
@@ -322,28 +259,21 @@ PUBLIC String *String_set_char(String *self, const size_t index, const char c)
 
 
 
-// ----------------------------------------------------------------- //
-// Set string from integer                                           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) value    - Integer value to set the string to.              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting a string to contain a textual repre-  //
-//   sentation of the specified integer value. The size of the re-   //
-//   sulting string is restricted to at most 32 characters which     //
-//   should be sufficient to hold all possible integer values. A     //
-//   warning would be issued if the buffer size was insufficient     //
-//   and the string be truncated to 32 characters (including the     //
-//   terminating null character) in this case.                       //
-// ----------------------------------------------------------------- //
+/// @brief Set string from integer
+///
+/// Public method for setting a string to contain a textual
+/// representation of the specified integer value. The size of
+/// the resulting string is restricted to at most 32 characters
+/// which should be sufficient to hold all possible integer values.
+/// A warning would be issued if the buffer size was insufficient
+/// and the string be truncated to 32 characters (including the
+/// terminating null character) in this case.
+///
+/// @param self    Object self-reference.
+/// @param format  Format specifier similar to `printf()`.
+/// @param value   Integer value to set the string to.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_set_int(String *self, const char *format, const long int value)
 {
@@ -369,38 +299,30 @@ PUBLIC String *String_set_int(String *self, const char *format, const long int v
 
 
 
-// ----------------------------------------------------------------- //
-// Set string from or until delimiting character                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) string    - String value to set the String object to.       //
-//   (3) delimiter - Delimiting character from or up to which to     //
-//                   copy the string value.                          //
-//   (4) first     - If true, use the first occurrence of the deli-  //
-//                   miter (first from start), otherwise use the     //
-//                   last occurrence (last before end).              //
-//   (5) until     - If true, copy the string until the delimiting   //
-//                   character, otherwise copy the string from the   //
-//                   delimiting character onwards. The delimiter it- //
-//                   self will be excluded in both cases.            //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting a String object to the specified      //
-//   string up to or until the specified delimiting character. The   //
-//   delimiting character can either be the first from the start or  //
-//   the last before the end (argument 'first'), and either the sub- //
-//   string until the delimiter or from the delimiter onwards can be //
-//   copied (argument 'until'). The delimiting character itself will //
-//   be excluded in all cases. This method can be used to copy part  //
-//   of a string as defined by a specific delimiting character.      //
-// ----------------------------------------------------------------- //
+/// @brief Set string from or until delimiting character
+///
+/// Public method for setting a String object to the specified
+/// string up to or until the specified delimiting character. The
+/// delimiting character can either be the first from the start or
+/// the last before the end (argument @p first), and either the sub-
+/// string until the delimiter or from the delimiter onward can be
+/// copied (argument @p until). The delimiting character itself will
+/// be excluded in all cases. This method can be used to copy part
+/// of a string as defined by a specific delimiting character.
+///
+/// @param  self       Object self-reference.
+/// @param  string     C string value to set the String object to.
+/// @param  delimiter  Delimiting character from or up to which to
+///                    copy the string value.
+/// @param  first      If @p true, use the first occurrence of the
+///                    delimiter (first from start), otherwise use
+///                    the last occurrence (last before end).
+/// @param  until      If @p true, copy the string until the delimiting
+///                    character, otherwise copy the string from the
+///                    delimiting character onward. The delimiter
+///                    itself will be excluded in both cases.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_set_delim(String *self, const char *string, const char delimiter, const bool first, const bool until)
 {
@@ -439,24 +361,16 @@ PUBLIC String *String_set_delim(String *self, const char *string, const char del
 
 
 
-// ----------------------------------------------------------------- //
-// Append string                                                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) string   - String value to be appended.                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for appending a String object with the specified  //
-//   string value. The size of the String object will be automati-   //
-//   cally adjusted.                                                 //
-// ----------------------------------------------------------------- //
+/// @brief Append string
+///
+/// Public method for appending a String object with the specified
+/// C string value. The size of the String object will be automatically
+/// adjusted.
+///
+/// @param self    Object self-reference.
+/// @param string  C string value to be appended.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_append(String *self, const char *string)
 {
@@ -475,29 +389,22 @@ PUBLIC String *String_append(String *self, const char *string)
 
 
 
-// ----------------------------------------------------------------- //
-// Append integer value to string                                    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) value    - Integer value the textual representation of      //
-//                  which will be appended to the string.            //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for appending the textual representation of the   //
-//   specified integer value to a string. The size of the resulting  //
-//   string is restricted to at most 32 characters which should be   //
-//   sufficient to hold all possible integer values. A warning would //
-//   be issued if the buffer size was insufficient and the string be //
-//   truncated to 32 characters (including the terminating null      //
-//   character) in this case.                                        //
-// ----------------------------------------------------------------- //
+/// @brief Append integer value to string
+///
+/// Public method for appending the textual representation of the
+/// specified integer value to a string. The size of the resulting
+/// string is restricted to at most 32 characters which should be
+/// sufficient to hold all possible integer values. A warning would
+/// be issued if the buffer size was insufficient and the string be
+/// truncated to 32 characters (including the terminating null
+/// character) in this case.
+///
+/// @param self    Object self-reference.
+/// @param format  Format specifier similar to `printf()`.
+/// @param value   Integer value the textual representation of
+///                which will be appended to the string.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_append_int(String *self, const char *format, const long int value)
 {
@@ -523,31 +430,23 @@ PUBLIC String *String_append_int(String *self, const char *format, const long in
 
 
 
-// ----------------------------------------------------------------- //
-// Append floating-point value to string                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) format   - Format specifier as used by printf(). If set to  //
-//                  NULL, the default format will be applied.        //
-//   (3) value    - Floating-point value the textual representation  //
-//                  of which will be appended to the string.         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for appending the textual representation of the   //
-//   specified floating-point value to a string. The format can be   //
-//   specified as in the printf() function. If no format is given    //
-//   (i.e. format is a NULL pointer) then %.5f will be used by de-   //
-//   fault. The resulting string is restricted to 32 characters (in- //
-//   cluding the terminating null character) and will be truncated   //
-//   with a warning message if exceeded.                             //
-// ----------------------------------------------------------------- //
+/// @brief Append floating-point value to string
+///
+/// Public method for appending the textual representation of the
+/// specified floating-point value to a string. The format can be
+/// specified as in the @p printf() function. If no format is given
+/// (i.e. format is a @p NULL pointer) then @p %.5f will be used by
+/// default. The resulting string is restricted to 32 characters
+/// (including the terminating null character) and will be truncated
+/// with a warning message if exceeded.
+///
+/// @param self    Object self-reference.
+/// @param format  Format specifier as used by @p printf(). If set
+///                to @p NULL, the default format will be applied.
+/// @param value   Floating-point value the textual representation
+///                of which will be appended to the string.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_append_flt(String *self, const char *format, const double value)
 {
@@ -573,23 +472,15 @@ PUBLIC String *String_append_flt(String *self, const char *format, const double 
 
 
 
-// ----------------------------------------------------------------- //
-// Prepend string                                                    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) format   - String to be prepended.                          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for prepending a string with the specified string //
-//   value. The size of the string will be automatically adjusted.   //
-// ----------------------------------------------------------------- //
+/// @brief Prepend string
+///
+/// Public method for prepending a string with the specified string
+/// value. The size of the string will be automatically adjusted.
+///
+/// @param self    Object self-reference.
+/// @param string  C string to be prepended.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_prepend(String *self, const char *string)
 {
@@ -609,23 +500,15 @@ PUBLIC String *String_prepend(String *self, const char *string)
 
 
 
-// ----------------------------------------------------------------- //
-// Clear string                                                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after assignment.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for clearing the specified String object. This    //
-//   will set the string to an empty C string ("\0") and the size of //
-//   the string to zero.                                             //
-// ----------------------------------------------------------------- //
+/// @brief Clear string
+///
+/// Public method for clearing the specified String object. This
+/// will set the string to an empty C string (@p "\0") and the
+/// size of the string to zero.
+///
+/// @param self  Object self-reference.
+///
+/// @return Pointer to @p self after assignment.
 
 PUBLIC String *String_clear(String *self)
 {
@@ -641,24 +524,16 @@ PUBLIC String *String_clear(String *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Trim string                                                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after trimming.                                 //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for trimming a string by removing any contiguous  //
-//   sequence of whitespace characters from the beginning and end of //
-//   the string. Whitespace will be anything considered as white-    //
-//   space by the standard library function isspace().               //
-// ----------------------------------------------------------------- //
+/// @brief Trim string
+///
+/// Public method for trimming a string by removing any contiguous
+/// sequence of whitespace characters from the beginning and end of
+/// the string. Whitespace will be anything considered as white-
+/// space by the standard library function @p isspace().
+///
+/// @param self  Object self-reference.
+///
+/// @return Pointer to @p self after trimming.
 
 PUBLIC String *String_trim(String *self)
 {
@@ -693,24 +568,16 @@ PUBLIC String *String_trim(String *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Convert string to lower/upper case                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to self after conversion.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public methods for converting a string to lower/upper case.     //
-//   This makes use of the tolower() and toupper() functions from    //
-//   the C standard library. A pointer to self after conversion will //
-//   be returned to allow chaining of methods.                       //
-// ----------------------------------------------------------------- //
+/// @brief Convert string to lower case
+///
+/// Public method for converting a string to lower case. This makes
+/// use of the @p tolower() function from the C standard library. A
+/// pointer to @p self after conversion will be returned to allow
+/// chaining of methods.
+///
+/// @param self  Object self-reference.
+///
+/// @return Pointer to @p self after conversion.
 
 PUBLIC String *String_to_lower(String *self)
 {
@@ -722,6 +589,19 @@ PUBLIC String *String_to_lower(String *self)
 	
 	return self;
 }
+
+
+
+/// @brief Convert string to upper case
+///
+/// Public method for converting a string to upper case. This makes
+/// use of the @p toupper() function from the C standard library. A
+/// pointer to @p self after conversion will be returned to allow
+/// chaining of methods.
+///
+/// @param self  Object self-reference.
+///
+/// @return Pointer to @p self after conversion.
 
 PUBLIC String *String_to_upper(String *self)
 {

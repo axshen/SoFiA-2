@@ -29,44 +29,43 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Flagger.c
+/// @author Tobias Westmeier
+/// @date   26/11/2021
+/// @brief  Class for storing data flagging information (**WORK IN PROGRESS**).
+
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include "Flagger.h"
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Flagger                        //
-// ----------------------------------------------------------------- //
+/// @brief Class for storing data flagging information (**WORK IN PROGRESS**).
+///
+/// The purpose of this class is to provide a structure for storing
+/// flagging information. It supports several different shapes of
+/// regions, such as individual pixels or 3D rectangular regions. All
+/// parameters are expected to be in units of integer pixels.
 
 CLASS Flagger
 {
-	int n_par[SHAPE_COUNT];
-	size_t size;
-	int *shape;
-	long int **parameters;
+	int n_par[SHAPE_COUNT];  ///< Array keeping track of the number of parameters required by each supported shape.
+	size_t size;             ///< Number of flagging shapes currently stored.
+	int *shape;              ///< Pointer to array of shape types.
+	long int **parameters;   ///< Pointer to array of shape parameters.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   No arguments.                                                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Flagger object.                        //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new, empty Flagger object   //
-//   and return a pointer to the newly created object. Note that the //
-//   destructor will need to be called explicitly once the object is //
-//   no longer required to release any memory allocated during the   //
-//   lifetime of the object.                                         //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new, empty Flagger object
+/// and return a pointer to the newly created object. Note that the
+/// destructor will need to be called explicitly once the object is
+/// no longer required to release any memory allocated during the
+/// lifetime of the object.
+///
+/// @return Pointer to newly created Flagger object.
 
 PUBLIC Flagger *Flagger_new(void)
 {
@@ -85,23 +84,13 @@ PUBLIC Flagger *Flagger_new(void)
 }
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the
+/// memory occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void Flagger_delete(Flagger *self)
 {
@@ -118,22 +107,14 @@ PUBLIC void Flagger_delete(Flagger *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Return number of flagging items                                   //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of currently held flagging instructions.                 //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the number of currently held flag-  //
-//   ging instructions.                                              //
-// ----------------------------------------------------------------- //
+/// @brief Return number of flagging items
+///
+/// Public method for returning the number of currently held
+/// flagging instructions.
+///
+/// @param self  Object self-reference.
+///
+/// @return Number of currently held flagging instructions.
 
 PUBLIC size_t Flagger_size(const Flagger *self)
 {
@@ -143,24 +124,16 @@ PUBLIC size_t Flagger_size(const Flagger *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Return number of parameters for given shape                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) shape    - Shape to be enquired about.                      //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of parameters required by the specified shape.           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the number of parameters associated //
-//   with the specified shape. For example, if shape is PIXEL, then  //
-//   two parameters, x and y, will be required to define the shape.  //
-// ----------------------------------------------------------------- //
+/// @brief Return number of parameters for given shape
+///
+/// Public method for returning the number of parameters associated
+/// with the specified shape. For example, if shape is `PIXEL`, then
+/// two parameters, `x` and `y`, will be required to define the shape.
+///
+/// @param self   Object self-reference.
+/// @param shape  Shape to be enquired about.
+///
+/// @return Number of parameters required by the specified shape.
 
 PUBLIC int Flagger_npar(const Flagger *self, const int shape)
 {
@@ -171,30 +144,22 @@ PUBLIC int Flagger_npar(const Flagger *self, const int shape)
 
 
 
-// ----------------------------------------------------------------- //
-// Add flagging instruction to object                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) shape    - Shape of the flagging region to be added         //
-//   (3) ...      - Additional parameters required for defining the  //
-//                  specified shape.                                 //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to the object with the new instruction included.        //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding a new flagging instruction to the cur- //
-//   rent list of instructions held by the object. The shape must be //
-//   one of the shapes supported by the class. The required number   //
-//   of additional parameters defining the shape must be supplied.   //
-//   These must be integer numbers in absolute pixel coordinates. A  //
-//   pointer to the object after insertion of the new instruction    //
-//   will be returned to allow chaining of insert commands.          //
-// ----------------------------------------------------------------- //
+/// @brief Add flagging instruction to object
+///
+/// Public method for adding a new flagging instruction to the
+/// current list of instructions held by the object. The shape must
+/// be one of the shapes supported by the class. The required number
+/// of additional parameters defining the shape must be supplied.
+/// These must be integer numbers in absolute pixel coordinates. A
+/// pointer to the object after insertion of the new instruction
+/// will be returned to allow chaining of insert commands.
+///
+/// @param self   Object self-reference.
+/// @param shape  Shape of the flagging region to be added
+/// @param ...    Additional parameters required for defining the
+///               specified shape.
+///
+/// @return Pointer to the object with the new instruction included.
 
 PUBLIC Flagger *Flagger_add(Flagger *self, const int shape, ...)
 {
@@ -221,37 +186,29 @@ PUBLIC Flagger *Flagger_add(Flagger *self, const int shape, ...)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract flagging instruction at the specified index               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//   (2) index      - Index of the instruction to be extracted.      //
-//   (3) shape      - Pointer to integer to hold shape information.  //
-//   (4) parameters - Pointer to a pointer to integer to hold the    //
-//                    array of parameters associated with the shape. //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for extracting the flagging instruction at the    //
-//   specified index. Two pointers will need to be provided: shape   //
-//   must be a pointer to int for storing the shape information of   //
-//   the item, while parameters must be a pointer to a pointer to    //
-//   const long int and will point to the array of parameters asso-  //
-//   ciated with the shape. Usage example:                           //
-//                                                                   //
-//     int *shape;                                                   //
-//     const long int **parameters;                                  //
-//     Flagger_get(flagger, 0, &shape, &parameters);                 //
-//                                                                   //
-//   shape and parameters will then contain the relevant information //
-//   about the region to be flagged.                                 //
-// ----------------------------------------------------------------- //
+/// @brief Extract flagging instruction at the specified index
+///
+/// Public method for extracting the flagging instruction at the
+/// specified index. Two pointers will need to be provided: shape
+/// must be a pointer to `int` for storing the shape information of
+/// the item, while `parameters` must be a pointer to a pointer to
+/// `const long int` and will point to the array of parameters
+/// associated with the shape. Usage example:
+///
+/// \code{.c}
+///   int *shape;
+///   const long int **parameters;
+///   Flagger_get(flagger, 0, &shape, &parameters);
+/// \endcode
+///
+/// The `shape` and `parameters` pointers will then contain the
+/// relevant information about the region to be flagged.
+///
+/// @param self        Object self-reference.
+/// @param index       Index of the instruction to be extracted.
+/// @param shape       Pointer to integer to hold shape information.
+/// @param parameters  Pointer to a pointer to integer to hold the
+///                    array of parameters associated with the shape.
 
 PUBLIC void Flagger_get(const Flagger *self, const size_t index, int *shape, const long int **parameters)
 {

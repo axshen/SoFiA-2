@@ -1,33 +1,39 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.4.1 (Path.c) - Source Finding Application                    ///
-/// Copyright (C) 2021 The SoFiA 2 Authors                               ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (Path.c) - Source Finding Application                    //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   Path.c
+/// @author Tobias Westmeier
+/// @date   24/11/2021
+/// @brief  Class for storing and handling file paths.
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,39 +44,32 @@
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Path                           //
-// ----------------------------------------------------------------- //
+/// @brief Class for storing and handling file paths.
+///
+/// The purpose of this class is to provide a structure for storing
+/// and handling file paths in a Linux/Unix directory system. Various
+/// methods for setting and reading the different components of the
+/// path are available.
 
 CLASS Path
 {
-	String *dir;
-	String *file;
-	String *path;
+	String *dir;   ///< String holding directory name.
+	String *file;  ///< String holding file name.
+	String *path;  ///< String holding full path name.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   No arguments.                                                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Path object.                           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new and empty Path object   //
-//   and return a pointer to the newly created object. No memory     //
-//   will be allocated other than for the object itself. Note that   //
-//   the destructor will need to be called explicitly once the       //
-//   object is no longer required to release any memory allocated    //
-//   during the lifetime of the object.                              //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new and empty Path object
+/// and return a pointer to the newly created object. No memory
+/// will be allocated other than for the object itself. Note that
+/// the destructor will need to be called explicitly once the
+/// object is no longer required to release any memory allocated
+/// during the lifetime of the object.
+///
+/// @return Pointer to newly created Path object.
 
 PUBLIC Path *Path_new(void)
 {
@@ -85,23 +84,13 @@ PUBLIC Path *Path_new(void)
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the memory
+/// occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void Path_delete(Path *self)
 {
@@ -118,25 +107,15 @@ PUBLIC void Path_delete(Path *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Set path from string                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) path     - String from which to extract path.               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the path from the specified string.   //
-//   The path can contain just a directory, just a file, or a combi- //
-//   nation of both. Anything before the final '/' will be treated   //
-//   as a directory and anything after the final '/' as a file name. //
-// ----------------------------------------------------------------- //
+/// @brief Set path from string
+///
+/// Public method for setting the path from the specified string.
+/// The path can contain just a directory, just a file, or a
+/// combination of both. Anything before the final @p / will be treated
+/// as a directory and anything after the final @p / as a file name.
+///
+/// @param self  Object self-reference.
+/// @param path  C-string from which to extract path.
 
 PUBLIC void Path_set(Path *self, const char *path)
 {
@@ -181,23 +160,13 @@ PUBLIC void Path_set(Path *self, const char *path)
 
 
 
-// ----------------------------------------------------------------- //
-// Set file name of path                                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) file     - String from which to extract file name.          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the file name of the specified path.  //
-//   The directory name of the path will be left unchanged.          //
-// ----------------------------------------------------------------- //
+/// @brief Set file name of path
+///
+/// Public method for setting the file name of the specified path.
+/// The directory name of the path will be left unchanged.
+///
+/// @param self  Object self-reference.
+/// @param file  C-string from which to extract file name.
 
 PUBLIC void Path_set_file(Path *self, const char *file)
 {
@@ -216,23 +185,13 @@ PUBLIC void Path_set_file(Path *self, const char *file)
 
 
 
-// ----------------------------------------------------------------- //
-// Set directory name of path                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) file     - String from which to extract directory name.     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the directory name of the specified   //
-//   path. The file name of the path will be left unchanged.         //
-// ----------------------------------------------------------------- //
+/// @brief Set directory name of path
+///
+/// Public method for setting the directory name of the specified
+/// path. The file name of the path will be left unchanged.
+///
+/// @param self  Object self-reference.
+/// @param dir   C-string from which to extract directory name.
 
 PUBLIC void Path_set_dir(Path *self, const char *dir)
 {
@@ -252,40 +211,32 @@ PUBLIC void Path_set_dir(Path *self, const char *dir)
 
 
 
-// ----------------------------------------------------------------- //
-// Append directory name of path from template                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) basename - Basename to be used for the subdirectory name to //
-//                  be appended.                                     //
-//   (3) appendix - Suffix to be appended to the subdirectory name.  //
-//                  NOTE that any connecting character such as '_'   //
-//                  must be explicitly included.                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for appending a subdirectory to the given direc-  //
-//   tory. The name of the subdirectory will be constructed from the //
-//   specified basename and appendix. Basename is expected to be a   //
-//   file name, and if it includes a mime type suffix (e.g. .fits),  //
-//   then that suffix will be removed first before concatenating the //
-//   appendix. Note that neither basename nor appendix must contain  //
-//   a slash (/).                                                    //
-//                                                                   //
-//   Example:                                                        //
-//                                                                   //
-//     Assume self->dir = "/home/user/"                              //
-//            basename  = "data.fits"                                //
-//            appendix  = "_cubelets"                                //
-//                                                                   //
-//     Then   self->dir = "/home/user/data_cubelets/"                //
-// ----------------------------------------------------------------- //
+/// @brief Append directory name of path from template
+///
+/// Public method for appending a sub-directory to the given directory.
+/// The name of the sub-directory will be constructed from the
+/// specified @p basename and @p appendix. Basename is expected to be a
+/// file name, and if it includes a mime type suffix (e.g. @p .fits),
+/// then that suffix will be removed first before concatenating the
+/// appendix. Note that neither @p basename nor @p appendix must contain
+/// a slash (@p /).
+///
+/// Example:
+///
+/// \code
+///   Assume self->dir = "/home/user/"
+///          basename  = "data.fits"
+///          appendix  = "_cubelets"
+///
+///   Then   self->dir = "/home/user/data_cubelets/"
+/// \endcode
+///
+/// @param self      Object self-reference.
+/// @param basename  Basename to be used for the subdirectory name to
+///                  be appended.
+/// @param appendix  Suffix to be appended to the subdirectory name.
+///                  Note that any connecting character such as @p _
+///                  must be explicitly included.
 
 PUBLIC void Path_append_dir_from_template(Path *self, const char *basename, const char *appendix)
 {
@@ -307,23 +258,13 @@ PUBLIC void Path_append_dir_from_template(Path *self, const char *basename, cons
 
 
 
-// ----------------------------------------------------------------- //
-// Append string to file name                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) appendix - String to be appended.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for appending the specified string to the file    //
-//   name. The appendix must not contain a slash (/).                //
-// ----------------------------------------------------------------- //
+/// @brief Append string to file name
+///
+/// Public method for appending the specified string to the file
+/// name. The appendix must not contain a slash (@p /).
+///
+/// @param self      Object self-reference.
+/// @param appendix  C-string to be appended.
 
 PUBLIC void Path_append_file(Path *self, const char *appendix)
 {
@@ -338,44 +279,36 @@ PUBLIC void Path_append_file(Path *self, const char *appendix)
 
 
 
-// ----------------------------------------------------------------- //
-// Construct file name of path from specified template               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) basename - Base name to be used for the file name.          //
-//   (3) suffix   - Suffix to be appended to basename such that the  //
-//                  file name becomes "basename" "suffix". NOTE that //
-//                  any connecting character (like '_') must be ex-  //
-//                  plicitly included.                               //
-//   (4) mimetype - Mime type to be appended to file name such that  //
-//                  the name becomes "basename" "suffix" "mimetype". //
-//                  NOTE that the dot ('.') must be explicitly in-   //
-//                  cluded.                                          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for constructing the file name of the specified   //
-//   path from the given template. The final file name will become   //
-//   "basename" "suffix" "mimetype". The directory name of the path  //
-//   will remain unchanged.                                          //
-//   Note that if 'basename' already contains a mimetype (identified //
-//   by the presence of a dot that is not the first character), then //
-//   that mimetype ending will be removed first.                     //
-//                                                                   //
-//   Example:                                                        //
-//                                                                   //
-//     Assume basename = "data.fits"                                 //
-//            suffix   = "_mask"                                     //
-//            mimetype = ".fits"                                     //
-//                                                                   //
-//     Then   filename = "data_mask.fits"                            //
-// ----------------------------------------------------------------- //
+/// @brief Construct file name of path from specified template
+///
+/// Public method for constructing the file name of the specified
+/// path from the given template. The final file name will become
+/// @p basename @p suffix @p mimetype. The directory name of the path
+/// will remain unchanged.
+/// Note that if @p basename already contains a mime type (identified
+/// by the presence of a dot that is not the first character), then
+/// that mime type ending will be removed first.
+///
+/// Example:
+///
+/// \code
+///   Assume basename = "data.fits"
+///          suffix   = "_mask"
+///          mimetype = ".fits"
+///
+///   Then   filename = "data_mask.fits"
+/// \endcode
+///
+/// @param self      Object self-reference.
+/// @param basename  Base name to be used for the file name.
+/// @param suffix    Suffix to be appended to @p basename such that the
+///                  file name becomes @p basename @p suffix. Note that
+///                  any connecting character (like @p _) must be
+///                  explicitly included.
+/// @param mimetype  Mime type to be appended to file name such that
+///                  the name becomes @p basename @p suffix @p mimetype.
+///                  Note that the dot (@p .) must be explicitly
+///                  included.
 
 PUBLIC void Path_set_file_from_template(Path *self, const char *basename, const char *suffix, const char *mimetype)
 {
@@ -394,24 +327,16 @@ PUBLIC void Path_set_file_from_template(Path *self, const char *basename, const 
 
 
 
-// ----------------------------------------------------------------- //
-// Return the full path as a string                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   String containing the full path.                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the full path of the specified Path //
-//   object as a string. The string will be internally stored as     //
-//   part of the object and will be automatically deleted whenever   //
-//   the destructor is called.                                       //
-// ----------------------------------------------------------------- //
+/// @brief Return the full path as a string
+///
+/// Public method for returning the full path of the specified Path
+/// object as a string. The string will be internally stored as
+/// part of the object and will be automatically deleted whenever
+/// the destructor is called.
+///
+/// @param self  Object self-reference.
+///
+/// @return C-string containing the full path.
 
 PUBLIC const char *Path_get(Path *self)
 {
@@ -424,7 +349,18 @@ PUBLIC const char *Path_get(Path *self)
 	return String_get(self->path);
 }
 
-// Same, but for directory part only
+
+
+/// @brief Return the directory as a string
+///
+/// Public method for returning the directory of the specified Path
+/// object as a string. The string will be internally stored as
+/// part of the object and will be automatically deleted whenever
+/// the destructor is called.
+///
+/// @param self  Object self-reference.
+///
+/// @return C-string containing the directory.
 
 PUBLIC const char *Path_get_dir(const Path *self)
 {
@@ -432,7 +368,18 @@ PUBLIC const char *Path_get_dir(const Path *self)
 	return String_get(self->dir);
 }
 
-// Same, but for file part only
+
+
+/// @brief Return the file name as a string
+///
+/// Public method for returning the file name of the specified Path
+/// object as a string. The string will be internally stored as
+/// part of the object and will be automatically deleted whenever
+/// the destructor is called.
+///
+/// @param self  Object self-reference.
+///
+/// @return C-string containing the file name.
 
 PUBLIC const char *Path_get_file(const Path *self)
 {
@@ -442,24 +389,16 @@ PUBLIC const char *Path_get_file(const Path *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Check if file stored in path is readable                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   True if path is readable, false otherwise.                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for testing of the file pointed to by the speci-  //
-//   fied path is readable or not. Note that this does not test if   //
-//   the file exists, as it could exist but not be readable, e.g. as //
-//   a result of insufficient read permission.                       //
-// ----------------------------------------------------------------- //
+/// @brief Check if file stored in path is readable
+///
+/// @param self  Object self-reference.
+///
+/// @return @p true if path is readable, @p false otherwise.
+///
+/// Public method for testing of the file pointed to by the specified
+/// path is readable or not. Note that this does not test if the file
+/// exists, as it could exist but not be readable, e.g. as a result
+/// of insufficient read permission.
 
 PUBLIC bool Path_file_is_readable(Path *self)
 {

@@ -1,33 +1,39 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.4.1 (Table.c) - Source Finding Application                   ///
-/// Copyright (C) 2021 The SoFiA 2 Authors                               ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (Table.c) - Source Finding Application                   //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   Table.c
+/// @author Tobias Westmeier
+/// @date   25/11/2021
+/// @brief  Container class for reading tabulated data from text files.
+
 
 #include <stdlib.h>
 #include <string.h>
@@ -36,41 +42,37 @@
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Table                          //
-// ----------------------------------------------------------------- //
+/// @brief Container class for reading tabulated data from text files.
+///
+/// This class provides a convenient container for reading tabulated
+/// data from a text file. The container size will be automatically
+/// adjusted to match the number of rows and columns in the file. The
+/// data values will be stored as double-precision floating-point.
+/// The standard constructor has been set to private to disallow the
+/// creation of empty Table objects.
 
 CLASS Table
 {
-	size_t cols;
-	size_t rows;
-	double *data;
+	size_t cols;   ///< Number of table columns.
+	size_t rows;   ///< Number of table rows.
+	double *data;  ///< Pointer to array of data values.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   No arguments.                                                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Table object.                          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new and empty Table object. //
-//   Note that the destructor will have to be called explicitly once //
-//   the object is no longer required to release its memory again.   //
-//   NOTE: The standard constructor has been made private to disable //
-//   the creation of empty Table objects, as there are no methods to //
-//   change the size of a Table object. The Table_from_file() con-   //
-//   structor must instead be used to directly generate Tables from  //
-//   tabulated data stored in a text file.                           //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new and empty Table object.
+/// Note that the destructor will have to be called explicitly once
+/// the object is no longer required to release its memory again.
+///
+/// @return Pointer to newly created Table object.
+///
+/// @note The standard constructor has been made private to disable
+///       the creation of empty Table objects, as there are no methods
+///       to change the size of a Table object. The @p Table_from_file()
+///       constructor must instead be used to directly generate Tables
+///       from tabulated data stored in a text file.
 
 PRIVATE Table *Table_new(void)
 {
@@ -85,40 +87,34 @@ PRIVATE Table *Table_new(void)
 
 
 
-// ----------------------------------------------------------------- //
-// Alternative constructor for creating tables from text file        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) filename   - Path to the file from which to read data.      //
-//   (2) delimiters - List of delimiting characters to be used to    //
-//                    separate columns in the data file.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Table object.                          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Alternative constructor. Will create a new table object from    //
-//   tabulated data read from the specified text file. The list of   //
-//   delimiters to be used to separate data columns can be specified //
-//   using the delimiters string (e.g. " \t" will use space and tab  //
-//   characters as delimiters). Consecutive delimiting characters    //
-//   will always be merged even when of mixed type. A new object     //
-//   filled with the data from the file will be returned.            //
-//   If no valid data are found in the specified file, then an empty //
-//   Table object with 0 rows and columns will be returned. The size //
-//   of the table will be defined by the first data row in the file. //
-//   All subsequent rows must have the same number of columns. If    //
-//   fewer columns are encountered, the method will terminate with   //
-//   an error message. If more columns are encountered, then any ex- //
-//   cess columns will be silently ignored. If an entry is encoun-   //
-//   tered that does not constitute a floating-point number, then    //
-//   the resulting table entry will be set to 0.                     //
-//   The data file can contain empty lines and lines beginning with  //
-//   a comment character (#); these will be ignored.                 //
-// ----------------------------------------------------------------- //
+/// @brief Alternative constructor for creating tables from text file
+///
+/// Alternative constructor. Will create a new Table object from
+/// tabulated data read from the specified text file. The list of
+/// delimiters to be used to separate data columns can be specified
+/// using the @p delimiters string (e.g. @p " \t" will use space and
+/// tab characters as delimiters). Consecutive delimiting characters
+/// will always be merged even when of mixed type. A new object
+/// filled with the data from the file will be returned.
+///
+/// If no valid data are found in the specified file, then an empty
+/// Table object with 0 rows and columns will be returned. The size
+/// of the table will be defined by the first data row in the file.
+/// All subsequent rows must have the same number of columns. If
+/// fewer columns are encountered, the method will terminate with
+/// an error message. If more columns are encountered, then any
+/// excess columns will be silently ignored. If an entry is
+/// encountered that does not constitute a floating-point number,
+/// then the resulting table entry will be set to 0.
+///
+/// The data file can contain empty lines and lines beginning with
+/// a comment character (\p #); these will be ignored.
+///
+/// @param filename    The path to the file from which to read data.
+/// @param delimiters  List of delimiting characters to be used to
+///                    separate columns in the data file.
+///
+/// @return Pointer to newly created Table object.
 
 PUBLIC Table *Table_from_file(const char *filename, const char *delimiters)
 {
@@ -195,23 +191,13 @@ PUBLIC Table *Table_from_file(const char *filename, const char *delimiters)
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release all me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release all
+/// memory occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void Table_delete(Table *self)
 {
@@ -222,27 +208,30 @@ PUBLIC void Table_delete(Table *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Return the number of table rows or columns                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of table rows.                                           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public methods for retrieving the number of rows or columns in  //
-//   the specified Table object.                                     //
-// ----------------------------------------------------------------- //
+/// @brief Return the number of table rows
+///
+/// Public methods for retrieving the number of rows in
+/// the specified Table object.
+///
+/// @param self  Object self-reference.
+///
+/// @return Number of table rows.
 
 PUBLIC size_t Table_rows(const Table *self)
 {
 	return self == NULL ? 0 : self->rows;
 }
+
+
+
+/// @brief Return the number of table columns
+///
+/// Public methods for retrieving the number of columns in
+/// the specified Table object.
+///
+/// @param self  Object self-reference.
+///
+/// @return Number of table columns.
 
 PUBLIC size_t Table_cols(const Table *self)
 {
@@ -251,26 +240,18 @@ PUBLIC size_t Table_cols(const Table *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Get table value at specified row and column                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//   (2) row        - Requested row.                                 //
-//   (3) column     - Requested column.                              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Table value at specified row and column.                        //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for retrieving the table entry at the specified   //
-//   row and column of the Table object. The method will terminate   //
-//   with an error message if the requested row or column is out of  //
-//   range.                                                          //
-// ----------------------------------------------------------------- //
+/// @brief Get table value at specified row and column
+///
+/// Public method for retrieving the table entry at the specified
+/// row and column of the Table object. The method will terminate
+/// with an error message if the requested row or column is out of
+/// range.
+///
+/// @param self  Object self-reference.
+/// @param row   Requested row.
+/// @param col   Requested column.
+///
+/// @return Table value at specified row and column.
 
 PUBLIC double Table_get(const Table *self, const size_t row, const size_t col)
 {
@@ -283,27 +264,17 @@ PUBLIC double Table_get(const Table *self, const size_t row, const size_t col)
 
 
 
-// ----------------------------------------------------------------- //
-// Set table value at specified row and column                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//   (2) row        - Requested row.                                 //
-//   (3) column     - Requested column.                              //
-//   (4) value      - Value to write into the table.                 //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for writing the specified value into the speci-   //
-//   fied row and column of the Table object, thus overwriting any   //
-//   existing value. The method will terminate with an error message //
-//   if the requested row or column is out of range.                 //
-// ----------------------------------------------------------------- //
+/// @brief Set table value at specified row and column
+///
+/// Public method for writing the specified value into the specified
+/// row and column of the Table object, thus overwriting any
+/// existing value. The method will terminate with an error message
+/// if the requested row or column is out of range.
+///
+/// @param self   Object self-reference.
+/// @param row    Requested row.
+/// @param col    Requested column.
+/// @param value  Value to write into the table.
 
 PUBLIC void Table_set(Table *self, const size_t row, const size_t col, const double value)
 {

@@ -29,6 +29,12 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   DataCube.c
+/// @author Tobias Westmeier
+/// @date   08/12/2021
+/// @brief  Class for storage, source finding and parameterisation of FITS data cubes.
+
+
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -70,6 +76,7 @@
 // force compilation on non-compliant systems.                       //
 // ----------------------------------------------------------------- //
 
+/// \cond doxy_ignore
 COMPILE_TIME_CHECK ( CHAR_BIT == 8,              FATAL_Number_of_bits_per_byte_is_not_equal_to_8 );
 COMPILE_TIME_CHECK ( sizeof(int) > sizeof(char), FATAL_Size_of_int_is_not_greater_than_size_of_char );
 COMPILE_TIME_CHECK ( sizeof(int8_t)  == 1,       FATAL_Size_of_uint8_is_not_equal_to_1 );
@@ -78,47 +85,46 @@ COMPILE_TIME_CHECK ( sizeof(int32_t) == 4,       FATAL_Size_of_int32_is_not_equa
 COMPILE_TIME_CHECK ( sizeof(int64_t) == 8,       FATAL_Size_of_int64_is_not_equal_to_8 );
 COMPILE_TIME_CHECK ( sizeof(float)   == 4,       FATAL_Size_of_float_is_not_equal_to_4 );
 COMPILE_TIME_CHECK ( sizeof(double)  == 8,       FATAL_Size_of_double_is_not_equal_to_8 );
+/// \endcond
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class DataCube                       //
-// ----------------------------------------------------------------- //
+/// @brief Class for storage, source finding and parameterisation of FITS data cubes.
+///
+/// The purpose of this class is to handle up to three-dimensional
+/// astronomical data cubes. The class is intended for reading and
+/// manipulating FITS data cubes by providing methods for loading and
+/// saving FITS files and manipulating the header and data units of a
+/// FITS file. In addition, methods for filtering, source finding and
+/// parameterisation are available. Currently, only single-HDU files
+/// are supported.
 
 CLASS DataCube
 {
-	char   *data;
-	size_t  data_size;
-	Header *header;
-	int     data_type;
-	int     word_size;
-	size_t  dimension;
-	size_t  axis_size[4];
-	bool    verbosity;
+	char   *data;          ///< Pointer to `char` array containing data values.
+	size_t  data_size;     ///< Total number of data values in cube.
+	Header *header;        ///< Pointer to Header object containing header information.
+	int     data_type;     ///< FITS data type (-64, -32, 8, 16, 32 or 64).
+	int     word_size;     ///< Size of a single datum in multiples of `sizeof(char)`.
+	size_t  dimension;     ///< Dimension of the cube (1-4).
+	size_t  axis_size[4];  ///< Size of the up-to-four axes of the cube.
+	bool    verbosity;     ///< Verbosity level (0 or 1).
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) verbosity - Verbosity level of the new object.              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created DataCube object.                       //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new and empty DataCube ob-  //
-//   ject and return a pointer to the newly created object. No me-   //
-//   mory will be allocated other than for the object itself. Note   //
-//   that the destructor will need to be called explicitly once the  //
-//   object is no longer required to release any memory allocated    //
-//   during the lifetime of the object.                              //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new and empty DataCube
+/// object and return a pointer to the newly created object. No
+/// memory will be allocated other than for the object itself. Note
+/// that the destructor will need to be called explicitly once the
+/// object is no longer required to release any memory allocated
+/// during the lifetime of the object.
+///
+/// @param verbosity  Verbosity level of the new object.
+///
+/// @return Pointer to newly created DataCube object.
 
 PUBLIC DataCube *DataCube_new(const bool verbosity)
 {
@@ -143,26 +149,18 @@ PUBLIC DataCube *DataCube_new(const bool verbosity)
 
 
 
-// ----------------------------------------------------------------- //
-// Copy constructor                                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) source - Pointer to DataCube object to be copied.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created DataCube object.                       //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Copy constructor. Will create a new DataCube object that is a   //
-//   physical copy of the object pointed to by source. A pointer to  //
-//   the newly created object will be returned. Note that the de-    //
-//   structor will need to be called explicitly once the object is   //
-//   no longer required to release any memory allocated to the       //
-//   object.                                                         //
-// ----------------------------------------------------------------- //
+/// @brief Copy constructor
+///
+/// Copy constructor. Will create a new DataCube object that is a
+/// physical copy of the object pointed to by source. A pointer
+/// to the newly created object will be returned. Note that the
+/// destructor will need to be called explicitly once the object
+/// is no longer required to release any memory allocated to the
+/// object.
+///
+/// @param source  Pointer to DataCube object to be copied.
+///
+/// @return Pointer to newly created DataCube object.
 
 PUBLIC DataCube *DataCube_copy(const DataCube *source)
 {
@@ -193,32 +191,24 @@ PUBLIC DataCube *DataCube_copy(const DataCube *source)
 
 
 
-// ----------------------------------------------------------------- //
-// Variant of standard constructor                                   //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) nx        - Size of first axis of data array.               //
-//   (2) ny        - Size of second axis of data array.              //
-//   (3) nz        - Size of third axis of data array.               //
-//   (4) type      - Standard FITS data type (-64, -32, 8, 16, 32,   //
-//                   or 64).                                         //
-//   (5) verbosity - Verbosity level of the new object.              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created DataCube object.                       //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Alternative standard constructor. Will create a new DataCube    //
-//   object with the dimensions and data type specified. Memory for  //
-//   the data array and basic header will be allocated. The array    //
-//   will be initialised with a value of 0. A pointer to the newly   //
-//   created object will be returned. Note that the destructor will  //
-//   need to be called explicitly once the object is no longer re-   //
-//   quired to release any memory allocated to the object.           //
-// ----------------------------------------------------------------- //
+/// @brief Variant of standard constructor
+///
+/// Alternative standard constructor. Will create a new DataCube
+/// object with the dimensions and data type specified. Memory for
+/// the data array and basic header will be allocated. The array
+/// will be initialised with a value of 0. A pointer to the newly
+/// created object will be returned. Note that the destructor will
+/// need to be called explicitly once the object is no longer
+/// required to release any memory allocated to the object.
+///
+/// @param nx         Size of first axis of data array.
+/// @param ny         Size of second axis of data array.
+/// @param nz         Size of third axis of data array.
+/// @param type       Standard FITS data type (-64, -32, 8, 16,
+///                   32 or 64).
+/// @param verbosity  Verbosity level of the new object.
+///
+/// @return Pointer to newly created DataCube object.
 
 PUBLIC DataCube *DataCube_blank(const size_t nx, const size_t ny, const size_t nz, const int type, const bool verbosity)
 {
@@ -280,23 +270,13 @@ PUBLIC DataCube *DataCube_blank(const size_t nx, const size_t ny, const size_t n
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the
+/// memory occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void DataCube_delete(DataCube *self)
 {
@@ -312,23 +292,15 @@ PUBLIC void DataCube_delete(DataCube *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Get data array size                                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Size of the data array (number of elements).                    //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for retrieving the size of the data array of the  //
-//   specified data cube, i.e. the total number of data samples. If  //
-//   a NULL pointer is provided, 0 will be returned.                 //
-// ----------------------------------------------------------------- //
+/// @brief Get data array size
+///
+/// Public method for retrieving the size of the data array of the
+/// specified data cube, i.e. the total number of data samples. If
+/// a `NULL` pointer is provided, 0 will be returned.
+///
+/// @param self  Object self-reference.
+///
+/// @return Size of the data array (number of elements).
 
 PUBLIC size_t DataCube_get_size(const DataCube *self)
 {
@@ -337,23 +309,15 @@ PUBLIC size_t DataCube_get_size(const DataCube *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Get data axis size                                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) axis     - Index of the axis the size of which is needed.   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Size of the requested axis in pixels.                           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for retrieving the size of the specified axis of  //
-//   the data array. Note that axis must be in the range of 0 to 3.  //
-// ----------------------------------------------------------------- //
+/// @brief Get data axis size
+///
+/// Public method for retrieving the size of the specified axis of
+/// the data array. Note that axis must be in the range of 0 to 3.
+///
+/// @param self  Object self-reference.
+/// @param axis  Index of the axis the size of which is needed.
+///
+/// @return Size of the requested axis in pixels.
 
 PUBLIC size_t DataCube_get_axis_size(const DataCube *self, const size_t axis)
 {
@@ -363,32 +327,22 @@ PUBLIC size_t DataCube_get_axis_size(const DataCube *self, const size_t axis)
 
 
 
-// ----------------------------------------------------------------- //
-// Read data cube from FITS file                                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) filename - Name of the input FITS file.                     //
-//   (3) region   - Array of 6 values denoting a region of the cube  //
-//                  to be read in (format: x_min, x_max, y_min,      //
-//                  y_max, z_min, z_max). Set to NULL to read entire //
-//                  data cube.                                       //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for reading a data cube from a FITS file. The     //
-//   data cube must have between 1 and 3 dimensions. 4-dimensional   //
-//   FITS cubes are also supported as long as the 4th axis is of     //
-//   size 1 (e.g. Stokes I). A region can be specified to read only  //
-//   a portion of the image. The region must be of the form x_min,   //
-//   x_max, y_min, y_max, z_min, z_max. If NULL, the full cube will  //
-//   be read in.                                                     //
-// ----------------------------------------------------------------- //
+/// @brief Read data cube from FITS file
+///
+/// Public method for reading a data cube from a FITS file. The
+/// data cube must have between 1 and 3 dimensions. 4-dimensional
+/// FITS cubes are also supported as long as the 4th axis is of
+/// size 1 (e.g. Stokes I). A region can be specified to read only
+/// a portion of the image. The region must be of the form `x_min`,
+/// `x_max`, `y_min`, `y_max`, `z_min`, `z_max`. If `NULL`, the
+/// full cube will be read in.
+///
+/// @param self      Object self-reference.
+/// @param filename  Name of the input FITS file.
+/// @param region    Array of 6 values denoting a region of the cube
+///                  to be read in (format: `x_min`, `x_max`, `y_min`,
+///                  `y_max`, `z_min`, `z_max`). Set to `NULL` to read
+///                  entire data cube.
 
 PUBLIC void DataCube_load(DataCube *self, const char *filename, const Array_siz *region)
 {
@@ -590,7 +544,7 @@ PUBLIC void DataCube_load(DataCube *self, const char *filename, const Array_siz 
 		
 		// Update object properties
 		// NOTE: This must happen after reading the sub-cube, as the full
-		//       cube dimensions must be known during data extraction.
+		///     cube dimensions must be known during data extraction.
 		self->data_size = region_size;
 		self->axis_size[0] = region_nx;
 		self->axis_size[1] = region_ny;
@@ -676,33 +630,24 @@ PUBLIC void DataCube_load(DataCube *self, const char *filename, const Array_siz 
 
 
 
-// ----------------------------------------------------------------- //
-// Write data cube into FITS file                                    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//   (2) filename   - Name of output FITS file.                      //
-//   (3) overwrite  - If true, overwrite existing file. Otherwise    //
-//                    terminate if the file already exists.          //
-//   (4) preserve   - If true, ensure that the data array is in the  //
-//                    correct byte order after returning. If false,  //
-//                    the byte order may be corrupted, which may be  //
-//                    faster and acceptable if the data are no       //
-//                    longer needed afterwards.                      //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for writing the current data cube object (re-     //
-//   ferenced by *self) into a FITS file. The function will termi-   //
-//   nate the current programme execution if an error is encountered //
-//   during the write process. If the output file already exists, it //
-//   will be overwritten only if overwrite is set to true.           //
-// ----------------------------------------------------------------- //
+/// @brief Write data cube into FITS file
+///
+/// Public method for writing the current data cube object
+/// (referenced by `self`) into a FITS file. The function will
+/// terminate the current programme execution if an error is
+/// encountered during the write process. If the output file
+/// already exists, it will be overwritten only if overwrite
+/// is set to true.
+///
+/// @param self        Object self-reference.
+/// @param filename    Name of output FITS file.
+/// @param overwrite   If `true`, overwrite existing file. Otherwise
+///                    terminate if the file already exists.
+/// @param preserve    If `true`, ensure that the data array is in the
+///                    correct byte order after returning. If `false`,
+///                    the byte order may be corrupted, which may be
+///                    faster and acceptable if the data are no
+///                    longer needed afterwards.
 
 PUBLIC void DataCube_save(const DataCube *self, const char *filename, const bool overwrite, const bool preserve)
 {
@@ -747,60 +692,118 @@ PUBLIC void DataCube_save(const DataCube *self, const char *filename, const bool
 
 
 
-// ----------------------------------------------------------------- //
-// Wrappers around commonly needed Header methods                    //
-// ----------------------------------------------------------------- //
-// See class Header for detailed information on the respective me-   //
-// thods and their arguments and return values.                      //
-// ----------------------------------------------------------------- //
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_get_int() in class Header for detailed information on
+/// the respective method and its arguments and return value.
 
 PUBLIC long int DataCube_gethd_int(const DataCube *self, const char *key) {
 	return Header_get_int(self->header, key);
 }
 
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_get_flt() in class Header for detailed information on
+/// the respective method and its arguments and return value.
+
 PUBLIC double DataCube_gethd_flt(const DataCube *self, const char *key) {
 	return Header_get_flt(self->header, key);
 }
+
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_get_bool() in class Header for detailed information on
+/// the respective method and its arguments and return value.
 
 PUBLIC bool DataCube_gethd_bool(const DataCube *self, const char *key) {
 	return Header_get_bool(self->header, key);
 }
 
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_get_string() in class Header for detailed information on
+/// the respective method and its arguments and return value.
+
 PUBLIC String *DataCube_gethd_string(const DataCube *self, const char *key) {
 	return Header_get_string(self->header, key);
 }
+
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_get_str() in class Header for detailed information on
+/// the respective method and its arguments and return value.
 
 PUBLIC int DataCube_gethd_str(const DataCube *self, const char *key, char *value) {
 	return Header_get_str(self->header, key, value);
 }
 
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_set_int() in class Header for detailed information on
+/// the respective method and its arguments and return value.
+
 PUBLIC int DataCube_puthd_int(DataCube *self, const char *key, const long int value) {
 	return Header_set_int(self->header, key, value);
 }
+
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_set_flt() in class Header for detailed information on
+/// the respective method and its arguments and return value.
 
 PUBLIC int DataCube_puthd_flt(DataCube *self, const char *key, const double value) {
 	return Header_set_flt(self->header, key, value);
 }
 
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_set_bool() in class Header for detailed information on
+/// the respective method and its arguments and return value.
+
 PUBLIC int DataCube_puthd_bool(DataCube *self, const char *key, const bool value) {
 	return Header_set_bool(self->header, key, value);
 }
+
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_set_str() in class Header for detailed information on
+/// the respective method and its arguments and return value.
 
 PUBLIC int DataCube_puthd_str(DataCube *self, const char *key, const char *value) {
 	return Header_set_str(self->header, key, value);
 }
 
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_check() in class Header for detailed information on
+/// the respective method and its arguments and return value.
+
 PUBLIC size_t DataCube_chkhd(const DataCube *self, const char *key) {
 	return Header_check(self->header, key);
 }
+
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_compare() in class Header for detailed information on
+/// the respective method and its arguments and return value.
 
 PUBLIC bool DataCube_cmphd(const DataCube *self, const char *key, const char *value, const size_t n) {
 	return Header_compare(self->header, key, value, n);
 }
 
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_remove() in class Header for detailed information on
+/// the respective method and its arguments and return value.
+
 PUBLIC int DataCube_delhd(DataCube *self, const char *key) {
 	return Header_remove(self->header, key);
 }
+
+/// @brief Wrapper around commonly needed Header method
+///
+/// See Header_copy_wcs() in class Header for detailed information on
+/// the respective method and its arguments and return value.
 
 PUBLIC void DataCube_copy_wcs(const DataCube *source, DataCube *target) {
 	Header_copy_wcs(source->header, target->header);
@@ -809,24 +812,14 @@ PUBLIC void DataCube_copy_wcs(const DataCube *source, DataCube *target) {
 
 
 
-// ----------------------------------------------------------------- //
-// Add SoFiA settings to FITS file history                           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self - Object self-reference.                               //
-//   (2) par  - SoFiA parameter settings object.                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for writing the SoFiA parameter settings stored   //
-//   in 'par' as FITS header HISTORY items. If 'par' is NULL, then   //
-//   no history will be written.                                     //
-// ----------------------------------------------------------------- //
+/// @brief Add SoFiA settings to FITS file history
+///
+/// Public method for writing the SoFiA parameter settings stored
+/// in 'par' as FITS header HISTORY items. If `par` is `NULL`, then
+/// no history will be written.
+///
+/// @param self  Object self-reference.
+/// @param par   SoFiA parameter settings object.
 
 PUBLIC void DataCube_add_history(DataCube *self, const Parameter *par)
 {
@@ -861,29 +854,21 @@ PUBLIC void DataCube_add_history(DataCube *self, const Parameter *par)
 
 
 
-// ----------------------------------------------------------------- //
-// Read data value as double-precision floating-point number         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self - Object self-reference.                               //
-//   (2) x    - First coordinate.                                    //
-//   (3) y    - Second coordinate.                                   //
-//   (4) z    - Third coordinate.                                    //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the value of the data array at the given position as a  //
-//   double-precision floating-point value.                          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method to extract the data value at the specified posi-  //
-//   tion (x, y, z), where x indexes the first axis, y the second    //
-//   axis and z the third axis of the cube. The function will return //
-//   the result as a double-precision floating-point value irrespec- //
-//   tive of the native data type of the FITS file.                  //
-// ----------------------------------------------------------------- //
+/// @brief Read data value as double-precision floating-point number
+///
+/// Public method to extract the data value at the specified position
+/// (`x`, `y`, `z`), where `x` indexes the first axis, `y` the second
+/// axis and `z` the third axis of the cube. The function will return
+/// the result as a double-precision floating-point value irrespective
+/// of the native data type of the FITS file.
+///
+/// @param self  Object self-reference.
+/// @param x     First coordinate.
+/// @param y     Second coordinate.
+/// @param z     Third coordinate.
+///
+/// @return Returns the value of the data array at the given position
+///         as a double-precision floating-point value.
 
 PUBLIC double DataCube_get_data_flt(const DataCube *self, const size_t x, const size_t y, const size_t z)
 {
@@ -913,29 +898,21 @@ PUBLIC double DataCube_get_data_flt(const DataCube *self, const size_t x, const 
 
 
 
-// ----------------------------------------------------------------- //
-// Read data value as long integer number                            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self - Object self-reference.                               //
-//   (2) x    - First coordinate.                                    //
-//   (3) y    - Second coordinate.                                   //
-//   (4) z    - Third coordinate.                                    //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the value of the data array at the given position as a  //
-//   long integer value.                                             //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method to extract the data value at the specified posi-  //
-//   tion (x, y, z), where x indexes the first axis, y the second    //
-//   axis and z the third axis of the cube. The function will return //
-//   the result as a long integer value irrespective of the native   //
-//   data type of the FITS file.                                     //
-// ----------------------------------------------------------------- //
+/// @brief Read data value as long integer number
+///
+/// Public method to extract the data value at the specified position
+/// (`x`, `y`, `z`), where `x` indexes the first axis, `y` the second
+/// axis and `z` the third axis of the cube. The function will return
+/// the result as a long integer value irrespective of the native data
+/// type of the FITS file.
+///
+/// @param self  Object self-reference.
+/// @param x     First coordinate.
+/// @param y     Second coordinate.
+/// @param z     Third coordinate.
+///
+/// @return Returns the value of the data array at the given position as a
+///         long integer value.
 
 PUBLIC long int DataCube_get_data_int(const DataCube *self, const size_t x, const size_t y, const size_t z)
 {
@@ -965,29 +942,18 @@ PUBLIC long int DataCube_get_data_int(const DataCube *self, const size_t x, cons
 
 
 
-// ----------------------------------------------------------------- //
-// Set data value as double-precision floating-point number          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self  - Object self-reference.                              //
-//   (2) x     - First coordinate.                                   //
-//   (3) y     - Second coordinate.                                  //
-//   (4) z     - Third coordinate.                                   //
-//   (4) value - Data value to be written to array.                  //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method to write the data value to the specified position //
-//   (x, y, z), where x indexes the first axis, y the second axis    //
-//   and z the third axis of the cube. Note that the data value will //
-//   be cast to the native data type of the array before being writ- //
-//   ten.                                                            //
-// ----------------------------------------------------------------- //
+/// @brief Set data value as double-precision floating-point number
+///
+/// Public method to write the data value to the specified position
+/// (`x`, `y`, `z`), where `x` indexes the first axis, `y` the second
+/// axis and `z` the third axis of the cube. Note that the data value
+/// will be cast to the native data type of the array before being written.
+///
+/// @param self   Object self-reference.
+/// @param x      First coordinate.
+/// @param y      Second coordinate.
+/// @param z      Third coordinate.
+/// @param value  Data value to be written to array.
 
 PUBLIC void DataCube_set_data_flt(DataCube *self, const size_t x, const size_t y, const size_t z, const double value)
 {
@@ -1021,7 +987,20 @@ PUBLIC void DataCube_set_data_flt(DataCube *self, const size_t x, const size_t y
 	return;
 }
 
-// Same, but adding instead of setting.
+
+
+/// @brief Add data value as double-precision floating-point number
+///
+/// Public method to add the data value to the specified position
+/// (`x`, `y`, `z`), where `x` indexes the first axis, `y` the second
+/// axis and `z` the third axis of the cube. Note that the data value
+/// will be cast to the native data type of the array before being written.
+///
+/// @param self   Object self-reference.
+/// @param x      First coordinate.
+/// @param y      Second coordinate.
+/// @param z      Third coordinate.
+/// @param value  Data value to be added to array.
 
 PUBLIC void DataCube_add_data_flt(DataCube *self, const size_t x, const size_t y, const size_t z, const double value)
 {
@@ -1057,29 +1036,18 @@ PUBLIC void DataCube_add_data_flt(DataCube *self, const size_t x, const size_t y
 
 
 
-// ----------------------------------------------------------------- //
-// Set data value as long integer number                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self  - Object self-reference.                              //
-//   (2) x     - First coordinate.                                   //
-//   (3) y     - Second coordinate.                                  //
-//   (4) z     - Third coordinate.                                   //
-//   (5) value - Data value to be written to array.                  //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method to write the data value to the specified position //
-//   (x, y, z), where x indexes the first axis, y the second axis    //
-//   and z the third axis of the cube. Note that the data value will //
-//   be cast to the native data type of the array before being writ- //
-//   ten.                                                            //
-// ----------------------------------------------------------------- //
+/// @brief Set data value as long integer number
+///
+/// Public method to write the data value to the specified position
+/// (`x`, `y`, `z`), where `x` indexes the first axis, `y` the second
+/// axis and `z` the third axis of the cube. Note that the data value
+/// will be cast to the native data type of the array before being written.
+///
+/// @param self   Object self-reference.
+/// @param x      First coordinate.
+/// @param y      Second coordinate.
+/// @param z      Third coordinate.
+/// @param value  Data value to be written to array.
 
 PUBLIC void DataCube_set_data_int(DataCube *self, const size_t x, const size_t y, const size_t z, const long int value)
 {
@@ -1112,7 +1080,20 @@ PUBLIC void DataCube_set_data_int(DataCube *self, const size_t x, const size_t y
 	return;
 }
 
-// Same, but adding instead of setting.
+
+
+/// @brief Add data value as long integer number
+///
+/// Public method to add the data value to the specified position
+/// (`x`, `y`, `z`), where `x` indexes the first axis, `y` the second
+/// axis and `z` the third axis of the cube. Note that the data value
+/// will be cast to the native data type of the array before being written.
+///
+/// @param self   Object self-reference.
+/// @param x      First coordinate.
+/// @param y      Second coordinate.
+/// @param z      Third coordinate.
+/// @param value  Data value to be added to array.
 
 PUBLIC void DataCube_add_data_int(DataCube *self, const size_t x, const size_t y, const size_t z, const long int value)
 {
@@ -1147,24 +1128,14 @@ PUBLIC void DataCube_add_data_int(DataCube *self, const size_t x, const size_t y
 
 
 
-// ----------------------------------------------------------------- //
-// Fill data cube with floating-point value                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self  - Object self-reference.                              //
-//   (2) value - Data value to be written to array.                  //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for filling the data cube with the specified      //
-//   floating-point value. Note that this will only be possible if   //
-//   the data cube is of 32 or 64-bit floating-point type.           //
-// ----------------------------------------------------------------- //
+/// @brief Fill data cube with floating-point value
+///
+/// Public method for filling the data cube with the specified
+/// floating-point value. Note that this will only be possible if
+/// the data cube is of 32 or 64-bit floating-point type.
+///
+/// @param self   Object self-reference.
+/// @param value  Data value to be written to array.
 
 PUBLIC void DataCube_fill_flt(DataCube *self, const double value)
 {
@@ -1189,25 +1160,15 @@ PUBLIC void DataCube_fill_flt(DataCube *self, const double value)
 
 
 
-// ----------------------------------------------------------------- //
-// Divide a data cube by another cube                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) divisor - Data cube to divide by.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for dividing a data cube by another one. Both     //
-//   cubes must be of floating-point type and need to have the same  //
-//   size. The dividend will be set to NaN in places where the divi- //
-//   sor is zero.                                                    //
-// ----------------------------------------------------------------- //
+/// @brief Divide a data cube by another cube
+///
+/// Public method for dividing a data cube by another one. Both
+/// cubes must be of floating-point type and need to have the same
+/// size. The dividend will be set to `NaN` in places where the divisor
+/// is zero.
+///
+/// @param self     Object self-reference.
+/// @param divisor  Data cube to divide by.
 
 PUBLIC void DataCube_divide(DataCube *self, const DataCube *divisor)
 {
@@ -1279,25 +1240,15 @@ PUBLIC void DataCube_divide(DataCube *self, const DataCube *divisor)
 
 
 
-// ----------------------------------------------------------------- //
-// Multiply by square root of weights cube                           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) weights - Weights cube to be applied.                       //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for multiplying a data cube by the square root of //
-//   a weights cube. Both cubes must be of floating-point type and   //
-//   need to have the same size. The cube will be set to NaN in pla- //
-//   ces where the weights cube is NaN.                              //
-// ----------------------------------------------------------------- //
+/// @brief Multiply by square root of weights cube
+///
+/// Public method for multiplying a data cube by the square root of
+/// a weights cube. Both cubes must be of floating-point type and
+/// need to have the same size. The cube will be set to `NaN` in places
+/// where the weights cube is `NaN`.
+///
+/// @param self     Object self-reference.
+/// @param weights  Weights cube to be applied.
 
 PUBLIC void DataCube_apply_weights(DataCube *self, const DataCube *weights)
 {
@@ -1353,23 +1304,13 @@ PUBLIC void DataCube_apply_weights(DataCube *self, const DataCube *weights)
 
 
 
-// ----------------------------------------------------------------- //
-// Multiply data cube by constant factor                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) factor  - Factor to multiply by.                            //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for multiplying a data cube by a constant factor. //
-//   The data cube must be of floating-point type.                   //
-// ----------------------------------------------------------------- //
+/// @brief Multiply data cube by constant factor
+///
+/// Public method for multiplying a data cube by a constant factor.
+/// The data cube must be of floating-point type.
+///
+/// @param self    Object self-reference.
+/// @param factor  Factor to multiply by.
 
 PUBLIC void DataCube_multiply_const(DataCube *self, const double factor)
 {
@@ -1390,23 +1331,13 @@ PUBLIC void DataCube_multiply_const(DataCube *self, const double factor)
 
 
 
-// ----------------------------------------------------------------- //
-// Add constant to data cube                                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) summand - Constant to be added to data cube.                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding a constant to the entire data cube.    //
-//   The data cube must be of floating-point type.                   //
-// ----------------------------------------------------------------- //
+/// @brief Add constant to data cube
+///
+/// Public method for adding a constant to the entire data cube.
+/// The data cube must be of floating-point type.
+///
+/// @param self     Object self-reference.
+/// @param summand  Constant to be added to data cube.
 
 PUBLIC void DataCube_add_const(DataCube *self, const double summand)
 {
@@ -1427,39 +1358,30 @@ PUBLIC void DataCube_add_const(DataCube *self, const double summand)
 
 
 
-// ----------------------------------------------------------------- //
-// Calculate the standard deviation about a value                    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) value   - Value about which to calculate the standard       //
-//                 deviation.                                        //
-//   (3) cadence - Cadence used in the calculation, i.e. a cadence   //
-//                 of N will calculate the standard deviation using  //
-//                 every N-th element from the array.                //
-//   (4) range   - Flux range to be used in the calculation. Options //
-//                 are 0 (entire flux range), -1 (negative fluxes    //
-//                 only) and +1 (positive fluxes only).              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Standard deviation about the specified value.                   //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for calculating the standard deviation of the     //
-//   data array about a specified value. The cadence specifies which //
-//   fraction of the elements in the array will be used in the cal-  //
-//   culation; it can be set to > 1 for large arrays in order to     //
-//   reduce the processing time of the algorithm. The range defines  //
-//   the flux range to be used; if set to 0, all pixels will be      //
-//   used, whereas a positive or negative value indicates that only  //
-//   positive or negative pixels should be used, respectively. This  //
-//   is useful for increasing the robustness of the standard devia-  //
-//   tion in the presence of negative or positive flux or artefacts  //
-//   in the data.                                                    //
-// ----------------------------------------------------------------- //
+/// @brief Calculate the standard deviation about a value
+///
+/// Public method for calculating the standard deviation of the
+/// data array about a specified value. The cadence specifies which
+/// fraction of the elements in the array will be used in the
+/// calculation; it can be set to > 1 for large arrays in order to
+/// reduce the processing time of the algorithm. The range defines
+/// the flux range to be used; if set to 0, all pixels will be used,
+/// whereas a positive or negative value indicates that only positive
+/// or negative pixels should be used, respectively. This is useful
+/// for increasing the robustness of the standard deviation in the
+/// presence of negative or positive flux or artefacts in the data.
+///
+/// @param self     Object self-reference.
+/// @param value    Value about which to calculate the standard
+///                 deviation.
+/// @param cadence  Cadence used in the calculation, i.e. a cadence
+///                 of N will calculate the standard deviation using
+///                 every N-th element from the array.
+/// @param range    Flux range to be used in the calculation. Options
+///                 are 0 (entire flux range), -1 (negative fluxes
+///                 only) and +1 (positive fluxes only).
+///
+/// @return Standard deviation about the specified value.
 
 PUBLIC double DataCube_stat_std(const DataCube *self, const double value, const size_t cadence, const int range)
 {
@@ -1474,32 +1396,26 @@ PUBLIC double DataCube_stat_std(const DataCube *self, const double value, const 
 
 
 
-// ----------------------------------------------------------------- //
-// Calculate the median absolute deviation of the array              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) value   - Value relative to which to calculate the MAD.     //
-//   (3) cadence - Cadence used in the calculation, i.e. a cadence   //
-//                 of N will calculate the standard deviation using  //
-//                 every N-th element from the array.                //
-//   (4) range   - Flux range to be used in the calculation. Options //
-//                 are 0 (entire flux range), -1 (negative fluxes    //
-//                 only) and +1 (positive fluxes only).              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Median absolute deviation of the data array.                    //
-//   were found.                                                     //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for calculating the median absolute deviation re- //
-//   lative to the specified value. NOTE that a copy of (parts of)   //
-//   the data array will need to be made in order to calculate the   //
-//   median of the data as part of this process.                     //
-// ----------------------------------------------------------------- //
+/// @brief Calculate the median absolute deviation of the array
+///
+/// Public method for calculating the median absolute deviation re
+/// relative to the specified value.
+///
+/// @param self     Object self-reference.
+/// @param value    Value relative to which to calculate the MAD.
+/// @param cadence  Cadence used in the calculation, i.e. a cadence
+///                 of N will calculate the standard deviation using
+///                 every N-th element from the array.
+/// @param range    Flux range to be used in the calculation. Options
+///                 are 0 (entire flux range), -1 (negative fluxes
+///                 only) and +1 (positive fluxes only).
+///
+/// @return Median absolute deviation of the data array.
+///         were found.
+///
+/// @note A copy of (parts of) the data array will need to be made
+///       in order to calculate the median of the data as part of
+///       this process.
 
 PUBLIC double DataCube_stat_mad(const DataCube *self, const double value, const size_t cadence, const int range)
 {
@@ -1515,38 +1431,29 @@ PUBLIC double DataCube_stat_mad(const DataCube *self, const double value, const 
 
 
 
-// ----------------------------------------------------------------- //
-// Calculate the noise via Gaussian fitting to flux histogram        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) cadence - Cadence used in the calculation, i.e. a cadence   //
-//                 of N will calculate the flux histogram using      //
-//                 every N-th element from the array.                //
-//   (3) range   - Flux range to be used in the calculation. Options //
-//                 are 0 (entire flux range), -1 (negative fluxes    //
-//                 only) and +1 (positive fluxes only).              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Standard deviation of the Gaussian fitted to the histogram.     //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for determining the noise level in the data array //
-//   by fitting a Gaussian function to the flux histogram and deter- //
-//   mining the standard deviation of that Gaussian. The cadence     //
-//   specifies which fraction of the elements in the array will be   //
-//   used in the calculation; it can be set to > 1 for large arrays  //
-//   in order to reduce the processing time of the algorithm. The    //
-//   range defines the flux range to be used; if set to 0, all pix-  //
-//   els will be used, whereas a positive or negative value indi-    //
-//   cates that only positive or negative pixels should be used, re- //
-//   spectively. This is useful for increasing the robustness of the //
-//   standard deviation in the presence of negative or positive flux //
-//   or artefacts in the data.                                       //
-// ----------------------------------------------------------------- //
+/// @brief Calculate the noise via Gaussian fitting to flux histogram
+///
+/// Public method for determining the noise level in the data array
+/// by fitting a Gaussian function to the flux histogram and determining
+/// the standard deviation of that Gaussian. The cadence specifies which
+/// fraction of the elements in the array will be used in the
+/// calculation; it can be set to > 1 for large arrays in order to
+/// reduce the processing time of the algorithm. The range defines the
+/// flux range to be used; if set to 0, all pixels will be used, whereas
+/// a positive or negative value indicates that only positive or
+/// negative pixels should be used, respectively. This is useful for
+/// increasing the robustness of the standard deviation in the presence
+/// of negative or positive flux or artefacts in the data.
+///
+/// @param self     Object self-reference.
+/// @param cadence  Cadence used in the calculation, i.e. a cadence
+///                 of N will calculate the flux histogram using
+///                 every N-th element from the array.
+/// @param range    Flux range to be used in the calculation. Options
+///                 are 0 (entire flux range), -1 (negative fluxes
+///                 only) and +1 (positive fluxes only).
+///
+/// @return Standard deviation of the Gaussian fitted to the histogram.
 
 PUBLIC double DataCube_stat_gauss(const DataCube *self, const size_t cadence, const int range)
 {
@@ -1561,35 +1468,26 @@ PUBLIC double DataCube_stat_gauss(const DataCube *self, const size_t cadence, co
 
 
 
-// ----------------------------------------------------------------- //
-// Global noise scaling along spectral axis                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) statistic - Statistic to use in noise measurement. Can be   //
-//                   NOISE_STAT_STD for standard deviation,          //
-//                   NOISE_STAT_MAD for median absolute deviation or //
-//                   NOISE_STAT_GAUSS for Gaussian fitting to the    //
-//                   flux histogram.                                 //
-//   (3) range     - Flux range to be used in noise measurement. Can //
-//                   be -1, 0 or +1 for negative range, full range   //
-//                   or positive range, respectively.                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for dividing the data cube by the global noise    //
-//   level as a function of frequency as measured in each spatial    //
-//   plane of the cube. The statistic and flux range used in the     //
-//   noise measurement can be selected to ensure a robust noise mea- //
-//   surement. This method should be applied prior to source finding //
-//   on data cubes where the noise level varies with frequency, but  //
-//   is constant along the two spatial axes in each channel.         //
-// ----------------------------------------------------------------- //
+/// @brief Global noise scaling along spectral axis
+///
+/// Public method for dividing the data cube by the global noise
+/// level as a function of frequency as measured in each spatial
+/// plane of the cube. The statistic and flux range used in the
+/// noise measurement can be selected to ensure a robust noise
+/// measurement. This method should be applied prior to source
+/// finding on data cubes where the noise level varies with
+/// frequency, but is constant along the two spatial axes in each
+/// channel.
+///
+/// @param self       Object self-reference.
+/// @param statistic  Statistic to use in noise measurement. Can be
+///                   `NOISE_STAT_STD` for standard deviation,
+///                   `NOISE_STAT_MAD` for median absolute deviation or
+///                   `NOISE_STAT_GAUSS` for Gaussian fitting to the
+///                   flux histogram.
+/// @param range      Flux range to be used in noise measurement. Can
+///                   be -1, 0 or +1 for negative range, full range
+///                   or positive range, respectively.
 
 PUBLIC void DataCube_scale_noise_spec(const DataCube *self, const noise_stat statistic, const int range)
 {
@@ -1640,58 +1538,49 @@ PUBLIC void DataCube_scale_noise_spec(const DataCube *self, const noise_stat sta
 
 
 
-// ----------------------------------------------------------------- //
-// Local noise scaling within running window                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self        - Object self-reference.                        //
-//   (2) statistic   - Statistic to use in noise measurement. Can    //
-//                     be NOISE_STAT_STD for standard deviation,     //
-//                     NOISE_STAT_MAD for median absolute deviation  //
-//                     or NOISE_STAT_GAUSS for Gaussian fitting to   //
-//                     the flux histogram.                           //
-//                     Alternatively, NOISE_STAT_MEAN or NOISE_STAT_ //
-//                     MEDIAN can be used to measure and subtract    //
-//                     the mean or median value.                     //
-//   (3) range       - Flux range to be used in noise measurement.   //
-//                     Can be -1, 0 or +1 for negative range, full   //
-//                     range or positive range, respectively. NOTE   //
-//                     that this has no effect if the mean or median //
-//                     is to be calculated rather than the noise.    //
-//   (4) window_spat - Spatial window size in pixels; must be odd.   //
-//   (5) window_spec - Spectral window size in chan.; must be odd.   //
-//   (6) grid_spat   - Spatial grid size in pixels; must be odd.     //
-//   (7) grid_spec   - Spectral grid size in chan.; must be odd.     //
-//   (8) interpolate - If true, the noise or mean/median values will //
-//                     be interpolated in between the grid points.   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns a data cube containing the measured noise values (or    //
-//   the mean/median value if requested).                            //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for dividing the data cube by the local noise le- //
-//   vel in a running window throughout the entire data cube. The    //
-//   size of the window and the size of the grid across which the    //
-//   window is moved within the cube can be specified by the user.   //
-//   If set to 0, default values will instead apply, with the grid   //
-//   size being set to half the window size. Nearest-neighbour in-   //
-//   terpolation will be used by default to fill the grid cells with //
-//   the noise measurement, unless 'interpolation' is set to true,   //
-//   in which case bilinear interpolation will instead be used for   //
-//   positions in between the grid points. Once completed, the me-   //
-//   thod will return a DataCube object that contains the measured   //
-//   noise values by which the cube was divided.                     //
-//                                                                   //
-//   Alternatively, this method can also be used to measure and sub- //
-//   tract either the mean or the median across the specified window //
-//   by setting the argument 'statistic' to either 'NOISE_STAT_MEAN' //
-//   or 'NOISE_STAT_MEDIAN'. This can be useful to remove DC offsets //
-//   or bandpass ripples from the data.                              //
-// ----------------------------------------------------------------- //
+/// @brief Local noise scaling within running window
+///
+/// Public method for dividing the data cube by the local noise
+/// level in a running window throughout the entire data cube. The
+/// size of the window and the size of the grid across which the
+/// window is moved within the cube can be specified by the user.
+/// If set to 0, default values will instead apply, with the grid
+/// size being set to half the window size. Nearest-neighbour
+/// interpolation will be used by default to fill the grid cells with
+/// the noise measurement, unless `interpolation` is set to `true`,
+/// in which case bilinear interpolation will instead be used for
+/// positions in between the grid points. Once completed, the
+/// method will return a DataCube object that contains the measured
+/// noise values by which the cube was divided.
+///
+/// Alternatively, this method can also be used to measure and
+/// subtract either the mean or the median across the specified window
+/// by setting the argument `statistic` to either `NOISE_STAT_MEAN`
+/// or `NOISE_STAT_MEDIAN`. This can be useful to remove DC offsets
+/// or bandpass ripples from the data.
+///
+/// @param self         Object self-reference.
+/// @param statistic    Statistic to use in noise measurement. Can
+///                     be `NOISE_STAT_STD` for standard deviation,
+///                     `NOISE_STAT_MAD` for median absolute deviation
+///                     or `NOISE_STAT_GAUSS` for Gaussian fitting to
+///                     the flux histogram. Alternatively, `NOISE_STAT_MEAN`
+///                     or `NOISE_STAT_MEDIAN` can be used to measure and
+///                     subtract the mean or median value.
+/// @param range        Flux range to be used in noise measurement.
+///                     Can be -1, 0 or +1 for negative range, full
+///                     range or positive range, respectively. Note
+///                     that this has no effect if the mean or median
+///                     is to be calculated rather than the noise.
+/// @param window_spat  Spatial window size in pixels; must be odd.
+/// @param window_spec  Spectral window size in chan.; must be odd.
+/// @param grid_spat    Spatial grid size in pixels; must be odd.
+/// @param grid_spec    Spectral grid size in chan.; must be odd.
+/// @param interpolate  If `true`, the noise or mean/median values will
+///                     be interpolated in between the grid points.
+///
+/// @return Returns a data cube containing the measured noise values
+///         (or the mean/median value if requested).
 
 PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat statistic, const int range, size_t window_spat, size_t window_spec, size_t grid_spat, size_t grid_spec, const bool interpolate)
 {
@@ -1981,26 +1870,17 @@ PUBLIC DataCube *DataCube_scale_noise_local(DataCube *self, const noise_stat sta
 
 
 
-// ----------------------------------------------------------------- //
-// Apply boxcar filter to spectral axis                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) radius  - Filter radius in channels.                        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for convolving each spectrum of the data cube     //
-//   with a boxcar filter of size 2 * radius + 1. The algorithm is   //
-//   NaN-safe by setting all NaN values to 0 prior to filtering. Any //
-//   pixel outside of the cube's spectral range is also assumed to   //
-//   be 0.                                                           //
-// ----------------------------------------------------------------- //
+/// @brief Apply boxcar filter to spectral axis
+///
+/// Public method for convolving each spectrum of the data cube
+/// with a boxcar filter of size `2 * radius + 1`.
+///
+/// @note The algorithm is `NaN`-safe by setting all `NaN` values
+///       to 0 prior to filtering. Any pixel outside of the cube's
+///       spectral range is also assumed to be 0.
+///
+/// @param self    Object self-reference.
+/// @param radius  Filter radius in channels.
 
 PUBLIC void DataCube_boxcar_filter(DataCube *self, size_t radius)
 {
@@ -2080,32 +1960,23 @@ PUBLIC void DataCube_boxcar_filter(DataCube *self, size_t radius)
 
 
 
-// ----------------------------------------------------------------- //
-// Apply 2D Gaussian filter to spatial planes                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self    - Object self-reference.                            //
-//   (2) sigma   - Standard deviation of the Gaussian in pixels.     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for convolving each spatial image plane (x-y) of  //
-//   the data cube with a Gaussian function of standard deviation    //
-//   sigma. The Gaussian convolution is approximated through a set   //
-//   of 1D boxcar filters, which makes the algorithm extremely fast. //
-//   Limitations from this approach are that the resulting convolu-  //
-//   tion kernel is only an approximation of a Gaussian (although a  //
-//   fairly accurate one) and the value of sigma can only be appro-  //
-//   ximated (typically within +/- 0.2 sigma) and must be at least   //
-//   1.5 pixels.                                                     //
-//   The algorithm is NaN-safe by setting all NaN values to 0. Any   //
-//   pixel outside of the image boundaries is also assumed to be 0.  //
-// ----------------------------------------------------------------- //
+/// @brief Apply 2D Gaussian filter to spatial planes
+///
+/// Public method for convolving each spatial image plane (x-y) of
+/// the data cube with a Gaussian function of standard deviation
+/// sigma. The Gaussian convolution is approximated through a set
+/// of 1D boxcar filters, which makes the algorithm extremely fast.
+/// Limitations from this approach are that the resulting convolution
+/// kernel is only an approximation of a Gaussian (although a fairly
+/// accurate one) and the value of `sigma` can only be approximated
+/// (typically within +/- 0.2 sigma) and must be at least 1.5 pixels.
+///
+/// @note The algorithm is `NaN`-safe by setting all `NaN` values to 0.
+///       Any pixel outside of the image boundaries is also assumed
+///       to be 0.
+///
+/// @param self   Object self-reference.
+/// @param sigma  Standard deviation of the Gaussian in pixels.
 
 PUBLIC void DataCube_gaussian_filter(DataCube *self, const double sigma)
 {
@@ -2116,7 +1987,7 @@ PUBLIC void DataCube_gaussian_filter(DataCube *self, const double sigma)
 	
 	// Set up parameters required for boxcar filter
 	// NOTE: We don't need to extract a copy of each image plane, as
-	//       x-y planes are contiguous in memory.
+	///     x-y planes are contiguous in memory.
 	size_t n_iter;
 	size_t filter_radius;
 	optimal_filter_size_dbl(sigma, &filter_radius, &n_iter);
@@ -2176,44 +2047,34 @@ PUBLIC void DataCube_gaussian_filter(DataCube *self, const double sigma)
 
 
 
-// ----------------------------------------------------------------- //
-// Subtract residual continuum emission                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) order     - Order of polynomial fit (0 or 1).               //
-//   (3) shift     - Amount by which to shift and subtract spectrum. //
-//   (4) padding   - Padding around flagged channels with emission.  //
-//   (5) threshold - Threshold for flagging of emission.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for fitting and subtracting a polynomial from the //
-//   spectrum at each spatial position of the data cube. Currently,  //
-//   order = 0 (constant offset) and 1 (offset + linear slope) are   //
-//   implemented and supported.                                      //
-//   The algorithm works by subtracting the spectrum shifted by      //
-//   -shift from the same spectrum shifted by +shift. It then uses a //
-//   robust algorithm for measuring the noise in the shifted and     //
-//   subtracted spectrum and flags all channels in the original      //
-//   spectrum where the flux density exceeds threshold times the     //
-//   noise level. A certain amount of padding can be applied by set- //
-//   ting the padding parameter to > 0. In a last step, a polynomial //
-//   of order 0 or 1 is fitted and subtracted from all channels in   //
-//   the original data cube.                                         //
-//   For this algorithm to work correctly, the data must be a 3D     //
-//   cube with a sufficiently large number of channels. In addition, //
-//   the continuum residual must be a simple offset + slope, and     //
-//   higher-order variation cannot be handled at the moment. It is   //
-//   also crucial that any emission lines in the data cube do not    //
-//   cover more than about 20% of the spectral band, as otherwise    //
-//   their presence may start to influence the fit.                  //
-// ----------------------------------------------------------------- //
+/// @brief Subtract residual continuum emission
+///
+/// Public method for fitting and subtracting a polynomial from the
+/// spectrum at each spatial position of the data cube. Currently,
+/// `order` = 0 (constant offset) and 1 (offset + linear slope) are
+/// implemented and supported.
+/// The algorithm works by subtracting the spectrum shifted by
+/// `-shift` from the same spectrum shifted by `+shift`. It then uses
+/// a robust algorithm for measuring the noise in the shifted and
+/// subtracted spectrum and flags all channels in the original
+/// spectrum where the flux density exceeds threshold times the
+/// noise level. A certain amount of padding can be applied by setting
+/// the padding parameter to > 0. In a last step, a polynomial of
+/// order 0 or 1 is fitted and subtracted from all channels in the
+/// original data cube.
+/// For this algorithm to work correctly, the data must be a 3D
+/// cube with a sufficiently large number of channels. In addition,
+/// the continuum residual must be a simple offset + slope, and
+/// higher-order variation cannot be handled at the moment. It is
+/// also crucial that any emission lines in the data cube do not
+/// cover more than about 20% of the spectral band, as otherwise
+/// their presence may start to influence the fit.
+///
+/// @param self       Object self-reference.
+/// @param order      Order of polynomial fit (0 or 1).
+/// @param shift      Amount by which to shift and subtract spectrum.
+/// @param padding    Padding around flagged channels with emission.
+/// @param threshold  Threshold for flagging of emission.
 
 PUBLIC void DataCube_contsub(DataCube *self, unsigned int order, size_t shift, const size_t padding, double threshold)
 {
@@ -2406,25 +2267,16 @@ PUBLIC void DataCube_contsub(DataCube *self, unsigned int order, size_t shift, c
 
 
 
-// ----------------------------------------------------------------- //
-// Mask pixels of abs(value) > threshold                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) maskCube  - Pointer to mask cube.                           //
-//   (3) threshold - Flux threshold for masking operation.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting pixels in the mask cube to 1 when     //
-//   their absolute value in the data cube is greater than the spe-  //
-//   cified threshold.                                               //
-// ----------------------------------------------------------------- //
+/// @brief Mask pixels of abs(value) > threshold
+///
+/// Public method for setting pixels in the mask cube to 1 when
+/// their absolute value in the data cube is greater than the
+/// specified threshold. Similar to DataCube_mask_8(), but for
+/// mask cubes of any integer type.
+///
+/// @param self       Object self-reference.
+/// @param maskCube   Pointer to mask cube.
+/// @param threshold  Flux threshold for masking operation.
 
 PUBLIC void DataCube_mask(const DataCube *self, DataCube *maskCube, const double threshold)
 {
@@ -2480,7 +2332,19 @@ PUBLIC void DataCube_mask(const DataCube *self, DataCube *maskCube, const double
 	return;
 }
 
-// Same, but for 8-bit mask cubes (faster)
+
+
+/// @brief Mask pixels of abs(value) > threshold
+///
+/// Public method for setting pixels in the mask cube to `value`
+/// when their absolute value in the data cube is greater than the
+/// specified threshold. Similar to DataCube_mask(), but for 8-bit
+/// masks.
+///
+/// @param self       Object self-reference.
+/// @param maskCube   Pointer to mask cube.
+/// @param threshold  Flux threshold for masking operation.
+/// @param value      Value to set the mask to.
 
 PUBLIC void DataCube_mask_8(const DataCube *self, DataCube *maskCube, const double threshold, const uint8_t value)
 {
@@ -2522,25 +2386,16 @@ PUBLIC void DataCube_mask_8(const DataCube *self, DataCube *maskCube, const doub
 
 
 
-// ----------------------------------------------------------------- //
-// Set masked pixels to constant value                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) maskCube  - Pointer to mask cube.                           //
-//   (3) value     - Flux value to replace pixels with.              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for replacing the values of all pixels in the     //
-//   data cube that are non-zero in the mask cube to their signum    //
-//   multiplied by the specified value.                              //
-// ----------------------------------------------------------------- //
+/// @brief Set masked pixels to constant value
+///
+/// Public method for replacing the values of all pixels in the
+/// data cube that are non-zero in the mask cube to their signum
+/// multiplied by the specified value. Same as DataCube_set_masked_8(),
+/// but for masks of any integer type.
+///
+/// @param self      Object self-reference.
+/// @param maskCube  Pointer to mask cube.
+/// @param value     Flux value to replace pixels with.
 
 PUBLIC void DataCube_set_masked(DataCube *self, const DataCube *maskCube, const double value)
 {
@@ -2582,7 +2437,18 @@ PUBLIC void DataCube_set_masked(DataCube *self, const DataCube *maskCube, const 
 	return;
 }
 
-// Same, but for 8-bit mask cube (faster) //
+
+
+/// @brief Set masked pixels to constant value
+///
+/// Public method for replacing the values of all pixels in the
+/// data cube that are non-zero in the mask cube to their signum
+/// multiplied by the specified value. Same as DataCube_set_masked(),
+/// but for 8-bit masks.
+///
+/// @param self      Object self-reference.
+/// @param maskCube  Pointer to mask cube.
+/// @param value     Flux value to replace pixels with.
 
 PUBLIC void DataCube_set_masked_8(DataCube *self, const DataCube *maskCube, const double value)
 {
@@ -2622,24 +2488,14 @@ PUBLIC void DataCube_set_masked_8(DataCube *self, const DataCube *maskCube, cons
 
 
 
-// ----------------------------------------------------------------- //
-// Replace masked pixels with the specified value                    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) value     - Mask value to replace pixels with.              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for replacing the values of all pixels in the     //
-//   mask cube that are non-zero with the specified value. The mask  //
-//   cube must be of 32-bit integer type.                            //
-// ----------------------------------------------------------------- //
+/// @brief Replace masked pixels with the specified value
+///
+/// Public method for replacing the values of all pixels in the
+/// mask cube that are non-zero with the specified value. The mask
+/// cube must be of 32-bit integer type.
+///
+/// @param self   Object self-reference.
+/// @param value  Mask value to replace pixels with.
 
 PUBLIC void DataCube_reset_mask_32(DataCube *self, const int32_t value)
 {
@@ -2659,29 +2515,19 @@ PUBLIC void DataCube_reset_mask_32(DataCube *self, const int32_t value)
 
 
 
-// ----------------------------------------------------------------- //
-// Remove unreliable sources from mask and relabel remaining ones    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) filter    - Map object with old and new label pairs of all  //
-//                   reliable sources.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for removing unreliable sources from the mask.    //
-//   This is done by comparing the pixel values with a list of old   //
-//   and new source labels and, if present in that list, replace the //
-//   pixel value with its new label. Pixel values not present in the //
-//   list will be discarded by setting them to 0. If an empty filter //
-//   is supplied, a warning message appears and no filtering will be //
-//   done.                                                           //
-// ----------------------------------------------------------------- //
+/// @brief Remove unreliable sources from mask and relabel remaining ones
+///
+/// Public method for removing unreliable sources from the mask.
+/// This is done by comparing the pixel values with a list of old
+/// and new source labels and, if present in that list, replace the
+/// pixel value with its new label. Pixel values not present in the
+/// list will be discarded by setting them to 0. If an empty filter
+/// is supplied, a warning message appears and no filtering will be
+/// done.
+///
+/// @param self    Object self-reference.
+/// @param filter  Map object with old and new label pairs of all
+///                reliable sources.
 
 PUBLIC void DataCube_filter_mask_32(DataCube *self, const Map *filter)
 {
@@ -2712,26 +2558,18 @@ PUBLIC void DataCube_filter_mask_32(DataCube *self, const Map *filter)
 
 
 
-// ----------------------------------------------------------------- //
-// Copy masked pixels from any integer mask to 32-bit mask           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - 32-bit target mask.                             //
-//   (2) source    - integer source mask.                            //
-//   (3) value     - Mask value to set in target mask.               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of masked pixels.                                        //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting all of the pixels that are not equal  //
-//   to zero in the integer source mask to the specified value in    //
-//   the signed 32-bit target mask. This can be used to copy masked  //
-//   pixels from any integer mask to a 32-bit mask.                  //
-// ----------------------------------------------------------------- //
+/// @brief Copy masked pixels from any integer mask to 32-bit mask
+///
+/// Public method for setting all of the pixels that are not equal
+/// to zero in the integer source mask to the specified value in
+/// the signed 32-bit target mask. This can be used to copy masked
+/// pixels from any integer mask to a 32-bit mask.
+///
+/// @param self    32-bit target mask.
+/// @param source  integer source mask.
+/// @param value   Mask value to set in target mask.
+///
+/// @return Number of masked pixels.
 
 PUBLIC size_t DataCube_copy_mask_32(DataCube *self, const DataCube *source, const int32_t value)
 {
@@ -2810,41 +2648,36 @@ PUBLIC size_t DataCube_copy_mask_32(DataCube *self, const DataCube *source, cons
 
 
 
-// ----------------------------------------------------------------- //
-// Grow mask and update basic source parameters                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Data cube.                                     //
-//   (2) mask       - Mask cube.                                     //
-//   (3) src_id     - ID of source to be grown                       //
-//   (4) radius     - Radius by which to grow (in pixels).           //
-//   (5) mask_value - Value to set grown pixels to in the mask.      //
-//   (6) f_sum      - Summed flux density prior to mask growth.      //
-//   (7) f_min      - Minimum flux density prior to mask growth.     //
-//   (8) f_max      - Maximum flux density prior to mask growth.     //
-//   (9) n_pix      - Number of pixels in mask prior to mask growth. //
-//  (10) flag       - Source flag prior to mask growth.              //
-//  (11-16) x_min, x_max, y_min, y_max, z_min, z_max                 //
-//                  - Source bounding box prior to mask growth.      //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for growing the mask of the source identified by //
-//   src_id radially outwards using a circular kernel of the speci-  //
-//   fied radius (in pixels). The algorithm will update the relevant //
-//   source parameters (which must be provided as pointers holding   //
-//   the old values prior to mask growth), including fluxes, flags   //
-//   and source bounding boxes. In addition, the user can specify a  //
-//   mask value to which all newly added pixels will be set in the   //
-//   source mask. Note that as the algorithm only grows the mask in  //
-//   x and y, the bounding box in z will not change and will need to //
-//   be provided by value rather than by reference.                  //
-// ----------------------------------------------------------------- //
+/// @brief Grow mask and update basic source parameters
+///
+/// Private method for growing the mask of the source identified by
+/// `src_id` radially outwards using a circular kernel of the specified
+/// radius (in pixels). The algorithm will update the relevant source
+/// parameters (which must be provided as pointers holding the old
+/// values prior to mask growth), including fluxes, flags and source
+/// bounding boxes. In addition, the user can specify a mask value to
+/// which all newly added pixels will be set in the source mask.
+///
+/// @param self        Data cube.
+/// @param mask        Mask cube.
+/// @param src_id      ID of source to be grown.
+/// @param radius      Radius by which to grow (in pixels).
+/// @param mask_value  Value to set grown pixels to in the mask.
+/// @param f_sum       Summed flux density prior to mask growth.
+/// @param f_min       Minimum flux density prior to mask growth.
+/// @param f_max       Maximum flux density prior to mask growth.
+/// @param n_pix       Number of pixels in mask prior to mask growth.
+/// @param flag        Source flag prior to mask growth.
+/// @param x_min       Source bounding box prior to mask growth.
+/// @param x_max       Source bounding box prior to mask growth.
+/// @param y_min       Source bounding box prior to mask growth.
+/// @param y_max       Source bounding box prior to mask growth.
+/// @param z_min       Source bounding box prior to mask growth.
+/// @param z_max       Source bounding box prior to mask growth.
+///
+/// @note As the algorithm only grows the mask in x and y, the
+///       bounding box in z will not change and will need to be
+///       provided by value rather than by reference.
 
 PRIVATE void DataCube_grow_mask_xy(const DataCube *self, DataCube *mask, const long int src_id, const size_t radius, const long int mask_value, double *f_sum, double *f_min, double *f_max, size_t *n_pix, long int *flag, size_t *x_min, size_t *x_max, size_t *y_min, size_t *y_max, const size_t z_min, const size_t z_max)
 {
@@ -2938,39 +2771,30 @@ PRIVATE void DataCube_grow_mask_xy(const DataCube *self, DataCube *mask, const l
 
 
 
-// ----------------------------------------------------------------- //
-// Mask dilation in the spatial plane                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Data cube.                                      //
-//   (2) mask      - Mask cube.                                      //
-//   (3) cat       - Source catalogue.                               //
-//   (4) iter_max  - Maximum number of iterations.                   //
-//   (5) threshold - Threshold for relative flux increase.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for dilating the masks of all sources found in    //
-//   catalogue in the spatial plane. Dilation will occur iterative-  //
-//   ly until either the maximum number of iterations is reached or  //
-//   the relative increase in source flux drops below the specified  //
-//   threshold. If the threshold is negative, then the mask will be  //
-//   dilated by the maximum number of iterations regardless of the   //
-//   resulting flux change.                                          //
-//   Mask dilation will work correctly for sources with positive or  //
-//   negative flux; in the latter case the integrated flux is expec- //
-//   ted to decrease in each iteration. The source parameters in the //
-//   catalogue will be updated with the new, dilated values.         //
-//   Dilation will be carried out using a circular mask and itera-   //
-//   tively progress outwards by increasing the radius of the mask   //
-//   by 1 pixel in each iteration. The source mask should therefore  //
-//   approach a circle for a large number of iterations.             //
-// ----------------------------------------------------------------- //
+/// @brief Mask dilation in the spatial plane
+///
+/// Public method for dilating the masks of all sources found in
+/// catalogue in the spatial plane. Dilation will occur iteratively
+/// until either the maximum number of iterations is reached or
+/// the relative increase in source flux drops below the specified
+/// threshold. If the threshold is negative, then the mask will be
+/// dilated by the maximum number of iterations regardless of the
+/// resulting flux change.
+///
+/// Mask dilation will work correctly for sources with positive or
+/// negative flux; in the latter case the integrated flux is expected
+/// to decrease in each iteration. The source parameters in the
+/// catalogue will be updated with the new, dilated values.
+/// Dilation will be carried out using a circular mask and iteratively
+/// progress outwards by increasing the radius of the mask by
+/// 1 pixel in each iteration. The source mask should therefore
+/// approach a circle for a large number of iterations.
+///
+/// @param self       Data cube.
+/// @param mask       Mask cube.
+/// @param cat        Source catalogue.
+/// @param iter_max   Maximum number of iterations.
+/// @param threshold  Threshold for relative flux increase.
 
 PUBLIC void DataCube_dilate_mask_xy(const DataCube *self, DataCube *mask, Catalog *cat, const size_t iter_max, const double threshold)
 {
@@ -3134,35 +2958,26 @@ PUBLIC void DataCube_dilate_mask_xy(const DataCube *self, DataCube *mask, Catalo
 
 
 
-// ----------------------------------------------------------------- //
-// Mask dilation along spectral axis                                 //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Data cube.                                      //
-//   (2) mask      - Mask cube.                                      //
-//   (3) cat       - Source catalogue.                               //
-//   (4) iter_max  - Maximum number of iterations.                   //
-//   (5) threshold - Threshold for relative flux increase.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for dilating the masks of all sources found in    //
-//   catalogue along the spectral axis. Dilation will occur itera-   //
-//   tively until either the maximum number of iterations is reached //
-//   or the relative increase in source flux drops below the speci-  //
-//   field threshold.                                                //
-//   Mask dilation will work correctly for sources with positive or  //
-//   negative flux; in the latter case the integrated flux is expec- //
-//   ted to decrease in each iteration. The source parameters in the //
-//   catalogue will be updated with the new, dilated values.         //
-//   Dilation will progress by 1 channel per iteration in the di-    //
-//   rections directly adjacent to a pixel along the spectral axis.  //
-// ----------------------------------------------------------------- //
+/// @brief Mask dilation along spectral axis
+///
+/// Public method for dilating the masks of all sources found in
+/// catalogue along the spectral axis. Dilation will occur iteratively
+/// until either the maximum number of iterations is reached or the
+/// relative increase in source flux drops below the specified
+/// threshold.
+///
+/// Mask dilation will work correctly for sources with positive or
+/// negative flux; in the latter case the integrated flux is expected
+/// to decrease in each iteration. The source parameters in the
+/// catalogue will be updated with the new, dilated values.
+/// Dilation will progress by 1 channel per iteration in the
+/// directions directly adjacent to a pixel along the spectral axis.
+///
+/// @param self       Data cube.
+/// @param mask       Mask cube.
+/// @param cat        Source catalogue.
+/// @param iter_max   Maximum number of iterations.
+/// @param threshold  Threshold for relative flux increase.
 
 PUBLIC void DataCube_dilate_mask_z(const DataCube *self, DataCube *mask, Catalog *cat, const size_t iter_max, const double threshold)
 {
@@ -3346,26 +3161,18 @@ PUBLIC void DataCube_dilate_mask_z(const DataCube *self, DataCube *mask, Catalog
 
 
 
-// ----------------------------------------------------------------- //
-// 2-D projection of 3-D mask                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Projected 2-D mask image.                                       //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for projecting a 3-D mask cube onto a 2-D mask    //
-//   image along the spectral axis. It is implicitly assumed that    //
-//   the mask cube is of integer type. The projected 2-D image will  //
-//   be returned. Note that it is the caller's responsibility to run //
-//   the destructor on the returned image when it is no longer re-   //
-//   quired to release its memory again.                             //
-// ----------------------------------------------------------------- //
+/// @brief 2-D projection of 3-D mask
+///
+/// Public method for projecting a 3-D mask cube onto a 2-D mask
+/// image along the spectral axis. It is implicitly assumed that
+/// the mask cube is of integer type. The projected 2-D image will
+/// be returned. Note that it is the caller's responsibility to run
+/// the destructor on the returned image when it is no longer
+/// required to release its memory again.
+///
+/// @param self  Object self-reference.
+///
+/// @return Projected 2-D mask image.
 
 PUBLIC DataCube *DataCube_2d_mask(const DataCube *self)
 {
@@ -3398,31 +3205,21 @@ PUBLIC DataCube *DataCube_2d_mask(const DataCube *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Flag regions in data cube                                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) region    - Array containing the regions to be flagged.     //
-//                   Must be of the form x_min, x_max, y_min, y_max, //
-//                   z_min, z_max, ... where the boundaries are in-  //
-//                   clusive.                                        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for flagging the specified regions in the data    //
-//   cube. If the data cube is of floating-point type, then all      //
-//   pixels to be flagged will be set to NaN. For integer cubes a    //
-//   value of 0 will instead be used. The region must contain a mul- //
-//   tiple of 6 entries of the form x_min, x_max, y_min, y_max,      //
-//   z_min, z_max. Boundaries extending beyond the boundaries of the //
-//   cube will be automatically adjusted.                            //
-// ----------------------------------------------------------------- //
+/// @brief Flag regions in data cube
+///
+/// @param self    Object self-reference.
+/// @param region  Array containing the regions to be flagged.
+///                Must be of the form `x_min`, `x_max`, `y_min`,
+///                `y_max`, `z_min`, `z_max`, ... where the
+///                boundaries are inclusive.
+///
+/// Public method for flagging the specified regions in the data
+/// cube. If the data cube is of floating-point type, then all
+/// pixels to be flagged will be set to `NaN`. For integer cubes a
+/// value of 0 will instead be used. The region must contain a
+/// multiple of 6 entries of the form `x_min`, `x_max`, `y_min`, `y_max`,
+/// `z_min`, `z_max`. Boundaries extending beyond the boundaries of the
+/// cube will be automatically adjusted.
 
 PUBLIC void DataCube_flag_regions(DataCube *self, const Array_siz *region)
 {
@@ -3476,32 +3273,22 @@ PUBLIC void DataCube_flag_regions(DataCube *self, const Array_siz *region)
 
 
 
-// ----------------------------------------------------------------- //
-// Flagging based on catalogue of positions                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//   (2) filename   - Name of the source catalogue file.             //
-//   (3) coord_sys  - Pixel (0) or world (1) coordinates.            //
-//   (4) radius     - Radius of flagging area in pixels.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for flagging positions specified in an external   //
-//   source catalogue file. The file must contain just two columns   //
-//   specifying the longitude and latitude of the positions to be    //
-//   flagged. No other content (e.g. comments) is allowed. The coor- //
-//   dinates can either be specified in pixels (coord_sys = 1) or in //
-//   the native world coordinate system of the data cube (e.g. RA    //
-//   and declination in units of degrees). Lastly, a radius of > 0   //
-//   can be specified, in which case a circular region of that radi- //
-//   us (in pixels) will be flagged around the central coordinate.   //
-// ----------------------------------------------------------------- //
+/// @brief Flagging based on catalogue of positions
+///
+/// Public method for flagging positions specified in an external
+/// source catalogue file. The file must contain just two columns
+/// specifying the longitude and latitude of the positions to be
+/// flagged. No other content (e.g. comments) is allowed. The
+/// coordinates can either be specified in pixels (`coord_sys` = 1) or
+/// in the native world coordinate system of the data cube (e.g. RA
+/// and declination in units of degrees). Lastly, a radius of > 0
+/// can be specified, in which case a circular region of that radius
+/// (in pixels) will be flagged around the central coordinate.
+///
+/// @param self       Object self-reference.
+/// @param filename   Name of the source catalogue file.
+/// @param coord_sys  Pixel (0) or world (1) coordinates.
+/// @param radius     Radius of flagging area in pixels.
 
 PUBLIC void DataCube_continuum_flagging(DataCube *self, const char *filename, const int coord_sys, const long int radius)
 {
@@ -3586,36 +3373,31 @@ PUBLIC void DataCube_continuum_flagging(DataCube *self, const char *filename, co
 
 
 
-// ----------------------------------------------------------------- //
-// Automatic flagging module                                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) threshold - Threshold for flagging (see description below). //
-//   (3) mode      - Flagging mode; 0 = no flagging, 1 = channels,   //
-//                   2 = pixels, 3 = channels + pixels.              //
-//   (4) region    - Array containing the regions to be flagged.     //
-//                   New regions to be flagged will be appended to   //
-//                   any existing region specifications.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for automatically determining spectral channels   //
-//   and/or spatial pixels to be flagged. The algorithm first deter- //
-//   mines the RMS in each channel or pixel. It then calculates the  //
-//   median of the RMS values across all channels or pixels to de-   //
-//   termine the typical RMS. Next, the median absolute deviation    //
-//   will be determined as a measure of the scatter of the indivi-   //
-//   dual RMS values about the median. Lastly, any pixels or chan-   //
-//   nels with |rms - median| > threshold * MAD will be added to the //
-//   array of regions to be flagged. The order of the region speci-  //
-//   fication is x_min, x_max, y_min, y_max, z_min, z_max.           //
-// ----------------------------------------------------------------- //
+/// @brief Automatic flagging module
+///
+/// Public method for automatically determining spectral channels
+/// and/or spatial pixels to be flagged. The algorithm first determines
+/// the RMS in each channel or pixel. It then calculates the median of
+/// the RMS values across all channels or pixels to determine the
+/// typical RMS. Next, the median absolute deviation will be determined
+/// as a measure of the scatter of the individual RMS values about the
+/// median. Lastly, any pixels or channels with
+///
+/// \code{.c}
+///   |rms - median| > threshold * MAD
+/// \endcode
+///
+/// will be added to the array of regions to be flagged. The order of the
+/// region specification is `x_min`, `x_max`, `y_min`, `y_max`, `z_min`,
+/// `z_max`.
+///
+/// @param self       Object self-reference.
+/// @param threshold  Threshold for flagging (see description below).
+/// @param mode       Flagging mode; 0 = no flagging, 1 = channels,
+///                   2 = pixels, 3 = channels + pixels.
+/// @param region     Array containing the regions to be flagged.
+///                   New regions to be flagged will be appended to
+///                   any existing region specifications.
 
 PUBLIC void DataCube_autoflag(const DataCube *self, const double threshold, const unsigned int mode, Array_siz *region)
 {
@@ -3802,24 +3584,17 @@ PUBLIC void DataCube_autoflag(const DataCube *self, const double threshold, cons
 
 
 
-// ----------------------------------------------------------------- //
-// Identify pixels with value of infinity for flagging               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) region    - Array for storage of flagging regions.          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of pixels containing a value of infinity.                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for searching for values of infinity in floating- //
-//   point data cubes. Pixels with infinite values will be added to  //
-//   the specified flagging region array for later flagging.         //
-// ----------------------------------------------------------------- //
+/// @brief Identify pixels with value of infinity for flagging
+///
+/// Public method for searching for values of infinity in
+/// floating-point data cubes. Pixels with infinite values will
+/// be added to the specified flagging region array for later
+/// flagging.
+///
+/// @param self    Object self-reference.
+/// @param region  Array for storage of flagging regions.
+///
+/// @return Number of pixels containing a value of infinity.
 
 PUBLIC size_t DataCube_flag_infinity(const DataCube *self, Array_siz *region)
 {
@@ -3867,25 +3642,15 @@ PUBLIC size_t DataCube_flag_infinity(const DataCube *self, Array_siz *region)
 
 
 
-// ----------------------------------------------------------------- //
-// Copy blanked pixels from one cube to another                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) source    - Data cube from which to copy blanked pixels.    //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for copying blanked pixels from one cube to the   //
-//   other. Both cubes need to be of the same size in x, y and z and //
-//   must be of floating-point type. Blanked pixels are assumed to   //
-//   be represented by NaN (not a number).                           //
-// ----------------------------------------------------------------- //
+/// @brief Copy blanked pixels from one cube to another
+///
+/// Public method for copying blanked pixels from one cube to the
+/// other. Both cubes need to be of the same size in x, y and z and
+/// must be of floating-point type. Blanked pixels are assumed to
+/// be represented by `NaN` (not a number).
+///
+/// @param self    Object self-reference.
+/// @param source  Data cube from which to copy blanked pixels.
 
 PUBLIC void DataCube_copy_blanked(DataCube *self, const DataCube *source)
 {
@@ -3946,29 +3711,21 @@ PUBLIC void DataCube_copy_blanked(DataCube *self, const DataCube *source)
 
 
 
-// ----------------------------------------------------------------- //
-// Return array index from x, y and z                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self - Object self-reference.                               //
-//   (2) x    - First coordinate.                                    //
-//   (3) y    - Second coordinate.                                   //
-//   (4) z    - Third coordinate.                                    //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the 1-D array index corresponding to the 3 coordinate   //
-//   values specified under the assumption that the cube is 3-D.     //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method to turn a 3-D pixel coordinate into a 1-D array  //
-//   index position under the fundamental assumption that the cube   //
-//   is three-dimensional. Note that this function will still work   //
-//   for 2-D arrays by simply setting z = 0 and the size of the      //
-//   third axis to 1 (likewise for 1-D arrays).                      //
-// ----------------------------------------------------------------- //
+/// @brief Return array index from x, y and z
+///
+/// Private method to turn a 3-D pixel coordinate into a 1-D array
+/// index position under the fundamental assumption that the cube
+/// is three-dimensional. Note that this function will still work
+/// for 2-D arrays by simply setting `z` = 0 and the size of the
+/// third axis to 1 (likewise for 1-D arrays).
+///
+/// @param self  Object self-reference.
+/// @param x     First coordinate.
+/// @param y     Second coordinate.
+/// @param z     Third coordinate.
+///
+/// @return Returns the 1-D array index corresponding to the 3 coordinate
+/// values specified under the assumption that the cube is 3-D.
 
 PRIVATE inline size_t DataCube_get_index(const DataCube *self, const size_t x, const size_t y, const size_t z)
 {
@@ -3977,30 +3734,20 @@ PRIVATE inline size_t DataCube_get_index(const DataCube *self, const size_t x, c
 
 
 
-// ----------------------------------------------------------------- //
-// Calculate x, y and z from array index                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self  - Object self-reference.                              //
-//   (2) index - Index for which x, y and z are to be determined.    //
-//   (3) x     - First coordinate.                                   //
-//   (4) y     - Second coordinate.                                  //
-//   (5) z     - Third coordinate.                                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for determining the array coordinates x, y and z //
-//   from the specified array index. The results will be written to  //
-//   the specified pointers to x, y and z. Note that this will also  //
-//   work for 2-D arrays for which the size of the third axis is 1   //
-//   (and likewise for 1-D arrays); the resulting z (and/or y) will  //
-//   be 0 in that case.                                              //
-// ----------------------------------------------------------------- //
+/// @brief Calculate x, y and z from array index
+///
+/// Private method for determining the array coordinates x, y and z
+/// from the specified array index. The results will be written to
+/// the specified pointers to `x`, `y` and `z`. Note that this will
+/// also work for 2-D arrays for which the size of the third axis is 1
+/// (and likewise for 1-D arrays); the resulting `z` (and/or y) will
+/// be 0 in that case.
+///
+/// @param self   Object self-reference.
+/// @param index  Index for which `x`, `y` and `z` are to be determined.
+/// @param x      First coordinate.
+/// @param y      Second coordinate.
+/// @param z      Third coordinate.
 
 PRIVATE void DataCube_get_xyz(const DataCube *self, const size_t index, size_t *x, size_t *y, size_t *z)
 {
@@ -4014,109 +3761,103 @@ PRIVATE void DataCube_get_xyz(const DataCube *self, const size_t index, size_t *
 
 
 
-// ----------------------------------------------------------------- //
-// Run Smooth + Clip (S+C) finder on data cube                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self         - Data cube to run the S+C finder on.          //
-//   (2) maskCube     - Mask cube for recording detected pixels.     //
-//   (3) kernels_spat - List of spatial smoothing lengths correspon- //
-//                      ding to the FWHM of the Gaussian kernels to  //
-//                      be applied; 0 = no smoothing.                //
-//   (4) kernels_spec - List of spectral smoothing lengths corre-    //
-//                      sponding to the widths of the boxcar filters //
-//                      to be applied. Must be odd or 0.             //
-//   (5) threshold    - Relative flux threshold to be applied.       //
-//   (6) maskScaleXY  - Already detected pixels will be set to this  //
-//                      value times the original rms of the data be- //
-//                      fore smoothing the data again. If negative,  //
-//                      no replacement will be carried out.          //
-//   (7) method       - Method to use for measuring the noise in     //
-//                      the smoothed copies of the cube; can be      //
-//                      NOISE_STAT_STD, NOISE_STAT_MAD or            //
-//                      NOISE_STAT_GAUSS for standard deviation,     //
-//                      median absolute deviation and Gaussian fit   //
-//                      to flux histogram, respectively.             //
-//   (8) range        - Flux range to used in noise measurement, Can //
-//                      be -1, 0 or 1 for negative only, all or po-  //
-//                      sitive only.                                 //
-//   (9) scaleNoise   - 0 = no noise scaling; 1 = global noise sca-  //
-//                      ling; 2 = local noise scaling. Applied after //
-//                      each smoothing operation.                    //
-//  (10) snStatistic  - Statistic to use in the noise scaling. Can   //
-//                      be NOISE_STAT_STD for standard deviation,    //
-//                      NOISE_STAT_MAD for median absolute deviation //
-//                      or NOISE_STAT_GAUSS for Gaussian fitting to  //
-//                      the flux histogram.                          //
-//  (11) snRange      - Flux range to be used in the noise scaling.  //
-//                      Can be -1, 0 or +1 for negative range, full  //
-//                      range or positive range, respectively.       //
-//  (12) snWindowXY   - Spatial window size for local noise scaling. //
-//                      See DataCube_scale_noise_local() for de-     //
-//                      tails.                                       //
-//  (13) snWindowZ    - Spectral window size for local noise sca-    //
-//                      ling. See DataCube_scale_noise_local() for   //
-//                      details.                                     //
-//  (14) snGridXY     - Spatial grid size for local noise scaling.   //
-//                      See DataCube_scale_noise_local() for de-     //
-//                      tails.                                       //
-//  (15) snGridZ      - Spectral grid size for local noise scaling.  //
-//                      See DataCube_scale_noise_local() for de-     //
-//                      tails.                                       //
-//  (16) snInterpol   - Enable interpolation for local noise scaling //
-//                      if true. See DataCube_scale_noise_local()    //
-//                      for details.                                 //
-//  (17) start_time   - Arbitrary time stamp; progress time of the   //
-//                      algorithm will be calculated and printed re- //
-//                      lative to start_time.                        //
-//  (18) start_clock  - Arbitrary clock count; progress time of the  //
-//                      algorithm in term of CPU time will be calcu- //
-//                      lated and printed relative to clock_time.    //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for running the Smooth + Clip (S+C) finder on the //
-//   specified data cube. The S+C finder will smooth the data on the //
-//   specified spatial and spectral scales, applying a Gaussian fil- //
-//   ter in the spatial domain and a boxcar filter in the spectral   //
-//   domain. It will then measure the noise level in each iteration  //
-//   and mark all pixels with absolute values greater than or equal  //
-//   to the specified threshold (relative to the noise level) as 1   //
-//   in the specified mask cube, which must be of 8-bit integer      //
-//   type, while non-detected pixels will be set to a value of 0.    //
-//   Pixels already detected in a previous iteration will be set to  //
-//   maskScaleXY times the original rms noise level of the data be-  //
-//   fore smoothing. If the value of maskScaleXY is negative, no re- //
-//   placement will be carried out.                                  //
-//   The input data cube must be a 32 or 64 bit floating point data  //
-//   array. The spatial kernel sizes must be positive floating point //
-//   values that represent the FWHM of the Gaussian kernels to be    //
-//   applied in the spatial domain. The spectral kernel sizes must   //
-//   be positive, odd integer numbers representing the widths of the //
-//   boxcar filters to be applied in the spectral domain. The thre-  //
-//   shold is relative to the noise level and should be a floating   //
-//   point number greater than about 3.0. Lastly, the value of       //
-//   maskScaleXY times the original rms of the data will be used to  //
-//   replace pixels in the data cube that were already detected in a //
-//   previous iteration. This is to ensure that any sources in the   //
-//   data will not be smeared out beyond the extent of the source    //
-//   when convolving with large kernel sizes. It will, however, cre- //
-//   ate a positive bias in the flux measurement of the source and   //
-//   can therefore be disabled by setting maskScaleXY to a negative  //
-//   value.                                                          //
-//   Several methods are available for measuring the noise in the    //
-//   data cube, including the standard deviation, median absolute    //
-//   deviation and a Gaussian fit to the flux histogram. These dif-  //
-//   fer in their speed and robustness. In addition, the flux range  //
-//   used in the noise measurement can be restricted to negative or  //
-//   positive pixels only to reduce the impact or actual emission or //
-//   absorption featured on the noise measurement.                   //
-// ----------------------------------------------------------------- //
+/// @brief Run Smooth + Clip (S+C) finder on data cube
+///
+/// Public method for running the **Smooth + Clip** (S+C) finder on
+/// the specified data cube. The S+C finder will smooth the data on
+/// the specified spatial and spectral scales, applying a Gaussian
+/// filter in the spatial domain and a boxcar filter in the spectral
+/// domain. It will then measure the noise level in each iteration
+/// and mark all pixels with absolute values greater than or equal
+/// to the specified threshold (relative to the noise level) as 1
+/// in the specified mask cube, which must be of 8-bit integer
+/// type, while non-detected pixels will be set to a value of 0.
+/// Pixels already detected in a previous iteration will be set to
+/// `maskScaleXY` times the original rms noise level of the data
+/// before smoothing. If the value of `maskScaleXY` is negative, no
+/// replacement will be carried out.
+///
+/// The input data cube must be a 32 or 64-bit floating point data
+/// array. The spatial kernel sizes must be positive floating point
+/// values that represent the FWHM of the Gaussian kernels to be
+/// applied in the spatial domain. The spectral kernel sizes must
+/// be positive, odd integer numbers representing the widths of the
+/// boxcar filters to be applied in the spectral domain. The threshold
+/// is relative to the noise level and should be a floating
+/// point number greater than about 3.0. Lastly, the value of
+/// `maskScaleXY` times the original rms of the data will be used to
+/// replace pixels in the data cube that were already detected in a
+/// previous iteration. This is to ensure that any sources in the
+/// data will not be smeared out beyond the extent of the source
+/// when convolving with large kernel sizes. It will, however,
+/// create a positive bias in the flux measurement of the source and
+/// can therefore be disabled by setting `maskScaleXY` to a negative
+/// value.
+///
+/// Several methods are available for **measuring the noise** in the
+/// data cube, including the standard deviation, median absolute
+/// deviation and a Gaussian fit to the flux histogram. These
+/// differ in their speed and robustness. In addition, the flux range
+/// used in the noise measurement can be restricted to negative or
+/// positive pixels only to reduce the impact or actual emission or
+/// absorption featured on the noise measurement.
+///
+/// It is also possible to **renormalise the noise level** after each
+/// smoothing operation by setting `scaleNoise` to a value of 1 or 2.
+/// It should be noted that local noise normalisation on smoothed data
+/// is risky, as the number of statistically independent data samples
+/// may have become too low for a reliable measurement of the noise.
+///
+/// @param self          Data cube to run the S+C finder on.
+/// @param maskCube      Mask cube for recording detected pixels.
+/// @param kernels_spat  List of spatial smoothing lengths corresponding
+///                      to the FWHM of the Gaussian kernels to be
+///                      applied; 0 = no smoothing.
+/// @param kernels_spec  List of spectral smoothing lengths corresponding
+///                      to the widths of the boxcar filters to be
+///                      applied. Must be odd or 0.
+/// @param threshold     Relative flux threshold to be applied.
+/// @param maskScaleXY   Already detected pixels will be set to this
+///                      value times the original rms of the data
+///                      before smoothing the data again. If negative,
+///                      no replacement will be carried out.
+/// @param method        Method to use for measuring the noise in
+///                      the smoothed copies of the cube; can be
+///                      `NOISE_STAT_STD`, `NOISE_STAT_MAD` or
+///                      `NOISE_STAT_GAUSS` for standard deviation,
+///                      median absolute deviation and Gaussian fit
+///                      to flux histogram, respectively.
+/// @param range         Flux range to used in noise measurement, Can
+///                      be -1, 0 or 1 for negative only, all or
+///                      positive only.
+/// @param scaleNoise    0 = no noise scaling; 1 = global noise scaling;
+///                      2 = local noise scaling. Applied after each
+///                      smoothing operation.
+/// @param snStatistic   Statistic to use in the noise scaling. Can
+///                      be `NOISE_STAT_STD` for standard deviation,
+///                      `NOISE_STAT_MAD` for median absolute deviation
+///                      or `NOISE_STAT_GAUSS` for Gaussian fitting to
+///                      the flux histogram.
+/// @param snRange       Flux range to be used in the noise scaling.
+///                      Can be -1, 0 or +1 for negative range, full
+///                      range or positive range, respectively.
+/// @param snWindowXY    Spatial window size for local noise scaling.
+///                      See DataCube_scale_noise_local() for details.
+/// @param snWindowZ     Spectral window size for local noise scaling
+///                      See DataCube_scale_noise_local() for details.
+/// @param snGridXY      Spatial grid size for local noise scaling.
+///                      See DataCube_scale_noise_local() for details.
+/// @param snGridZ       Spectral grid size for local noise scaling.
+///                      See DataCube_scale_noise_local() for details.
+/// @param snInterpol    Enable interpolation for local noise scaling
+///                      if true. See DataCube_scale_noise_local()
+///                      for details.
+/// @param start_time    Arbitrary time stamp; progress time of the
+///                      algorithm will be calculated and printed
+///                      relative to `start_time`.
+/// @param start_clock   Arbitrary clock count; progress time of the
+///                      algorithm in term of CPU time will be
+///                      calculated and printed relative to `clock_time`.
 
 PUBLIC void DataCube_run_scfind(const DataCube *self, DataCube *maskCube, const Array_dbl *kernels_spat, const Array_siz *kernels_spec, const double threshold, const double maskScaleXY, const noise_stat method, const int range, const int scaleNoise, const noise_stat snStatistic, const int snRange, const size_t snWindowXY, const size_t snWindowZ, const size_t snGridXY, const size_t snGridZ, const bool snInterpol, const time_t start_time, const clock_t start_clock)
 {
@@ -4225,43 +3966,31 @@ PUBLIC void DataCube_run_scfind(const DataCube *self, DataCube *maskCube, const 
 
 
 
-// ----------------------------------------------------------------- //
-// Run simple threshold finder on data cube                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self         - Data cube to run the threshold finder on.    //
-//   (2) maskCube     - Mask cube for recording detected pixels.     //
-//   (3) absolute     - If true, apply absolute threshold; otherwise //
-//                      multiply threshold by noise level.           //
-//   (4) threshold    - Absolute or relative flux threshold.         //
-//   (5) method        - Method to use for measuring the noise in    //
-//                      the cube; can be NOISE_STAT_STD,             //
-//                      NOISE_STAT_MAD or NOISE_STAT_GAUSS for       //
-//                      standard deviation, median absolute devia-   //
-//                      tion and Gaussian fit to flux histogram,     //
-//                      respectively.                                //
-//   (6) range        - Flux range to used in noise measurement, Can //
-//                      be -1, 0 or 1 for negative only, all or po-  //
-//                      sitive only.                                 //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for running a simple threshold finder on the data //
-//   cube specified by the user. Detected pixels will be added to    //
-//   the mask cube provided, which must be of 8-bit integer type.    //
-//   The specified flux threshold can either be absolute or relative //
-//   depending on the value of the 'absolute' parameter. In the lat- //
-//   ter case, the threshold will be multiplied by the noise level   //
-//   across the data cube as measured using the method and range     //
-//   specified by the user. In both cases, pixels with an absolute   //
-//   flux value greater than the threshold will be added to the mask //
-//   cube.                                                           //
-// ----------------------------------------------------------------- //
+/// @brief Run simple threshold finder on data cube
+///
+/// Public method for running a simple threshold finder on the data
+/// cube specified by the user. Detected pixels will be added to
+/// the mask cube provided, which must be of 8-bit integer type.
+/// The specified flux threshold can either be absolute or relative
+/// depending on the value of the `absolute` parameter. In the latter
+/// case, the threshold will be multiplied by the noise level across
+/// the data cube as measured using the method and range specified
+/// by the user. In both cases, pixels with an absolute flux value
+/// greater than the threshold will be added to the mask cube.
+///
+/// @param self       Data cube to run the threshold finder on.
+/// @param maskCube   Mask cube for recording detected pixels.
+/// @param absolute   If true, apply absolute threshold; otherwise
+///                   multiply threshold by noise level.
+/// @param threshold  Absolute or relative flux threshold.
+/// @param method     Method to use for measuring the noise in
+///                   the cube; can be `NOISE_STAT_STD`,
+///                   `NOISE_STAT_MAD` or `NOISE_STAT_GAUSS` for
+///                   standard deviation, median absolute deviation
+///                   and Gaussian fit to flux histogram, respectively.
+/// @param range      Flux range to used in noise measurement, Can
+///                   be -1, 0 or 1 for negative only, all or
+///                   positive only, respectively.
 
 PUBLIC void DataCube_run_threshold(const DataCube *self, DataCube *maskCube, const bool absolute, double threshold, const noise_stat method, const int range)
 {
@@ -4300,57 +4029,48 @@ PUBLIC void DataCube_run_threshold(const DataCube *self, DataCube *maskCube, con
 
 
 
-// ----------------------------------------------------------------- //
-// Link objects in an integer mask                                   //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//   (2) mask       - 32-bit integer mask cube.                      //
-//   (3) radius_x   - Merging radius in x.                           //
-//   (4) radius_y   - Merging radius in y.                           //
-//   (5) radius_z   - Merging radius in z.                           //
-//   (6) min_size_x - Minimum size requirement for objects in x.     //
-//   (7) min_size_y - Minimum size requirement for objects in y.     //
-//   (8) min_size_z - Minimum size requirement for objects in z.     //
-//   (9) min_npix   - Minimum required number of pixels.             //
-//  (10) min_fill   - Minimum required filling factor of object.     //
-//  (11) max_size_x - Maximum size requirement for objects in x.     //
-//  (12) max_size_y - Maximum size requirement for objects in y.     //
-//  (13) max_size_z - Maximum size requirement for objects in z.     //
-//  (14) max_npix   - Maximum required number of pixels.             //
-//  (15) max_fill   - Maximum required filling factor of object.     //
-//  (16) pos_pix    - If true, negative pixels will be discarded.    //
-//  (17) pos_src    - If true, negative sources will be discarded.   //
-//  (18) rms        - Global rms value by which all flux values will //
-//                    be normalised. 1 = no normalisation.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for linking objects recorded in an integer mask   //
-//   within the specified merging radii. The mask must be a 32-bit   //
-//   integer array with a background value of 0, while objects can   //
-//   have any value != 0. If values != 0 are present, they will be   //
-//   set to -1 at the start. The linker will first give objects that //
-//   are connected within the specified radii a unique label.        //
-//   Objects that fall outside of the minimum or maximum size re-    //
-//   quirements will be removed on the fly. If pos_src is set to     //
-//   true, sources with negative total flux will also be removed.    //
-//   Likewise, if pos_pix is true, only positive pixels will be      //
-//   linked and negative ones discarded.                             //
-//   Several thresholds can be provided by the user. Objects that    //
-//   fall outside these thresholds will be discarded by the linker.  //
-//   Thresholds are specified with the min_ or max_ prefix and in-   //
-//   clude size in x, y and z, total number of pixels (npix) and     //
-//   filling factor (fill), with the latter defined as the total     //
-//   number of pixels divided by the number of pixels that make up   //
-//   the rectangular bounding box. Any threshold can be set to 0 to  //
-//   disable its application altogether.                             //
-// ----------------------------------------------------------------- //
+/// @brief Link objects in an integer mask
+///
+/// Public method for linking objects recorded in an integer mask
+/// within the specified merging radii. The mask must be a 32-bit
+/// integer array with a background value of 0, while objects can
+/// have any value `!= 0`. If values `!= 0` are present, they will be
+/// set to `-1` at the start. The linker will first give objects that
+/// are connected within the specified radii a unique label.
+/// Objects that fall outside of the minimum or maximum size
+/// requirements will be removed on the fly. If `pos_src` is set to
+/// `true`, sources with negative total flux will also be removed.
+/// Likewise, if `pos_pix` is `true`, only positive pixels will be
+/// linked and negative ones discarded.
+///
+/// Several thresholds can be provided by the user. Objects that
+/// fall outside these thresholds will be discarded by the linker.
+/// Thresholds are specified with the `min_` or `max_` prefix and
+/// include size in x, y and z, total number of pixels (`npix`) and
+/// filling factor (`fill`), with the latter defined as the total
+/// number of pixels divided by the number of pixels that make up
+/// the rectangular bounding box. Any threshold can be set to 0 to
+/// disable its application altogether.
+///
+/// @param self        Object self-reference.
+/// @param mask        32-bit integer mask cube.
+/// @param radius_x    Merging radius in x.
+/// @param radius_y    Merging radius in y.
+/// @param radius_z    Merging radius in z.
+/// @param min_size_x  Minimum size requirement for objects in x.
+/// @param min_size_y  Minimum size requirement for objects in y.
+/// @param min_size_z  Minimum size requirement for objects in z.
+/// @param min_npix    Minimum required number of pixels.
+/// @param min_fill    Minimum required filling factor of object.
+/// @param max_size_x  Maximum size requirement for objects in x.
+/// @param max_size_y  Maximum size requirement for objects in y.
+/// @param max_size_z  Maximum size requirement for objects in z.
+/// @param max_npix    Maximum required number of pixels.
+/// @param max_fill    Maximum required filling factor of object.
+/// @param pos_pix     If `true`, negative pixels will be discarded.
+/// @param pos_src     If `true`, negative sources will be discarded.
+/// @param rms         Global rms value by which all flux values will
+///                    be normalised. 1 = no normalisation.
 
 
 PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, const size_t radius_x, const size_t radius_y, const size_t radius_z, const size_t min_size_x, const size_t min_size_y, const size_t min_size_z, const size_t min_npix, const double min_fill, const size_t max_size_x, const size_t max_size_y, const size_t max_size_z, const size_t max_npix, const double max_fill, const bool pos_pix, const bool pos_src, const double rms)
@@ -4491,48 +4211,39 @@ PUBLIC LinkerPar *DataCube_run_linker(const DataCube *self, DataCube *mask, cons
 
 
 
-// ----------------------------------------------------------------- //
-// Recursive function for labelling neighbouring pixels              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self      - Object self-reference.                          //
-//   (2) mask      - 32-bit mask cube.                               //
-//   (3) stack     - Stack object to be processed.                   //
-//   (4) radius_x  - Merging radius in x.                            //
-//   (5) radius_y  - Merging radius in y.                            //
-//   (6) radius_z  - Merging radius in z.                            //
-//   (7) label     - Label to be assigned to detected neighbours.    //
-//                   Must be > 1, as 1 means not yet labelled!       //
-//   (8) lpar      - Pointer to LinkerPar object containing the re-  //
-//                   corded object parameters. This will be updated  //
-//                   whenever a new pixel is assigned to the same    //
-//                   object currently getting linked.                //
-//   (9) rms_inv   - Inverse of the global rms value by which all    //
-//                   flux values will multiplied. If set to 1, no    //
-//                   normalisation will occur.                       //
-//  (10) pos_pix   - If true, negative pixels will be discarded.     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for checking whether any neighbouring pixels of  //
-//   the specified location (x, y, z) within the specified merging   //
-//   radii are detected by the source finder (value of < 0). If so,  //
-//   their value will be set to the same label as (x, y, z) and the  //
-//   LinkerPar object will be updated to include the new pixel. If   //
-//   pos_pix is set to true, then only positive pixels will be ac-   //
-//   cepted and negative ones discarded.                             //
-//   The function will then process the neighbours of each neighbour //
-//   recursively by using an internal stack rather than recursive    //
-//   function calls, which makes stack overflows controllable and    //
-//   ensures that the stack is implemented on the heap to allow its  //
-//   size to be dynamically adjusted and take up as much memory as   //
-//   needed.                                                         //
-// ----------------------------------------------------------------- //
+/// @brief Recursive method for labelling neighbouring pixels
+///
+/// Private method for checking whether any neighbouring pixels of
+/// the object on the stack within the specified merging radii are
+/// detected by the source finder (value of < 0). If so, their value
+/// will be set to the same label as the object on the stack and the
+/// LinkerPar object will be updated to include the new pixel. If
+/// `pos_pix` is set to `true`, then only positive pixels will be
+/// accepted and negative ones discarded.
+///
+/// The method will then process the neighbours of each neighbour
+/// recursively by using an internal stack rather than recursive
+/// function calls, which makes stack overflows controllable and
+/// ensures that the stack is implemented on the heap to allow its
+/// size to be dynamically adjusted and take up as much memory as
+/// needed.
+///
+/// @param self      Object self-reference.
+/// @param mask      32-bit mask cube.
+/// @param stack     Stack object to be processed.
+/// @param radius_x  Merging radius in x.
+/// @param radius_y  Merging radius in y.
+/// @param radius_z  Merging radius in z.
+/// @param label     Label to be assigned to detected neighbours.
+///                  Must be > 1, as 1 means not yet labelled.
+/// @param lpar      Pointer to LinkerPar object containing the
+///                  recorded object parameters. This will be updated
+///                  whenever a new pixel is assigned to the same
+///                  object currently getting linked.
+/// @param rms_inv   Inverse of the global rms value by which all
+///                  flux values will multiplied. If set to 1, no
+///                  normalisation will occur.
+/// @param pos_pix   If `true`, negative pixels will be discarded.
 
 PRIVATE void DataCube_process_stack(const DataCube *self, DataCube *mask, Stack *stack, const size_t radius_x, const size_t radius_y, const size_t radius_z, const int32_t label, LinkerPar *lpar, const double rms_inv, const bool pos_pix)
 {
@@ -4619,37 +4330,30 @@ PRIVATE void DataCube_process_stack(const DataCube *self, DataCube *mask, Stack 
 
 
 
-// ----------------------------------------------------------------- //
-// Source parameterisation                                           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1)  self      - Object self-reference.                         //
-//   (2)  mask      - 32-bit mask cube.                              //
-//   (3)  cat       - Catalogue of sources to be parameterised.      //
-//   (4)  use_wcs   - If true, attempt to convert the position of    //
-//                    the source to WCS.                             //
-//   (5)  physical  - If true, convert relevant parameters to phy-   //
-//                    sical units using information from the header. //
-//                    If false, native pixel units will be used.     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for measuring advanced parameters of all sources  //
-//   contained in the specified catalogue. The mask cube must be of  //
-//   32-bit integer type and must have the same dimensions as the    //
-//   data cube. All sources found in the catalogue must also be re-  //
-//   corded in the mask with their catalogued source ID number. All  //
-//   parameters derived by this method will be appended at the end   //
-//   of the catalogue or updated if it already exists.               //
-//   If use_wcs is set to true, the method will attempt to convert   //
-//   certain parameters to WCS and append those to the catalogue in  //
-//   addition to their pixel-based equivalents.                      //
-// ----------------------------------------------------------------- //
+/// @brief Source parameterisation
+///
+/// Public method for measuring advanced parameters of all sources
+/// contained in the specified catalogue. The mask cube must be of
+/// 32-bit integer type and must have the same dimensions as the
+/// data cube. All sources found in the catalogue must also be
+/// recorded in the mask with their catalogued source ID number.
+/// All parameters derived by this method will be appended at the
+/// end of the catalogue or updated if it already exists.
+///
+/// If `use_wcs` is set to `true`, the method will attempt to convert
+/// certain parameters to WCS and append those to the catalogue in
+/// addition to their pixel-based equivalents.
+///
+/// @param self      Object self-reference.
+/// @param mask      32-bit mask cube.
+/// @param cat       Catalogue of sources to be parameterised.
+/// @param use_wcs   If `true`, attempt to convert the position of
+///                  the source to WCS.
+/// @param physical  If `true`, convert relevant parameters to
+///                  physical units using information from the header.
+///                  If `false`, native pixel units will be used.
+/// @param prefix    Prefix to be used in source names. Defaults to
+///                  `SoFiA` if set to `NULL`.
 
 PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Catalog *cat, bool use_wcs, bool physical, const char *prefix)
 {
@@ -5058,36 +4762,26 @@ PUBLIC void DataCube_parameterise(const DataCube *self, const DataCube *mask, Ca
 
 
 
-// ----------------------------------------------------------------- //
-// Extract WCS-related keywords from header                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self           - Object self-reference.                     //
-//   (2) unit_flux_dens - String to hold flux density unit.          //
-//   (3) unit_flux      - String to hold flux unit.                  //
-//   (4) label_lon      - String to hold longitude axis name.        //
-//   (5) label_lat      - String to hold latitude axis name.         //
-//   (6) label_spec     - String to hold spectral axis name.         //
-//   (7) ucd_lon        - String to hold UCD for longitude axis.     //
-//   (8) ucd_lat        - String to hold UCD for latitude axis.      //
-//   (9) ucd_spec       - String to hold UCD for spectral axis.      //
-//  (10) unit_lon       - String to hold longitude axis unit.        //
-//  (11) unit_lat       - String to hold latitude axis unit.         //
-//  (12) unit_spec      - String to hold spectral axis unit.         //
-//  (13) beam_area      - Variable to hold beam solid angle in px.   //
-//  (14) chan_size      - Variable to hold spectral channel width.   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for extracting header information related to the //
-//   World Coordinate System (WCS) of the data cube. All information //
-//   will be written to the variable pointers specified by the user. //
-// ----------------------------------------------------------------- //
+/// @brief Extract WCS-related keywords from header
+///
+/// Private method for extracting header information related to the
+/// World Coordinate System (WCS) of the data cube. All information
+/// will be written to the variable pointers specified by the user.
+///
+/// @param self            Object self-reference.
+/// @param unit_flux_dens  String to hold flux density unit.
+/// @param unit_flux       String to hold flux unit.
+/// @param label_lon       String to hold longitude axis name.
+/// @param label_lat       String to hold latitude axis name.
+/// @param label_spec      String to hold spectral axis name.
+/// @param ucd_lon         String to hold UCD for longitude axis.
+/// @param ucd_lat         String to hold UCD for latitude axis.
+/// @param ucd_spec        String to hold UCD for spectral axis.
+/// @param unit_lon        String to hold longitude axis unit.
+/// @param unit_lat        String to hold latitude axis unit.
+/// @param unit_spec       String to hold spectral axis unit.
+/// @param beam_area       Variable to hold beam solid angle in pixels.
+/// @param chan_size       Variable to hold spectral channel width.
 
 PRIVATE void DataCube_get_wcs_info(const DataCube *self, String **unit_flux_dens, String **unit_flux, String **label_lon, String **label_lat, String **label_spec, String **ucd_lon, String **ucd_lat, String **ucd_spec, String **unit_lon, String **unit_lat, String **unit_spec, double *beam_area, double *chan_size)
 {
@@ -5211,43 +4905,33 @@ PRIVATE void DataCube_get_wcs_info(const DataCube *self, String **unit_flux_dens
 
 
 
-// ----------------------------------------------------------------- //
-// Generate source name from WCS information                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self           - Object self-reference.                     //
-//   (2) source_name    - String to hold source name.                //
-//   (3) prefix         - C string specifying the desired prefix.    //
-//   (4) longitude      - Longitude of the source.                   //
-//   (5) latitude       - Latitude of the source.                    //
-//   (6) label_lon      - Longitude axis name.                       //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for generating a source name based on the coor-  //
-//   dinates and WCS information specified by the user. The name     //
-//   will consist of a prefix ("SoFiA" by default) followed by a     //
-//   space followed by the coordinate part of the source, the format //
-//   of which will depend on the prefix and coordinate type. If the  //
-//   prefix is "WALLABY", then the official WALLABY source naming    //
-//   convention will be used:                                        //
-//                                                                   //
-//     WALLABY Jhhmmss-ddmmss                                        //
-//                                                                   //
-//   In all other cases the source name will be                      //
-//                                                                   //
-//     prefix (J/B)hhmmss.ss-ddmmss.s  for equatorial coordinates,   //
-//     prefix Glll.llll-dd.dddd        for Galactic coordinates, and //
-//     prefix lll.llll-dd.dddd         otherwise.                    //
-//                                                                   //
-//   The final source name will be written to the String pointer     //
-//   specified by the user.                                          //
-// ----------------------------------------------------------------- //
+/// @brief Generate source name from WCS information
+///
+/// Private method for generating a source name based on the
+/// coordinates and WCS information specified by the user. The name
+/// will consist of a prefix (`SoFiA` by default) followed by a
+/// space followed by the coordinate part of the source, the format
+/// of which will depend on the prefix and coordinate type. If the
+/// prefix is `WALLABY`, then the official WALLABY source naming
+/// convention will be used:
+///
+///  * `WALLABY Jhhmmss-ddmmss`
+///
+/// In all other cases the source name will be
+///
+///  * `prefix (J/B)hhmmss.ss-ddmmss.s`  for equatorial coordinates,
+///  * `prefix Glll.llll-dd.dddd`        for Galactic coordinates, and
+///  * `prefix lll.llll-dd.dddd`         otherwise.
+///
+/// The final source name will be written to the String pointer
+/// specified by the user.
+///
+/// @param self         Object self-reference.
+/// @param source_name  String to hold source name.
+/// @param prefix       C string specifying the desired prefix.
+/// @param longitude    Longitude of the source.
+/// @param latitude     Latitude of the source.
+/// @param label_lon    Longitude axis name.
 
 PRIVATE void DataCube_create_src_name(const DataCube *self, String **source_name, const char *prefix, const double longitude, const double latitude, const String *label_lon)
 {
@@ -5307,53 +4991,44 @@ PRIVATE void DataCube_create_src_name(const DataCube *self, String **source_name
 
 
 
-// ----------------------------------------------------------------- //
-// Generate moment maps from data cube                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1)  self      - Object self-reference.                         //
-//   (2)  mask      - 32-bit mask cube.                              //
-//   (3)  mom0      - Pointer to a data cube object that will be     //
-//                    pointing to the generated moment 0 map.        //
-//   (4)  mom1      - Pointer to a data cube object that will be     //
-//                    pointing to the generated moment 1 map.        //
-//   (5)  mom2      - Pointer to a data cube object that will be     //
-//                    pointing to the generated moment 2 map.        //
-//   (6)  chan      - Pointer to a data cube object that will be     //
-//                    pointing to the generated map containing the   //
-//                    number of channels per pixel.                  //
-//   (7)  obj_name  - Name of the object for OBJECT header entry.    //
-//                    If NULL, no OBJECT entry will be created.      //
-//   (8)  use_wcs   - If true, convert channel numbers to WCS.       //
-//   (9)  threshold - Flux threshold to be used in the calculation   //
-//                    of moment 1 and 2. Note that moment 0 will al- //
-//                    ways include all channels to avoid a positive  //
-//                    flux bias.                                     //
-//  (10)  rms       - If positive, then convert the number of chan-  //
-//                    nels map to a proper SNR map. Set to 0 to dis- //
-//                    able this conversion.                          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for generating spectral moment maps from the spe- //
-//   cified data cube for all pixels that are != 0 in the mask. The  //
-//   generated maps will be pointed to by the mom0, mom1 and mom2    //
-//   pointers provided in the function call. NOTE that these must be //
-//   uninitialised pointers to a DataCube object, i.e. they must NOT //
-//   be pointing to any valid DataCube object before being passed on //
-//   to the function. It is the user's responsibility to call the    //
-//   destructor on each of the moment maps once they are no longer   //
-//   required.                                                       //
-//   If positive is set to true, then only pixels with positive flux //
-//   will contribute to the calculation of the first and second mo-  //
-//   ment maps. This can be useful to prevent large negative signals //
-//   from affecting the moment calculation.                          //
-// ----------------------------------------------------------------- //
+/// @brief Generate moment maps from data cube
+///
+/// Public method for generating spectral moment maps from the
+/// specified data cube for all pixels that are `!= 0` in the mask.
+/// The generated maps will be pointed to by the `mom0`, `mom1` and
+/// `mom2` pointers provided in the function call. Note that these must
+/// be uninitialised pointers to a DataCube object, i.e. they must **not**
+/// be pointing to any valid DataCube object before being passed on
+/// to the function. It is the user's responsibility to call the
+/// destructor on each of the moment maps once they are no longer
+/// required.
+///
+/// If positive is set to true, then only pixels with positive flux
+/// will contribute to the calculation of the first and second
+/// moment maps. This can be useful to prevent large negative signals
+/// from affecting the moment calculation.
+///
+/// @param  self       Object self-reference.
+/// @param  mask       32-bit mask cube.
+/// @param  mom0       Pointer to a data cube object that will be
+///                    pointing to the generated moment 0 map.
+/// @param  mom1       Pointer to a data cube object that will be
+///                    pointing to the generated moment 1 map.
+/// @param  mom2       Pointer to a data cube object that will be
+///                    pointing to the generated moment 2 map.
+/// @param  chan       Pointer to a data cube object that will be
+///                    pointing to the generated map containing the
+///                    number of channels per pixel.
+/// @param  obj_name   Name of the object for `OBJECT` header entry.
+///                    If `NULL`, no `OBJECT` entry will be created.
+/// @param  use_wcs    If `true`, convert channel numbers to WCS.
+/// @param  threshold  Flux threshold to be used in the calculation
+///                    of moment 1 and 2. Note that moment 0 will
+///                    always include all channels to avoid a
+///                    positive flux bias.
+/// @param  rms        If positive, then convert the number of
+///                    channels map to a proper SNR map. Set to 0
+///                    to disable this conversion.
 
 PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, const char *obj_name, bool use_wcs, const double threshold, const double rms)
 {
@@ -5442,10 +5117,10 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 	
 	// Determine moments 0 and 1
 	// NOTE: This should not be multi-threaded, as otherwise the moment-0 map would
-	//       no longer be deterministic due to the arbitrary order of the summation
-	//       which would result in slightly different rounding errors. While those
-	//       differences are negligible, the moment maps from different runs would
-	//       no longer be binary-identical, making unit testing impossible.
+	///     no longer be deterministic due to the arbitrary order of the summation
+	///     which would result in slightly different rounding errors. While those
+	///     differences are negligible, the moment maps from different runs would
+	///     no longer be binary-identical, making unit testing impossible.
 	for(size_t z = self->axis_size[2]; z--;)
 	{
 		double spectral = z;
@@ -5571,38 +5246,28 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 
 
 
-// ----------------------------------------------------------------- //
-// Create cubelets and other source products                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1)  self      - Object self-reference (data cube).             //
-//   (2)  mask      - Mask cube.                                     //
-//   (3)  cat       - Source catalogue.                              //
-//   (4)  basename  - Base name to be used for output files.         //
-//   (5)  overwrite - Replace existing files (true) or not (false)?  //
-//   (6)  use_wcs   - Try to convert channel numbers to WCS?         //
-//   (7)  physical  - If true, correct flux for beam solid angle.    //
-//   (8)  margin    - Margin in pixels to be added around each       //
-//                    source. If 0, sources will be cut out exactly. //
-//   (9)  threshold - Flux threshold to be used for moment 1 and 2.  //
-//  (10)  par       - SoFiA parameter settings; these will be added  //
-//                    to the output FITS file history in the header. //
-//                    If NULL, then no history will be written.      //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for generating cubelets and other data products   //
-//   for each source in the specified mask and catalogue. The method //
-//   will generate cut-outs of the data cube and mask cube around    //
-//   each source and also generate moment maps (0-2) and integrate   //
-//   spectra. All data products will be saved to disc and then de-   //
-//   leted again.                                                    //
-// ----------------------------------------------------------------- //
+/// @brief Create cubelets and other source products
+///
+/// Public method for generating cubelets and other data products
+/// for each source in the specified mask and catalogue. The method
+/// will generate cut-outs of the data cube and mask cube around
+/// each source and also generate moment maps (0-2) and integrate
+/// spectra. All data products will be saved to disc and then
+/// deleted again.
+///
+/// @param  self       Object self-reference (data cube).
+/// @param  mask       Mask cube.
+/// @param  cat        Source catalogue.
+/// @param  basename   Base name to be used for output files.
+/// @param  overwrite  Replace existing files (`true`) or not (`false`)?
+/// @param  use_wcs    Try to convert channel numbers to WCS?
+/// @param  physical   If `true`, correct flux for beam solid angle.
+/// @param  margin     Margin in pixels to be added around each
+///                    source. If 0, sources will be cut out exactly.
+/// @param  threshold  Flux threshold to be used for moment 1 and 2.
+/// @param  par        SoFiA parameter settings; these will be added
+///                    to the output FITS file history in the header.
+///                    If `NULL`, then no history will be written.
 
 PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask, const Catalog *cat, const char *basename, const bool overwrite, bool use_wcs, bool physical, const size_t margin, const double threshold, const Parameter *par)
 {
@@ -5914,26 +5579,18 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 
 
 
-// ----------------------------------------------------------------- //
-// Extract beam solid angle from header                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Solid angle of the beam in pixels.                              //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for extracting the solid angle of the beam from  //
-//   the header, reading the BMAJ, BMIN and CDELT2 keywords. This    //
-//   assumes that the beam is Gaussian, and the solid angle will be  //
-//   calculated in units of pixels under the assumption that the     //
-//   units of BMAJ, BMIN and CDELT2 are the same. If the beam cannot //
-//   be determined, NaN will instead be returned.                    //
-// ----------------------------------------------------------------- //
+/// @brief Extract beam solid angle from header
+///
+/// Private method for extracting the solid angle of the beam from
+/// the header, reading the `BMAJ`, `BMIN` and `CDELT2` keywords. This
+/// assumes that the beam is Gaussian, and the solid angle will be
+/// calculated in units of pixels under the assumption that the
+/// units of `BMAJ`, `BMIN` and `CDELT2` are the same. If the beam
+/// cannot be determined, `NaN` will instead be returned.
+///
+/// @param self  Object self-reference.
+///
+/// @return Solid angle of the beam in pixels.
 
 PRIVATE double DataCube_get_beam_area(const DataCube *self)
 {
@@ -5956,26 +5613,20 @@ PRIVATE double DataCube_get_beam_area(const DataCube *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract WCS information from header                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to WCS object if valid, NULL otherwise.                 //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for extracting WCS information from the header    //
-//   of the data cube pointed to by 'self'. If valid WCS information //
-//   was found, a WCS object will be returned; otherwise, the method //
-//   will return a NULL pointer. NOTE that it is the responsibility  //
-//   of the user to call the destructor on the returned WCS object   //
-//   once it is no longer required in order to release its memory.   //
-// ----------------------------------------------------------------- //
+/// @brief Extract WCS information from header
+///
+/// Public method for extracting WCS information from the header
+/// of the data cube pointed to by `self`. If valid WCS information
+/// was found, a WCS object will be returned; otherwise, the method
+/// will return a `NULL` pointer.
+///
+/// @param self  Object self-reference.
+///
+/// @return Pointer to WCS object if valid, NULL otherwise.
+///
+/// @note It is the responsibility of the user to call the destructor
+///       on the returned WCS object once it is no longer required in
+///       order to release its memory.
 
 PUBLIC WCS *DataCube_extract_wcs(const DataCube *self)
 {
@@ -5992,25 +5643,15 @@ PUBLIC WCS *DataCube_extract_wcs(const DataCube *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Swap byte order of data array                                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for swapping the byte order of the data array    //
-//   stored in the object referred to by 'self'. The function will   //
-//   check if byte order swapping is necessary and, if so, loop over //
-//   the entire array and call the corresponding swapping function   //
-//   defined in common.c on each array element.                      //
-// ----------------------------------------------------------------- //
+/// @brief Swap byte order of data array
+///
+/// Private method for swapping the byte order of the data array
+/// stored in the object referred to by `self`. The function will
+/// check if byte order swapping is necessary and, if so, loop over
+/// the entire array and call the corresponding swapping function
+/// swap_byte_order() defined in common.c on each array element.
+///
+/// @param self  Object self-reference.
 
 PRIVATE void DataCube_swap_byte_order(const DataCube *self)
 {
