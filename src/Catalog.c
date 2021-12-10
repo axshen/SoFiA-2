@@ -150,13 +150,13 @@ PUBLIC void Catalog_add_source(Catalog *self, Source *src)
 /// Public method for checking if the specified source is included in the
 /// catalogue. If so, the function will return the row number of the
 /// source in the catalogue (starting with 0). If the source is not
-/// found, the function will return @p SIZE_MAX.
+/// found, the function will return `SIZE_MAX`.
 ///
 /// @param self  Object self-reference.
 /// @param src   Pointer to the source to be checked.
 ///
 /// @return Returns the index (i.e. row number) of the source within
-///         the catalogue if the source was found. Otherwise, @p SIZE_MAX
+///         the catalogue if the source was found. Otherwise, `SIZE_MAX`
 ///         will be returned.
 
 PUBLIC size_t Catalog_get_index(const Catalog *self, const Source *src)
@@ -178,10 +178,10 @@ PUBLIC size_t Catalog_get_index(const Catalog *self, const Source *src)
 /// @brief Check if source exists in catalogue
 ///
 /// Public method for checking if the specified source is included
-/// in the catalogue. If so, the function will return @p true,
-/// otherwise @p false. If the source is found, the variable @p index
+/// in the catalogue. If so, the function will return `true`,
+/// otherwise `false`. If the source is found, the variable `index`
 /// will be set to the catalogue index of the source. Otherwise, it
-/// will be left untouched. If no index is required, a @p NULL pointer
+/// will be left untouched. If no index is required, a `NULL` pointer
 /// can instead be provided.
 ///
 /// @param self   Object self-reference.
@@ -245,7 +245,7 @@ PUBLIC Source *Catalog_get_source(const Catalog *self, const size_t index)
 /// @param self  Object self-reference.
 ///
 /// @return Returns the current size of the catalogue pointed to
-///         by @p self.
+///         by `self`.
 
 PUBLIC size_t Catalog_get_size(const Catalog *self)
 {
@@ -264,11 +264,11 @@ PUBLIC size_t Catalog_get_size(const Catalog *self)
 ///
 /// @param self       Object self-reference.
 /// @param filename   Full path to the output file.
-/// @param format     Output format; can be @p CATALOG_FORMAT_ASCII for
-///                   plain text ASCII files, @p CATALOG_FORMAT_XML for
-///                   VOTable format or @p CATALOG_FORMAT_SQL for SQL
+/// @param format     Output format; can be `CATALOG_FORMAT_ASCII` for
+///                   plain text ASCII files, `CATALOG_FORMAT_XML` for
+///                   VOTable format or `CATALOG_FORMAT_SQL` for SQL
 ///                   table format.
-/// @param overwrite  Overwrite existing file (@p true) or not (@p false)?
+/// @param overwrite  Overwrite existing file (`true`) or not (`false`)?
 
 PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_format format, const bool overwrite)
 {

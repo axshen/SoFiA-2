@@ -69,7 +69,7 @@ CLASS WCS
 /// pointer to the newly created object. The object will be set up
 /// from the information in the FITS header supplied by the user.
 /// If initialisation of the WCS information fails, the property
-/// @p valid will be set to @p false. Note that the destructor will
+/// `valid` will be set to `false`. Note that the destructor will
 /// need to be called explicitly once the object is no longer
 /// required to release any memory allocated during the lifetime
 /// of the object.
@@ -78,7 +78,7 @@ CLASS WCS
 ///                  the FITS data cube (not null-terminated).
 /// @param n_keys    Number of header keywords. Alternatively, it is
 ///                  also possible to provide the number of header
-///                  lines here, as anything beyond the @p END keyword
+///                  lines here, as anything beyond the `END` keyword
 ///                  will be ignored by wcslib anyway.
 /// @param n_axes    Number of WCS axes in the data cube.
 /// @param dim_axes  Array holding the size of each axis.
@@ -142,7 +142,7 @@ PUBLIC void WCS_delete(WCS *self)
 ///
 /// @param self  Object self-reference.
 ///
-/// @return @p true if WCS is valid, @p false otherwise.
+/// @return `true` if WCS is valid, `false` otherwise.
 
 PUBLIC bool WCS_is_valid(const WCS *self)
 {
@@ -156,15 +156,15 @@ PUBLIC bool WCS_is_valid(const WCS *self)
 /// Private method for setting up the WCS object with information
 /// from the supplied FITS header. If extraction of WCS information
 /// fails for some reason, the object will be left in an invalid
-/// state; the property @p valid will be set to @p false in this case,
-/// which can later be checked by calling @p WCS_is_valid().
+/// state; the property `valid` will be set to `false` in this case,
+/// which can later be checked by calling WCS_is_valid().
 ///
 /// @param self      Object self-reference.
 /// @param header    C string containing the raw header information of
 ///                  the FITS data cube (not null-terminated).
 /// @param n_keys    Number of header keywords. Alternatively, it is
 ///                  also possible to provide the number of header
-///                  lines here, as anything beyond the @p END keyword
+///                  lines here, as anything beyond the `END` keyword
 ///                  will be ignored by wcslib.
 /// @param n_axes    Number of WCS axes in the data cube.
 /// @param dim_axes  Array holding the size of each axis.
@@ -221,7 +221,7 @@ PRIVATE void WCS_setup(WCS *self, const char *header, const int n_keys, const in
 /// of the cube are in the aforementioned order. Pixel coordinates
 /// must be zero-based; world coordinates will be in the native
 /// units of the data cube. Longitude, latitude or spectral can be
-/// @p NULL, in which case they are not updated. If invalid input
+/// `NULL`, in which case they are not updated. If invalid input
 /// coordinates are supplied by the user, then a warning message will
 /// be printed and the output coordinate variables will be left
 /// unchanged.
@@ -291,7 +291,7 @@ PUBLIC void WCS_convertToWorld(const WCS *self, const double x, const double y, 
 /// the implicit assumption is made that the first up-to-three axes
 /// of the cube are in the aforementioned order. Pixel coordinates
 /// will be zero-based; world coordinates must be in the native
-/// units of the data cube. X, y or z can be @p NULL, in which case
+/// units of the data cube. X, y or z can be `NULL`, in which case
 /// they are not updated. If invalid input coordinates are supplied
 /// by the user, then a warning message will be printed and the
 /// output coordinate variables will be left unchanged.

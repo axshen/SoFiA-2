@@ -70,7 +70,7 @@ CLASS Table
 ///
 /// @note The standard constructor has been made private to disable
 ///       the creation of empty Table objects, as there are no methods
-///       to change the size of a Table object. The @p Table_from_file()
+///       to change the size of a Table object. The Table_from_file()
 ///       constructor must instead be used to directly generate Tables
 ///       from tabulated data stored in a text file.
 
@@ -92,7 +92,7 @@ PRIVATE Table *Table_new(void)
 /// Alternative constructor. Will create a new Table object from
 /// tabulated data read from the specified text file. The list of
 /// delimiters to be used to separate data columns can be specified
-/// using the @p delimiters string (e.g. @p " \t" will use space and
+/// using the `delimiters` string (e.g. "` \t`" will use space and
 /// tab characters as delimiters). Consecutive delimiting characters
 /// will always be merged even when of mixed type. A new object
 /// filled with the data from the file will be returned.
@@ -108,7 +108,7 @@ PRIVATE Table *Table_new(void)
 /// then the resulting table entry will be set to 0.
 ///
 /// The data file can contain empty lines and lines beginning with
-/// a comment character (\p #); these will be ignored.
+/// a comment character (`#`); these will be ignored.
 ///
 /// @param filename    The path to the file from which to read data.
 /// @param delimiters  List of delimiting characters to be used to

@@ -256,7 +256,7 @@ PUBLIC void Source_add_par_int(Source *self, const char *name, const long int va
 /// existing parameter list. Note that names are case-sensitive.
 ///
 /// If the parameter already exists and only its value should be
-/// updated, then @p unit and @p ucd can be set to @p NULL. This would
+/// updated, then `unit` and `ucd` can be set to `NULL`. This would
 /// cause an error, however, if the parameter did not yet exist.
 ///
 /// @param self   Object self-reference.
@@ -305,7 +305,7 @@ PUBLIC void Source_set_par_flt(Source *self, const char *name, const double valu
 /// Note that names are case-sensitive.
 ///
 /// If the parameter already exists and only its value should be
-/// updated, then @p unit and @p ucd can be set to @p NULL. This would
+/// updated, then `unit` and `ucd` can be set to `NULL`. This would
 /// cause an error, however, if the parameter did not yet exist.
 ///
 /// @param self   Object self-reference.
@@ -354,7 +354,7 @@ PUBLIC void Source_set_par_int(Source *self, const char *name, const long int va
 /// @param self   Object self-reference.
 /// @param index  Index of the parameter to be extracted.
 ///
-/// @return Requested parameter value as type @p double.
+/// @return Requested parameter value as type `double`.
 
 PUBLIC double Source_get_par_flt(const Source *self, const size_t index)
 {
@@ -373,7 +373,7 @@ PUBLIC double Source_get_par_flt(const Source *self, const size_t index)
 /// @param self   Object self-reference.
 /// @param index  Index of the parameter to be extracted.
 ///
-/// @return Requested parameter value as type @p long @p int.
+/// @return Requested parameter value as type `long int`.
 
 PUBLIC long int Source_get_par_int(const Source *self, const size_t index)
 {
@@ -389,12 +389,12 @@ PUBLIC long int Source_get_par_int(const Source *self, const size_t index)
 /// Public method for extracting the value of the specified parameter
 /// from the specified source as a double-precision floating-point
 /// number. If a parameter of the same name does not exist, a value
-/// of @p NaN will instead be returned.
+/// of `NaN` will instead be returned.
 ///
 /// @param self  Object self-reference.
 /// @param name  Name of the parameter to be extracted.
 ///
-/// @return Requested parameter value as type @p double.
+/// @return Requested parameter value as type `double`.
 
 PUBLIC double Source_get_par_by_name_flt(const Source *self, const char *name)
 {
@@ -411,13 +411,13 @@ PUBLIC double Source_get_par_by_name_flt(const Source *self, const char *name)
 ///
 /// Public method for extracting the value of the specified parameter
 /// from the specified source as a signed long integer value. If a
-/// parameter of the same name does not exist, a value of @p 0 will
+/// parameter of the same name does not exist, a value of 0 will
 /// instead be returned.
 ///
 /// @param self  Object self-reference.
 /// @param name  Name of the parameter to be extracted.
 ///
-/// @return Requested parameter value as type @p long @p int.
+/// @return Requested parameter value as type `long int`.
 
 PUBLIC long int Source_get_par_by_name_int(const Source *self, const char *name)
 {
@@ -430,11 +430,11 @@ PUBLIC long int Source_get_par_by_name_int(const Source *self, const char *name)
 
 
 
-/// @brief Add a position offset to @p x, @p y, @p z parameters
+/// @brief Add a position offset to `x`, `y`, `z` parameters
 ///
 /// Public method for adding a position offset to parameters named
-/// @p x, @p y, @p z, @p x_min, @p x_max, @p y_min, @p y_max,
-/// @p z_min, and @p z_max. Only existing parameters will be shifted
+/// `x`, `y`, `z`, `x_min`, `x_max`, `y_min`, `y_max`,
+/// `z_min`, and `z_max`. Only existing parameters will be shifted
 /// and non-existing ones ignored. Offsets can only be positive, as
 /// negative pixel coordinates are not possible.
 ///
@@ -469,10 +469,10 @@ PUBLIC void Source_offset_xyz(Source *self, const size_t dx, const size_t dy, co
 ///
 /// Public method for checking if a parameter of the specified name
 /// already exists in the specified source. The function will return
-/// @p true if the parameter exists and @p false otherwise. Note
-/// that name is case-sensitive. The variable @p index will be set
+/// `true` if the parameter exists and `false` otherwise. Note
+/// that name is case-sensitive. The variable `index` will be set
 /// to the index of the parameter if found. Otherwise it will be
-/// left untouched. If no index is required, a @p NULL pointer can
+/// left untouched. If no index is required, a `NULL` pointer can
 /// instead be provided.
 ///
 /// @param self   Object self-reference.
@@ -480,7 +480,7 @@ PUBLIC void Source_offset_xyz(Source *self, const size_t dx, const size_t dy, co
 /// @param index  Pointer to a variable that will hold the index
 ///               of the source parameter if found.
 ///
-/// @return Returns @p true if the parameter exists, @p false otherwise.
+/// @return Returns `true` if the parameter exists, `false` otherwise.
 
 PUBLIC bool Source_par_exists(const Source *self, const char *name, size_t *index)
 {
@@ -545,7 +545,7 @@ PUBLIC const char *Source_get_unit(const Source *self, const size_t index)
 /// @brief Extract type of parameter by index
 ///
 /// Public method for returning the data type of the specified
-/// parameter, where @p 0 means integer and @p 1 means floating-point.
+/// parameter, where 0 means integer and 1 means floating-point.
 ///
 /// @param self   Object self-reference.
 /// @param index  Index of the parameter the type of which is to

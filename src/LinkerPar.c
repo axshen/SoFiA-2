@@ -161,7 +161,7 @@ PUBLIC void LinkerPar_delete(LinkerPar *self)
 
 /// @brief Return number of sources in LinkerPar object
 ///
-/// Public method for returning the size of the @p LinkerPar object,
+/// Public method for returning the size of the LinkerPar object,
 /// i.e. the number of sources it currently contains.
 ///
 /// @param self  Object self-reference.
@@ -177,8 +177,8 @@ PUBLIC size_t LinkerPar_get_size(const LinkerPar *self)
 /// @brief Insert new object at end of list
 ///
 /// Public method for adding a new object to the end of the list pointed to by
-/// @p self. The label will be set to @p label, the number of pixels to 1, and
-/// the (x, y, z) position will be used as the initial @p x_min, @p x_max, etc.
+/// `self`. The label will be set to `label`, the number of pixels to 1, and
+/// the (x, y, z) position will be used as the initial `x_min`, `x_max`, etc.
 /// The memory allocation of the object will automatically be expanded if necessary.
 ///
 /// @param self   Object self-reference.
@@ -255,7 +255,7 @@ PUBLIC void LinkerPar_pop(LinkerPar *self)
 /// @brief Add another pixel to last object in list
 ///
 /// Public method for adding another pixel to the last object in the current linker list.
-/// The object's @p x_min, @p x_max, @p y_min, etc. values will be checked against the
+/// The object's `x_min`, `x_max`, `y_min`, etc. values will be checked against the
 /// newly added pixel and updated if necessary. The programme will terminate if the list
 /// is found to be empty.
 ///
@@ -332,7 +332,7 @@ PUBLIC void LinkerPar_update_flag(LinkerPar *self, const unsigned char flag)
 /// @brief Get size of object in x, y or z
 ///
 /// Public method for returning the size of the specified object along the specified axis.
-/// The programme will terminate if the @p axis or @p label are out of range.
+/// The programme will terminate if the `axis` or `label` are out of range.
 ///
 /// @param self   Object self-reference.
 /// @param label  Index of the object to be retrieved.
@@ -374,7 +374,7 @@ PUBLIC size_t LinkerPar_get_npix(const LinkerPar *self, const size_t label)
 
 /// @brief Get total flux of object
 ///
-/// Public method for returning the total flux of the object specified by @p label.
+/// Public method for returning the total flux of the object specified by `label`.
 /// The programme will terminate if the label is out of range.
 ///
 /// @param self   Object self-reference.
@@ -391,7 +391,7 @@ PUBLIC double LinkerPar_get_flux(const LinkerPar *self, const size_t label)
 
 /// @brief Get reliability of object
 ///
-/// Public method for returning the reliability of the object specified by @p label.
+/// Public method for returning the reliability of the object specified by `label`.
 /// The programme will terminate if the label is out of range.
 ///
 /// @param self   Object self-reference.
@@ -408,8 +408,8 @@ PUBLIC double LinkerPar_get_rel(const LinkerPar *self, const size_t label)
 
 /// @brief Get label of object by index
 ///
-/// Public method for returning the label of the object with the specified @p index.
-/// The programme will terminate if the @p index is out of range.
+/// Public method for returning the label of the object with the specified `index`.
+/// The programme will terminate if the `index` is out of range.
 ///
 /// @param self   Object self-reference.
 /// @param index  Index of the object to be retrieved.
@@ -462,7 +462,7 @@ PUBLIC void LinkerPar_get_bbox(const LinkerPar *self, const size_t label, size_t
 
 /// @brief Create source catalogue from LinkerPar object
 ///
-/// Public method for generating a source catalogue from the specified @p LinkerPar
+/// Public method for generating a source catalogue from the specified LinkerPar
 /// object. A pointer to the newly created catalogue will be returned. Note that
 /// the user will assume ownership of the catalogue and will be responsible for
 /// explicitly calling the destructor if the catalogue is no longer required.
@@ -470,7 +470,7 @@ PUBLIC void LinkerPar_get_bbox(const LinkerPar *self, const size_t label, size_t
 /// filter object that contains the old and new labels of all sources deemed reliable.
 ///
 /// The old labels will be replaced by the new ones in the source ID column of the
-/// catalogue. If filter is @p NULL or empty, all sources will be copied into the
+/// catalogue. If filter is `NULL` or empty, all sources will be copied into the
 /// catalogue without filtering.
 ///
 /// @param self       Object self-reference.
@@ -641,7 +641,7 @@ PUBLIC void LinkerPar_get_rel_cat(const LinkerPar *self, const char *flux_unit, 
 /// @brief Print basic information about LinkerPar object
 ///
 /// Public method for printing some basic information on the size and memory
-/// usage of the @p LinkerPar object pointed to by @p self.
+/// usage of the LinkerPar object pointed to by `self`.
 ///
 /// @param self  Object self-reference.
 
@@ -676,7 +676,7 @@ PUBLIC void LinkerPar_print_info(const LinkerPar *self)
 /// @param self   Object self-reference.
 /// @param label  Label of the element the index of which is to be returned.
 ///
-/// @return Index of the element identified with @p label
+/// @return Index of the element identified with `label`
 
 PRIVATE size_t LinkerPar_get_index(const LinkerPar *self, const size_t label)
 {
@@ -690,9 +690,9 @@ PRIVATE size_t LinkerPar_get_index(const LinkerPar *self, const size_t label)
 /// @brief Reallocate memory for LinkerPar object
 ///
 /// Private method for reallocating the memory requirements of the
-/// specified @p LinkerPar object, e.g. as necessitated by a change in
+/// specified LinkerPar object, e.g. as necessitated by a change in
 /// size. If the new size is 0, all memory will be de-allocated and
-/// the pointers will be set to @p NULL.
+/// the pointers will be set to `NULL`.
 ///
 /// @param self  Object self-reference.
 
@@ -783,7 +783,7 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 /// @brief Determine reliability of detections
 ///
 /// Public method for measuring the reliability of all the sources in the specified
-/// @p LinkerPar object. This will set the rel property of the object, but not yet
+/// LinkerPar object. This will set the rel property of the object, but not yet
 /// filter out unreliable sources. Reliability measurement works by comparing the
 /// density of positive and negative detections in an N-dimensional parameter space.
 /// For this purpose, the covariance matrix of the distribution of negative sources
@@ -795,20 +795,20 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 ///
 /// R = (P - N) / N,
 ///
-/// where @p P is the sum of the PDFs of the positive sources, and @p N is the sum
-/// of the PDFs of the negative sources. If <tt>N > P</tt>, @p R is set to 0 to
+/// where P is the sum of the PDFs of the positive sources, and N is the sum
+/// of the PDFs of the negative sources. If N > P, R is set to 0 to
 /// ensure that the resulting reliability is always in the range of 0 to 1. Note that
-/// the reliability will only be determined for positive sources above the @p fmin
-/// threshold, where @p fmin is the summed flux divided by the square root of the
+/// the reliability will only be determined for positive sources above the `fmin`
+/// threshold, where `fmin` is the summed flux divided by the square root of the
 /// number of pixels contributing to a source. In order to be able to exclude certain
 /// negative artefacts from affecting the reliability calculation, the user has the
 /// option of specifying a table of (x, y) pixel positions using the parameter
-/// @p rel_cat. All negative detections the (x, y) bounding box of which contains one
-/// of those positions will be excluded from the reliability calculation. @p rel_cat
-/// must contain exactly two columns (x and y in pixels). If set to @p NULL, this
+/// `rel_cat`. All negative detections the (x, y) bounding box of which contains one
+/// of those positions will be excluded from the reliability calculation. `rel_cat`
+/// must contain exactly two columns (x and y in pixels). If set to `NULL`, this
 /// feature will be disabled altogether. This method can also create a Skellam array
 /// to assist with the optimisation of the kernel scale. This can be controlled using
-/// the @p skellam parameter. If set to @p NULL, no Skellam array will be generated.
+/// the `skellam` parameter. If set to `NULL`, no Skellam array will be generated.
 ///
 /// @param self           Object self-reference.
 /// @param rel_par_space  Array of parameters to be used to determine the
@@ -821,7 +821,7 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 ///                       the original covariance matrix derived from the distribution
 ///                       of negative sources is used. Set 0.0 to use auto-kernel feature.
 /// @param minpix         Minimum number of pixels for a source to be considered reliable.
-/// @param fmin           Value of the fmin parameter, where fmin = sum / sqrt(N).
+/// @param fmin           Value of the `fmin` parameter, where `fmin = sum / sqrt(N)`.
 /// @param rel_cat        Table of pixel coordinates on the sky. All negative detections
 ///                       with bounding boxes including those positions will be removed
 ///                       before reliability calculation. NULL can be used to disable
@@ -831,10 +831,10 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 ///
 /// @return Covariance matrix from the negative detections.
 ///
-/// @note The auto-kernel algorithm will start at a low @p scale_kernel = 0.1 and will
+/// @note The auto-kernel algorithm will start at a low `scale_kernel = 0.1` and will
 /// incrementally increase that value until the median of the Skellam distribution drops
 /// below an internally defined threshold or the maximum number of iterations is exceeded.
-/// The @p scale_kernel increments will become smaller as the algorithm approaches the
+/// The `scale_kernel` increments will become smaller as the algorithm approaches the
 /// threshold.
 
 PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, double *scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam)
@@ -1175,7 +1175,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 /// The method will generate an Encapsulated PostScript (EPS) file that shows the
 /// distribution of negative and positive sources in 2-D projections of the parameter
 /// space and highlight the ones that do or don't fulfil the reliability threshold or
-/// @p fmin requirements. In addition, the location of @p fmin will be plotted, and
+/// `fmin` requirements. In addition, the location of `fmin` will be plotted, and
 /// the Gaussian smoothing kernel used in the reliability measurement will be
 /// overplotted as an ellipse based on the provided covariance matrix.
 ///
@@ -1188,11 +1188,11 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 ///                       parameters defined in the header file.
 /// @param threshold      Reliability threshold.
 /// @param fmin           Threshold for SNR filtering.
-/// @param minSNR         Only needed for labelling plot, while @p fmin is the parameter
+/// @param minSNR         Only needed for labelling plot, while `fmin` is the parameter
 ///                       used for drawing SNR line.
 /// @param covar          Covariance matrix.
 /// @param filename       Name of the output EPS file.
-/// @param overwrite      If @p true, overwrite output file, otherwise do not overwrite.
+/// @param overwrite      If `true`, overwrite output file, otherwise do not overwrite.
 
 PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const Array_siz *rel_par_space, const double threshold, const double fmin, const double minSNR, const Matrix *covar, const char *filename, const bool overwrite)
 {
@@ -1564,7 +1564,7 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const Array_siz *rel_par_
 /// @brief Create Skellam diagnostic plot
 ///
 /// Public function for generating a Skellam diagnostic plot showing the cumulative
-/// distribution of values in the Array called @p skellam which must contain values
+/// distribution of values in the Array called `skellam` which must contain values
 /// of (P - N) / sqrt(P + N) generated by the reliability module.The resulting plot
 /// will be written to an EPS file with the specified file name.
 ///
@@ -1772,26 +1772,26 @@ PUBLIC void LinkerPar_skellam_plot(Array_dbl *skellam, const char *filename, con
 ///   S = (P - N) / SQRT(P + N)
 ///
 /// where P and N are kernel density estimations for positive and negative detections,
-/// respectively. This function updates the provided @p skellam array with calculated
+/// respectively. This function updates the provided `skellam` array with calculated
 /// values.
 ///
 /// The parameters for the positive and negative detections must be provided using the
-/// @p pos and @p neg arrays which are expected to be flattened arrays of length
-/// @p dim * @p n_pos and @p dim * @p n_neg, respectively. Here, @p dim is the
-/// number of parameters (i.e. dimensionality of the parameter space), while @p n_pos
-/// and @p n_neg is the total number of positive and negative detections, respectively.
+/// `pos` and `neg` arrays which are expected to be flattened arrays of length
+/// `dim * n_pos` and `dim * `n_neg`, respectively. Here, `dim` is the
+/// number of parameters (i.e. dimensionality of the parameter space), while `n_pos`
+/// and `n_neg` is the total number of positive and negative detections, respectively.
 ///
 /// The size of the Gaussian density estimator kernel used in the calculation is
-/// determined from the specified covariance matrix. An additional @p scale factor
+/// determined from the specified covariance matrix. An additional `scale` factor
 /// can be specified to normalise the integral under the Gaussian kernel.
 ///
 /// @param skellam    Pointer to skellam array.
 /// @param covar_inv  Pointer to inverse of covariance matrix. Used to set the size of
 ///                   the Gaussian kernel. Can be calculated with Matrix_invert().
 /// @param pos        Array of parameters for positive detections. Must be of length
-///                   @p dim * @p n_pos.
+///                   `dim * n_pos`.
 /// @param neg        Array of parameters for negative detections. Must be of length
-///                   @p dim * @p n_neg.
+///                   `dim * n_neg`.
 /// @param dim        Dimensionality of parameter space.
 /// @param n_pos      Number of positive detections.
 /// @param n_neg      Number of negative detections.

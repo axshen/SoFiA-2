@@ -53,8 +53,8 @@
 
 CLASS String
 {
-	size_t size;   ///< String size @b without the terminating null character.
-	char *string;  ///< C string containing the string value, including @p '\0'.
+	size_t size;   ///< String size **without** the terminating null character.
+	char *string;  ///< C string containing the string value, including '`\0`'.
 };
 
 
@@ -66,7 +66,7 @@ CLASS String
 /// object is no longer required to release its memory again.
 ///
 /// @param string  String to be assigned to the new String object.
-///                Use @p "" to create an empty string.
+///                Use `""` to create an empty string.
 ///
 /// @return Pointer to newly created String object.
 
@@ -145,12 +145,12 @@ PUBLIC size_t String_size(const String *self)
 /// @brief Return pointer to C string
 ///
 /// Public method for returning a pointer to the C string stored in
-/// @p self. If @p self is @p NULL, then a @p NULL pointer will instead
+/// `self`. If `self` is `NULL`, then a `NULL` pointer will instead
 /// be returned.
 ///
 /// @param self  Object self-reference.
 ///
-/// @return Pointer to C string of @p self, or @p NULL if @p self is @p NULL.
+/// @return Pointer to C string of `self`, or `NULL` if `self` is `NULL`.
 
 PUBLIC const char *String_get(const String *self)
 {
@@ -185,12 +185,12 @@ PUBLIC char String_at(const String *self, const size_t index)
 ///
 /// Public method for checking if two strings are equal, i.e. if 
 /// they contain the same character sequence. The method will return
-/// @p true if the strings are equal and @p false otherwise.
+/// `true` if the strings are equal and `false` otherwise.
 ///
 /// @param self    Object self-reference.
 /// @param string  C string to compare with.
 ///
-/// @return @p true if strings are equal, @p false otherwise.
+/// @return `true` if strings are equal, `false` otherwise.
 
 PUBLIC bool String_compare(const String *self, const char *string)
 {
@@ -207,12 +207,12 @@ PUBLIC bool String_compare(const String *self, const char *string)
 ///
 /// Public method for setting a string to the specified value. The
 /// string will be cleared if the specified value is an empty
-/// string or a @p NULL pointer.
+/// string or a `NULL` pointer.
 ///
 /// @param self    Object self-reference.
 /// @param string  C string value to be set.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_set(String *self, const char *string)
 {
@@ -239,14 +239,14 @@ PUBLIC String *String_set(String *self, const char *string)
 /// @brief Set character at specified index
 ///
 /// Public method for setting the character at the specified index
-/// position to the value of @p c. The method will terminate if the
+/// position to the value of `c`. The method will terminate if the
 /// index is out of range.
 ///
 /// @param self   Object self-reference.
 /// @param index  Index of the character to be set.
 /// @param c      Character.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_set_char(String *self, const size_t index, const char c)
 {
@@ -273,7 +273,7 @@ PUBLIC String *String_set_char(String *self, const size_t index, const char c)
 /// @param format  Format specifier similar to `printf()`.
 /// @param value   Integer value to set the string to.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_set_int(String *self, const char *format, const long int value)
 {
@@ -304,9 +304,9 @@ PUBLIC String *String_set_int(String *self, const char *format, const long int v
 /// Public method for setting a String object to the specified
 /// string up to or until the specified delimiting character. The
 /// delimiting character can either be the first from the start or
-/// the last before the end (argument @p first), and either the sub-
+/// the last before the end (argument `first`), and either the sub-
 /// string until the delimiter or from the delimiter onward can be
-/// copied (argument @p until). The delimiting character itself will
+/// copied (argument `until`). The delimiting character itself will
 /// be excluded in all cases. This method can be used to copy part
 /// of a string as defined by a specific delimiting character.
 ///
@@ -314,15 +314,15 @@ PUBLIC String *String_set_int(String *self, const char *format, const long int v
 /// @param  string     C string value to set the String object to.
 /// @param  delimiter  Delimiting character from or up to which to
 ///                    copy the string value.
-/// @param  first      If @p true, use the first occurrence of the
+/// @param  first      If `true`, use the first occurrence of the
 ///                    delimiter (first from start), otherwise use
 ///                    the last occurrence (last before end).
-/// @param  until      If @p true, copy the string until the delimiting
+/// @param  until      If `true`, copy the string until the delimiting
 ///                    character, otherwise copy the string from the
 ///                    delimiting character onward. The delimiter
 ///                    itself will be excluded in both cases.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_set_delim(String *self, const char *string, const char delimiter, const bool first, const bool until)
 {
@@ -370,7 +370,7 @@ PUBLIC String *String_set_delim(String *self, const char *string, const char del
 /// @param self    Object self-reference.
 /// @param string  C string value to be appended.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_append(String *self, const char *string)
 {
@@ -404,7 +404,7 @@ PUBLIC String *String_append(String *self, const char *string)
 /// @param value   Integer value the textual representation of
 ///                which will be appended to the string.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_append_int(String *self, const char *format, const long int value)
 {
@@ -434,19 +434,19 @@ PUBLIC String *String_append_int(String *self, const char *format, const long in
 ///
 /// Public method for appending the textual representation of the
 /// specified floating-point value to a string. The format can be
-/// specified as in the @p printf() function. If no format is given
-/// (i.e. format is a @p NULL pointer) then @p %.5f will be used by
+/// specified as in the `printf()` function. If no format is given
+/// (i.e. format is a `NULL` pointer) then `%.5f` will be used by
 /// default. The resulting string is restricted to 32 characters
 /// (including the terminating null character) and will be truncated
 /// with a warning message if exceeded.
 ///
 /// @param self    Object self-reference.
-/// @param format  Format specifier as used by @p printf(). If set
-///                to @p NULL, the default format will be applied.
+/// @param format  Format specifier as used by `printf()`. If set
+///                to `NULL`, the default format will be applied.
 /// @param value   Floating-point value the textual representation
 ///                of which will be appended to the string.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_append_flt(String *self, const char *format, const double value)
 {
@@ -480,7 +480,7 @@ PUBLIC String *String_append_flt(String *self, const char *format, const double 
 /// @param self    Object self-reference.
 /// @param string  C string to be prepended.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_prepend(String *self, const char *string)
 {
@@ -503,12 +503,12 @@ PUBLIC String *String_prepend(String *self, const char *string)
 /// @brief Clear string
 ///
 /// Public method for clearing the specified String object. This
-/// will set the string to an empty C string (@p "\0") and the
+/// will set the string to an empty C string ("`\0`") and the
 /// size of the string to zero.
 ///
 /// @param self  Object self-reference.
 ///
-/// @return Pointer to @p self after assignment.
+/// @return Pointer to `self` after assignment.
 
 PUBLIC String *String_clear(String *self)
 {
@@ -529,11 +529,11 @@ PUBLIC String *String_clear(String *self)
 /// Public method for trimming a string by removing any contiguous
 /// sequence of whitespace characters from the beginning and end of
 /// the string. Whitespace will be anything considered as white-
-/// space by the standard library function @p isspace().
+/// space by the standard library function `isspace()`.
 ///
 /// @param self  Object self-reference.
 ///
-/// @return Pointer to @p self after trimming.
+/// @return Pointer to `self` after trimming.
 
 PUBLIC String *String_trim(String *self)
 {
@@ -571,13 +571,13 @@ PUBLIC String *String_trim(String *self)
 /// @brief Convert string to lower case
 ///
 /// Public method for converting a string to lower case. This makes
-/// use of the @p tolower() function from the C standard library. A
-/// pointer to @p self after conversion will be returned to allow
+/// use of the `tolower()` function from the C standard library. A
+/// pointer to `self` after conversion will be returned to allow
 /// chaining of methods.
 ///
 /// @param self  Object self-reference.
 ///
-/// @return Pointer to @p self after conversion.
+/// @return Pointer to `self` after conversion.
 
 PUBLIC String *String_to_lower(String *self)
 {
@@ -595,13 +595,13 @@ PUBLIC String *String_to_lower(String *self)
 /// @brief Convert string to upper case
 ///
 /// Public method for converting a string to upper case. This makes
-/// use of the @p toupper() function from the C standard library. A
-/// pointer to @p self after conversion will be returned to allow
+/// use of the `toupper()` function from the C standard library. A
+/// pointer to `self` after conversion will be returned to allow
 /// chaining of methods.
 ///
 /// @param self  Object self-reference.
 ///
-/// @return Pointer to @p self after conversion.
+/// @return Pointer to `self` after conversion.
 
 PUBLIC String *String_to_upper(String *self)
 {

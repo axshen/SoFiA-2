@@ -48,7 +48,7 @@
 
 
 
-/// @brief Container class template for storing a dynamic array of values of type @p DATA_T.
+/// @brief Container class template for storing a dynamic array of values of type `DATA_T`.
 ///
 /// The purpose of this class is to provide a convenient way to store
 /// multiple values of a specific type in an array-like structure. A
@@ -97,7 +97,7 @@ PUBLIC Array_SFX *Array_SFX_new(const size_t size)
 ///
 /// Alternative constructor. Will create a new Array_SFX object,
 /// the size of which is determined by the number of comma-separated
-/// values specified in @p string. A pointer to the newly created
+/// values specified in `string`. A pointer to the newly created
 /// object will be returned. Sufficient memory will be allocated
 /// to store the array values. Note that the destructor will need
 /// to be called explicitly once the object is no longer required to
@@ -220,7 +220,7 @@ PUBLIC size_t Array_SFX_get_size(const Array_SFX *self)
 /// @param self  Object self-reference.
 ///
 /// @return Pointer to the first element of the array. If the array has
-///         size 0, a @p NULL pointer will be returned instead.
+///         size 0, a `NULL` pointer will be returned instead.
 
 PUBLIC const DATA_T *Array_SFX_get_ptr(const Array_SFX *self)
 {
@@ -334,7 +334,7 @@ PUBLIC Array_SFX *Array_SFX_mul(Array_SFX *self, const size_t index, const DATA_
 /// @brief Concatenate two arrays
 ///
 /// Public method for concatenating two arrays by adding the
-/// elements of @p source at the end of @p self.
+/// elements of `source` at the end of `self`.
 ///
 /// @param self    Object self-reference.
 /// @param source  Array to be added.

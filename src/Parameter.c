@@ -178,19 +178,19 @@ PUBLIC void Parameter_set(Parameter *self, const char *key, const char *value)
 ///
 /// Public method for checking if the specified parameter name
 /// already exists in the current parameter list. If the parameter
-/// is found, the function returns @p true, otherwise @p false. The
-/// variable @p index will be set to the index of the parameter if
+/// is found, the function returns`true`, otherwise `false`. The
+/// variable `index` will be set to the index of the parameter if
 /// found and otherwise be left untouched. If the index is not
-/// required, a @p NULL pointer can instead be provided.
+/// required, a `NULL` pointer can instead be provided.
 ///
 /// @param self   Object self-reference.
 /// @param key    Name of the parameter to be checked.
 /// @param index  Pointer to an index variable that will be set to
 ///               the index of the parameter, if found. This can
-///               be @p NULL if the index is not required.
+///               be `NULL` if the index is not required.
 ///
-/// @return Returns @p true if the specified parameter exists and
-///         @p false otherwise.
+/// @return Returns `true` if the specified parameter exists and
+///         `false` otherwise.
 
 PUBLIC bool Parameter_exists(const Parameter *self, const char *key, size_t *index)
 {
@@ -217,7 +217,7 @@ PUBLIC bool Parameter_exists(const Parameter *self, const char *key, size_t *ind
 ///
 /// Public method for returning the value of the specified parameter
 /// as a double-precision floating-point number. If the parameter
-/// does not exist, a value of @p NaN will instead be returned.
+/// does not exist, a value of `NaN` will instead be returned.
 ///
 /// @param self  Object self-reference.
 /// @param key   Name of the parameter to be extracted.
@@ -277,7 +277,7 @@ PUBLIC unsigned long int Parameter_get_uint(const Parameter *self, const char *k
 ///
 /// Public method for returning the value of the specified parameter
 /// as a Boolean value (true or false). If the parameter does not
-/// exist, a value of @p false will be returned.
+/// exist, a value of `false` will be returned.
 ///
 /// @param self  Object self-reference.
 /// @param key   Name of the parameter to be extracted.
@@ -297,7 +297,7 @@ PUBLIC bool Parameter_get_bool(const Parameter *self, const char *key)
 ///
 /// Public method for returning the value of the specified parameter
 /// as a pointer to a string value. If the parameter does not exist,
-/// a @p NULL pointer will be returned. Note that this is just a
+/// a `NULL` pointer will be returned. Note that this is just a
 /// convenience function that will simply return the output of
 /// Parameter_get_raw().
 ///
@@ -316,7 +316,7 @@ PUBLIC const char *Parameter_get_str(const Parameter *self, const char *key)
 /// @brief Extract parameter value as String by index
 ///
 /// Public method for returning the value of the parameter specified
-/// by @p index as a pointer to a string value. If the index is out
+/// by `index` as a pointer to a string value. If the index is out
 /// of range, the process will be terminated.
 ///
 /// @param self   Object self-reference.
@@ -357,7 +357,7 @@ PUBLIC const char *Parameter_get_key(const Parameter *self, const size_t index)
 ///
 /// Private method for returning the value of the specified parameter
 /// as a pointer to the raw value string. If the parameter does not
-/// exist, a @p NULL pointer will instead be returned.
+/// exist, a `NULL` pointer will instead be returned.
 ///
 /// @param self  Object self-reference.
 /// @param key   Name of the parameter to be extracted.
@@ -376,7 +376,7 @@ PRIVATE const char *Parameter_get_raw(const Parameter *self, const char *key)
 /// @brief Load parameter settings from file
 ///
 /// Public method for loading parameter settings from an input file
-/// of the name @p filename. The parameter settings in the file must
+/// of the name `filename`. The parameter settings in the file must
 /// be of the form
 ///
 /// \code
@@ -385,19 +385,19 @@ PRIVATE const char *Parameter_get_raw(const Parameter *self, const char *key)
 ///
 /// where both the value and comment are optional (indicated by the
 /// brackets). Empty lines and lines starting with # (comments) will be
-/// ignored. If mode = @p PARAMETER_APPEND, the function will update any
+/// ignored. If mode = `PARAMETER_APPEND`, the function will update any
 /// existing parameter or append a new parameter setting if the parameter
-/// name does not yet exist. If mode = @p PARAMETER_UPDATE, the function
+/// name does not yet exist. If mode = `PARAMETER_UPDATE`, the function
 /// will only update existing parameters and discard any non-existing
-/// parameter settings. If the parameter @p pipeline.pedantic is found
+/// parameter settings. If the parameter `pipeline.pedantic` is found
 /// and set to true, an error message will be produced if a non-existing
 /// parameter name is found, and the process will be terminated in this
-/// case (only for mode = @p PARAMETER_UPDATE).
+/// case (only for mode = `PARAMETER_UPDATE`).
 ///
 /// @param self      Object self-reference.
 /// @param filename  Name of the input file.
-/// @param mode      Mode of operation; can be @p PARAMETER_APPEND or
-///                  @p PARAMETER_UPDATE.
+/// @param mode      Mode of operation; can be `PARAMETER_APPEND` or
+///                  `PARAMETER_UPDATE`.
 
 PUBLIC void Parameter_load(Parameter *self, const char *filename, const int mode)
 {

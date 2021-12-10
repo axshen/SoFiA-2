@@ -48,19 +48,19 @@
 
 /// @brief Terminate programme execution if condition is false
 ///
-/// If the specified condition is @p false, an error message will be
+/// If the specified condition is `false`, an error message will be
 /// printed and execution of the programme will be terminated with
-/// the signal specified by @p errorCode. The specified error message
-/// can contain optional format specifiers as used in the @p printf()
+/// the signal specified by `errorCode`. The specified error message
+/// can contain optional format specifiers as used in the `printf()`
 /// function, in which case additional arguments need to be sup-
 /// plied that will be printed as part of the message.
 ///
-/// @param condition  Condition to be tested. If @p false, programme
+/// @param condition  Condition to be tested. If `false`, programme
 ///                   execution will be terminated with an error
 ///                   message.
 /// @param errorCode  Integer value of the error code to be returned.
 /// @param format     Message to be printed. This can contain optional
-///                   format specifiers as used in the @p printf()
+///                   format specifiers as used in the `printf()`
 ///                   function.
 /// @param ...        Optional parameters to be printed as defined by
 ///                   the format specifiers, if present.
@@ -82,9 +82,9 @@ void ensure(const bool condition, const int errorCode, const char *format, ...)
 
 
 
-/// @brief Check if pointer is @p NULL
+/// @brief Check if pointer is `NULL`
 ///
-/// This function will check if the supplied pointer is @p NULL
+/// This function will check if the supplied pointer is `NULL`
 /// and terminate the current process in this case. Otherwise,
 /// the function will do nothing.
 ///
@@ -101,12 +101,12 @@ void check_null(const void *ptr)
 /// @brief Print informational message
 ///
 /// Prints an informational message to standard output. The message
-/// can contain optional format specifiers as used in the @p printf()
+/// can contain optional format specifiers as used in the `printf()`
 /// function, in which case additional arguments need to be supplied
 /// that will be printed as part of the message.
 ///
 /// @param format  Message to be printed. This can contain optional
-///                format specifiers as in the @p printf() function.
+///                format specifiers as in the `printf()` function.
 /// @param ...     Optional parameters to be printed as defined by
 ///                the format specifies, if present.
 
@@ -123,17 +123,17 @@ void message(const char *format, ...)
 
 
 
-/// @brief Print informational message if @p verbosity is @p true
+/// @brief Print informational message if `verbosity` is `true`
 ///
-/// Prints an informational message to standard output if @p verbosity
-/// is set to @p true, otherwise does nothing. The message can contain
-/// optional format specifiers as used in the @p printf() function, in
+/// Prints an informational message to standard output if `verbosity`
+/// is set to `true`, otherwise does nothing. The message can contain
+/// optional format specifiers as used in the `printf()` function, in
 /// which case additional arguments need to be supplied that will be
 /// printed as part of the message.
 ///
-/// @param verbosity  If @p true, print message, otherwise do nothing.
+/// @param verbosity  If `true`, print message, otherwise do nothing.
 /// @param format     Message to be printed. This can contain optional
-///                   format specifiers as in the @p printf() function.
+///                   format specifiers as in the `printf()` function.
 /// @param ...        Optional parameters to be printed as defined by
 ///                   the format specifies, if present.
 
@@ -159,12 +159,12 @@ void message_verb(const bool verbosity, const char *format, ...)
 /// Prints an informational status message to standard output. The
 /// message will be highlighted in some way in the terminal window
 /// to distinguish it from standard messages. The message can contain
-/// optional format specifiers as used in the @p printf() function,
+/// optional format specifiers as used in the `printf()` function,
 /// in which case additional arguments need to be supplied that will
 /// be printed as part of the message.
 ///
 /// @param format  Message to be printed. This can contain optional
-///                format specifiers as in the @p printf() function.
+///                format specifiers as in the `printf()` function.
 /// @param ...     Optional parameters to be printed as defined by
 ///                the format specifies, if present.
 
@@ -185,12 +185,12 @@ void status(const char *format, ...)
 ///
 /// Prints the word 'WARNING' followed by the specified message and
 /// a final newline character to standard error. The message can
-/// contain format specifiers as used in the @p printf() function,
+/// contain format specifiers as used in the `printf()` function,
 /// in which case additional arguments are expected that will be
 /// printed as part of the message.
 ///
 /// @param format  Message to be printed. This can contain optional
-///                format specifiers as in the @p printf() function.
+///                format specifiers as in the `printf()` function.
 /// @param ...     Optional parameters to be printed as defined by
 ///                the format specifies, if present.
 
@@ -208,19 +208,19 @@ void warning(const char *format, ...)
 
 
 
-/// @brief Print warning message if @p verbosity is @p true
+/// @brief Print warning message if `verbosity` is `true`
 ///
 /// Prints the word 'WARNING' followed by the specified message and
 /// a final newline character to standard error. The message can
-/// contain format specifiers as used in the @p printf() function,
+/// contain format specifiers as used in the `printf()` function,
 /// in which case additional arguments are expected that will be
 /// printed as part of the message. Output will be suppressed if
-/// the \p verbosity parameter is set to @p false, in which case
+/// the `verbosity` parameter is set to `false`, in which case
 /// the function will do nothing.
 ///
-/// @param verbosity  If @p true, print message, otherwise do nothing.
+/// @param verbosity  If `true`, print message, otherwise do nothing.
 /// @param format     Message to be printed. This can contain optional
-///                   format specifiers as in the @p printf() function.
+///                   format specifiers as in the `printf()` function.
 /// @param ...        Optional parameters to be printed as defined by
 ///                   the format specifies, if present.
 
@@ -309,15 +309,15 @@ void timestamp(const time_t start, const clock_t start_clock)
 
 
 
-/// @brief Wrapper around @p malloc() and @p calloc()
+/// @brief Wrapper around `malloc()` and `calloc()`
 ///
-/// Wrapper function for @p malloc() and @p calloc(). The function will
-/// reserve memory for @p n_blocks elements of size @p block_size and
-/// return a pointer of type @p void to the allocated memory. If memory
+/// Wrapper function for `malloc()` and `calloc()`. The function will
+/// reserve memory for `n_blocks` elements of size `block_size` and
+/// return a pointer of type `void` to the allocated memory. If memory
 /// allocation fails, an error message will be printed and the current
 /// process terminated.
 ///
-/// @param mode        @p MALLOC for @p malloc() or @p CALLOC for @p calloc().
+/// @param mode        `MALLOC` for `malloc()` or `CALLOC` for `calloc()`.
 /// @param n_blocks    Number of array elements to be stored.
 /// @param block_size  Size of each array element.
 ///
@@ -333,11 +333,11 @@ void *memory(const int mode, const size_t n_blocks, const size_t block_size)
 
 
 
-/// @brief Wrapper around @p realloc()
+/// @brief Wrapper around `realloc()`
 ///
-/// Wrapper function for @p realloc(). The function will reallocate
-/// memory for @p n_blocks elements of size @p block_size and return
-/// a pointer of type @p void to the allocated memory block. If memory
+/// Wrapper function for `realloc()`. The function will reallocate
+/// memory for `n_blocks` elements of size `block_size` and return
+/// a pointer of type `void` to the allocated memory block. If memory
 /// allocation fails, an error message will be printed and the current
 /// process terminated.
 ///
@@ -361,7 +361,7 @@ void *memory_realloc(void *ptr, const size_t n_blocks, const size_t block_size)
 ///
 /// Trims a string by removing whitespace from the beginning and
 /// end of the string. Whitespace will be any character that is
-/// considered as space by the @p isspace() function of the standard
+/// considered as space by the `isspace()` function of the standard
 /// library.
 ///
 /// @param str  C string to be trimmed.
@@ -402,7 +402,7 @@ char *trim_string(char *str)
 /// @brief Convert integer number to string
 ///
 /// Function for converting the specified integer value into a
-/// string of size @p size pointed to by @p str. The user will need
+/// string of size `size` pointed to by `str`. The user will need
 /// to ensure that the string is large enough to be able to hold the
 /// result. If the string is too small, the value will be truncated.
 ///
@@ -448,7 +448,7 @@ void swap(double *val1, double *val2)
 /// will be optimised such that approximately the right number of
 /// tick marks will be spread across the specified range while
 /// setting the tick mark intervals to either 1, 2, 5 or 10 times
-/// 10^N, where N is an integer number. Values for @p n should be
+/// 10^N, where N is an integer number. Values for `n` should be
 /// in the range of about 3-6 for optimal results.
 ///
 /// @param range  Plot range.
@@ -477,7 +477,7 @@ double auto_tick(const double range, const size_t n)
 /// @brief Write header of EPS file
 ///
 /// Function for writing header information to an EPS file pointed
-/// to by @p fp. The user can specify the title, creator and bounding
+/// to by `fp`. The user can specify the title, creator and bounding
 /// box of the file. In addition, a number of useful procedures
 /// will be defined.
 ///
@@ -517,7 +517,7 @@ void write_eps_header(FILE *fp, const char *title, const char *creator, const ch
 /// @param fp  File pointer
 ///
 /// Function for writing footer information to an EPS file pointed
-/// to by @p fp. Combined with @p write_eps_header() this will create
+/// to by `fp`. Combined with `write_eps_header()` this will create
 /// a valid EPS file.
 
 void write_eps_footer(FILE *fp)
@@ -537,7 +537,7 @@ void write_eps_footer(FILE *fp)
 /// time. Note that the result will only be correct on machines where
 /// `sizeof(char) < sizeof(int)`.
 ///
-/// @return Returns @p true on little-endian and @p false on big-endian
+/// @return Returns `true` on little-endian and `false` on big-endian
 ///         machines.
 
 bool is_little_endian(void)
@@ -551,9 +551,9 @@ bool is_little_endian(void)
 /// @brief Swap the byte order of a multi-byte word
 ///
 /// Static function for reversing the order of the bytes in a
-/// multi-byte word provided as an array of @p char with given size.
+/// multi-byte word provided as an array of `char` with given size.
 /// Only word sizes of 2, 4 or 8 are currently supported. Note that
-/// this function will only work correctly on systems where @p CHAR_BIT
+/// this function will only work correctly on systems where `CHAR_BIT`
 /// is equal to 8. In addition, the built-in byte swap functions from
 /// GCC are required.
 ///

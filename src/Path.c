@@ -111,8 +111,8 @@ PUBLIC void Path_delete(Path *self)
 ///
 /// Public method for setting the path from the specified string.
 /// The path can contain just a directory, just a file, or a
-/// combination of both. Anything before the final @p / will be treated
-/// as a directory and anything after the final @p / as a file name.
+/// combination of both. Anything before the final `/` will be treated
+/// as a directory and anything after the final `/` as a file name.
 ///
 /// @param self  Object self-reference.
 /// @param path  C-string from which to extract path.
@@ -215,11 +215,11 @@ PUBLIC void Path_set_dir(Path *self, const char *dir)
 ///
 /// Public method for appending a sub-directory to the given directory.
 /// The name of the sub-directory will be constructed from the
-/// specified @p basename and @p appendix. Basename is expected to be a
-/// file name, and if it includes a mime type suffix (e.g. @p .fits),
+/// specified `basename` and `appendix`. `basename` is expected to be a
+/// file name, and if it includes a mime type suffix (e.g. `.fits`),
 /// then that suffix will be removed first before concatenating the
-/// appendix. Note that neither @p basename nor @p appendix must contain
-/// a slash (@p /).
+/// appendix. Note that neither `basename` nor `appendix` must contain
+/// a slash (`/`).
 ///
 /// Example:
 ///
@@ -235,7 +235,7 @@ PUBLIC void Path_set_dir(Path *self, const char *dir)
 /// @param basename  Basename to be used for the subdirectory name to
 ///                  be appended.
 /// @param appendix  Suffix to be appended to the subdirectory name.
-///                  Note that any connecting character such as @p _
+///                  Note that any connecting character such as `_`
 ///                  must be explicitly included.
 
 PUBLIC void Path_append_dir_from_template(Path *self, const char *basename, const char *appendix)
@@ -261,7 +261,7 @@ PUBLIC void Path_append_dir_from_template(Path *self, const char *basename, cons
 /// @brief Append string to file name
 ///
 /// Public method for appending the specified string to the file
-/// name. The appendix must not contain a slash (@p /).
+/// name. The appendix must not contain a slash (`/`).
 ///
 /// @param self      Object self-reference.
 /// @param appendix  C-string to be appended.
@@ -283,9 +283,9 @@ PUBLIC void Path_append_file(Path *self, const char *appendix)
 ///
 /// Public method for constructing the file name of the specified
 /// path from the given template. The final file name will become
-/// @p basename @p suffix @p mimetype. The directory name of the path
+/// `basename suffix mimetype`. The directory name of the path
 /// will remain unchanged.
-/// Note that if @p basename already contains a mime type (identified
+/// Note that if `basename` already contains a mime type (identified
 /// by the presence of a dot that is not the first character), then
 /// that mime type ending will be removed first.
 ///
@@ -301,13 +301,13 @@ PUBLIC void Path_append_file(Path *self, const char *appendix)
 ///
 /// @param self      Object self-reference.
 /// @param basename  Base name to be used for the file name.
-/// @param suffix    Suffix to be appended to @p basename such that the
-///                  file name becomes @p basename @p suffix. Note that
-///                  any connecting character (like @p _) must be
+/// @param suffix    Suffix to be appended to `basename` such that the
+///                  file name becomes `basename suffix`. Note that
+///                  any connecting character (like `_`) must be
 ///                  explicitly included.
 /// @param mimetype  Mime type to be appended to file name such that
-///                  the name becomes @p basename @p suffix @p mimetype.
-///                  Note that the dot (@p .) must be explicitly
+///                  the name becomes `basename suffix mimetype`.
+///                  Note that the dot (`.`) must be explicitly
 ///                  included.
 
 PUBLIC void Path_set_file_from_template(Path *self, const char *basename, const char *suffix, const char *mimetype)
@@ -393,7 +393,7 @@ PUBLIC const char *Path_get_file(const Path *self)
 ///
 /// @param self  Object self-reference.
 ///
-/// @return @p true if path is readable, @p false otherwise.
+/// @return `true` if path is readable, `false` otherwise.
 ///
 /// Public method for testing of the file pointed to by the specified
 /// path is readable or not. Note that this does not test if the file

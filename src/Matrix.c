@@ -92,7 +92,7 @@ PUBLIC Matrix *Matrix_new(const size_t rows, const size_t cols)
 /// @brief Copy constructor
 ///
 /// Copy constructor. Will create a new matrix with the same dimensions
-/// as the specified source matrix and copy all entries from @p source. A
+/// as the specified source matrix and copy all entries from `source`. A
 /// pointer to the newly created copy will be returned. Note that the
 /// destructor will need to be called on the copy if it is no longer
 /// required to release its memory.
@@ -152,19 +152,19 @@ PUBLIC Matrix *Matrix_identity(const size_t size)
 /// the destructor will need to be called on the matrix if it is no
 /// longer required to release its memory.
 ///
-/// The specified array of values must be a flattened array of @p size
+/// The specified array of values must be a flattened array of `size`
 /// columns representing the different variables or parameters for which
-/// the covariance matrix is to be calculated and @p samples rows which
+/// the covariance matrix is to be calculated and `samples` rows which
 /// represent the list of samples supplied to the covariance calculation.
-/// Hence, the array of @p values must be of length @p size * @p samples.
+/// Hence, the array of `values` must be of length `size * samples`.
 ///
 /// @param size      Size of covariance matrix. Must be equal to the number
 ///                  of columns in the array prior to flattening (i.e.
 ///                  number of variables or dimensions).
 /// @param samples   Number of rows in the array prior to flattening, i.e.
 ///                  the number of samples.
-/// @param values    Flattened array of values. Must be of length @p size *
-///                  @p samples.
+/// @param values    Flattened array of values. Must be of length `size *
+///                  samples`.
 ///
 /// @return Pointer to newly created covariance matrix.
 
@@ -253,8 +253,8 @@ PUBLIC size_t Matrix_cols(const Matrix *self)
 
 /// @brief Set matrix element to specified value
 ///
-/// Public method for setting the element at position (@p row, @p col)
-/// to the specified value. If @p row or @p col are out of range, the
+/// Public method for setting the element at position (`row`, `col`)
+/// to the specified value. If `row` or `col` are out of range, the
 /// process will be terminated. See Matrix_set_value_nocheck() for a
 /// faster version without sanity checks.
 ///
@@ -278,8 +278,8 @@ PUBLIC void Matrix_set_value(Matrix *self, const size_t row, const size_t col, c
 
 /// @brief Set matrix element to specified value (no sanity checks)
 ///
-/// Public method for setting the element at position (@p row, @p col)
-/// to the specified value. If @p row or @p col are out of range, the
+/// Public method for setting the element at position (`row`, `col`)
+/// to the specified value. If `row` or `col` are out of range, the
 /// process will be terminated. Identical to Matrix_set_value(), but
 /// without sanity checks for better performance.
 ///
@@ -299,7 +299,7 @@ PUBLIC void Matrix_set_value_nocheck(Matrix *self, const size_t row, const size_
 /// @brief Get matrix element at specified position
 ///
 /// Public method for retrieving the value of the matrix at the
-/// position specified by @p row and @p col. If @p row or @p col
+/// position specified by `row` and `col`. If `row` or `col`
 /// are out of range, the process will be terminated. Also see
 /// Matrix_get_value_nocheck() for a version without sanity
 /// checks for better performance.
@@ -324,7 +324,7 @@ PUBLIC double Matrix_get_value(const Matrix *self, const size_t row, const size_
 /// @brief Get matrix element at specified position (no sanity checks)
 ///
 /// Public method for retrieving the value of the matrix at the
-/// position specified by @p row and @p col. If @p row or @p col
+/// position specified by `row` and `col`. If `row` or `col`
 /// are out of range, the process will be terminated. Identical
 /// to Matrix_get_value(), but without sanity checks for better
 /// performance.
@@ -345,7 +345,7 @@ PUBLIC double Matrix_get_value_nocheck(const Matrix *self, const size_t row, con
 /// @brief Add specified value to matrix element
 ///
 /// Public method for adding the specified value to the matrix element
-/// specified by (@p row, @p col). If @p row or @p col are out of range,
+/// specified by (`row`, `col`). If `row` or `col` are out of range,
 /// the process will be terminated.
 ///
 /// @param self   Object self-reference.
@@ -369,7 +369,7 @@ PUBLIC void Matrix_add_value(Matrix *self, const size_t row, const size_t col, c
 /// @brief Multiply matrix element by specified value
 ///
 /// Public method for multiplying the matrix element specified by
-/// (@p row, @p col) by value. If @p row or @p col are out of range,
+/// (`row`, `col`) by value. If `row` or `col` are out of range,
 /// the process will be terminated.
 ///
 /// @param self   Object self-reference.
@@ -597,7 +597,7 @@ PUBLIC Matrix *Matrix_transpose(const Matrix *self)
 /// makes use of the Gauss-Jordan elimination algorithm for this
 /// purpose, unless the matrix size is <= 3, in which case the
 /// solution is calculated analytically. The inverted matrix will
-/// be returned. If the matrix is not invertible, a @p NULL pointer
+/// be returned. If the matrix is not invertible, a `NULL` pointer
 /// will instead be returned. The user is responsible for calling
 /// the destructor once the matrix is no longer needed.
 ///
@@ -871,7 +871,7 @@ PUBLIC double Matrix_det(const Matrix *self, const double scale_factor)
 ///
 /// Public method for calculating the probability density of a
 /// multivariate normal distribution described by the specified
-/// covariance matrix at the location specified by @p vector
+/// covariance matrix at the location specified by `vector`
 /// (relative to the mean). For this to work, the covariance
 /// matrix must be square and invertible, and the vector must be
 /// in column form with a size equal to that of the covariance
@@ -916,7 +916,7 @@ PUBLIC double Matrix_prob_dens(const Matrix *covar_inv, const Matrix *vector, co
 ///
 /// Public method for calculating the probability density of a
 /// multivariate normal distribution described by the specified
-/// covariance matrix at the location specified by @p vector
+/// covariance matrix at the location specified by `vector`
 /// (relative to the mean). For this to work, the covariance
 /// matrix must be square and invertible, and the vector must be
 /// in column form with a size equal to that of the covariance
@@ -956,8 +956,8 @@ PUBLIC double Matrix_prob_dens_nocheck(const Matrix *covar_inv, const Matrix *ve
 /// Public method for determining the radii and position angle of
 /// the error ellipse corresponding to the specified covariance
 /// matrix. The radii correspond to the standard deviation (sigma).
-/// The results will be written into the parameters @p radius_maj,
-/// @p radius_min and @p pa.
+/// The results will be written into the parameters `radius_maj`,
+/// `radius_min` and `pa`.
 ///
 /// @param covar       Covariance matrix.
 /// @param par1        First parameter to use.
@@ -967,7 +967,7 @@ PUBLIC double Matrix_prob_dens_nocheck(const Matrix *covar_inv, const Matrix *ve
 /// @param pa          Position angle of the ellipse.
 ///
 /// @note The covariance matrix must be a square matrix for this
-/// to make sense. The parameters @p par1 and @p par2 are used to
+/// to make sense. The parameters `par1` and `par2` are used to
 /// select two of of the N parameters of the covariance matrix, and
 /// the ellipse parameters will then be determined for this specific
 /// 2-D projection.
@@ -1058,8 +1058,8 @@ PRIVATE inline size_t Matrix_get_index(const Matrix *self, const size_t row, con
 
 /// @brief Swap two matrix rows
 ///
-/// Private method for swapping the two rows specified by @p row1 and
-/// @p row2 of the matrix. This method is needed for the Gauss-Jordan
+/// Private method for swapping the two rows specified by `row1` and
+/// `row2` of the matrix. This method is needed for the Gauss-Jordan
 /// elimination algorithm.
 ///
 /// @param self  Object self-reference.
@@ -1074,10 +1074,10 @@ PRIVATE void Matrix_swap_rows(Matrix *self, const size_t row1, const size_t row2
 
 
 
-/// @brief Add @p factor * @p row2 to @p row1
+/// @brief Add `factor * row2` to `row1`
 ///
-/// Private method for multiplying @p row2 by @p factor and adding
-/// the result to @p row1 of the specified matrix. This method is
+/// Private method for multiplying `row2` by `factor` and adding
+/// the result to `row1` of the specified matrix. This method is
 /// needed for the Gauss-Jordan elimination algorithm.
 ///
 /// @param self    Object self-reference.
