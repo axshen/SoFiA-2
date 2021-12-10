@@ -29,6 +29,12 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   common.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  This file defines functionality commonly required by all classes (header).
+
+
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -36,81 +42,71 @@
 #include <stdbool.h>
 #include <time.h>
 
-// SoFiA version number
-#define SOFIA_VERSION "2.4.1"
-#define SOFIA_VERSION_FULL "SoFiA 2.4.1"
-#define SOFIA_CREATION_DATE "24-Nov-2021"
+#define SOFIA_VERSION "2.4.1"              ///< SoFiA version number.
+#define SOFIA_VERSION_FULL "SoFiA 2.4.1"   ///< Full SoFiA version string.
+#define SOFIA_CREATION_DATE "24-Nov-2021"  ///< Date of current SoFiA version.
 
-// Define value of pi
 #ifndef M_PI
-#define M_PI 3.141592653589793
+#define M_PI 3.141592653589793  ///< Archimedes' constant (pi).
 #endif
 
-// Define value of conversion factor between MAD and standard deviation
-// of normal distribution, calculated as 1.0 / scipy.stats.norm.ppf(3.0 / 4.0)
 #ifndef MAD_TO_STD
-#define MAD_TO_STD 1.482602218505602
+#define MAD_TO_STD 1.482602218505602  ///< Conversion factor between MAD and standard deviation of normal distribution.
 #endif
+// NOTE: Calculated as 1.0 / scipy.stats.norm.ppf(3.0 / 4.0)
 
-// Define value of 1 / sqrt(2 * pi)
 #ifndef INV_SQRT_TWO_PI
-#define INV_SQRT_TWO_PI 0.3989422804014327
+#define INV_SQRT_TWO_PI 0.3989422804014327  ///< Value of 1 / sqrt(2 * pi).
 #endif
 
-// Check for NaN
 #ifndef IS_NAN
-#define IS_NAN(x) ((x) != (x))
+#define IS_NAN(x) ((x) != (x))  ///< Returns `true` if `x` is Not a Number (NaN).
 #endif
 #ifndef IS_NOT_NAN
-#define IS_NOT_NAN(x) ((x) == (x))
+#define IS_NOT_NAN(x) ((x) == (x))  ///< Returns `false` if `x` is Not a Number (NaN).
 #endif
 #ifndef FILTER_NAN
-#define FILTER_NAN(x) ((x) == (x) ? (x) : 0)
+#define FILTER_NAN(x) ((x) == (x) ? (x) : 0)  ///< Returns zero if `x` is Not a Number (NaN); otherwise returns `x`.
 #endif
 
-// Check if odd
 #ifndef IS_ODD
-#define IS_ODD(x) ((x) & 1)
+#define IS_ODD(x) ((x) & 1)  ///< Returns `true` if `x` is an odd number.
 #endif
 #ifndef IS_EVEN
-#define IS_EVEN(x) (!((x) & 1))
+#define IS_EVEN(x) (!((x) & 1))  ///< Returns `true` if `x` is an even number.
 #endif
 
-// Define memory allocation modes
-#define MALLOC 0
-#define CALLOC 1
+enum {MALLOC, CALLOC};  // Define memory allocation modes
 
-// Define maximum RMS measurement sample size
+#define NOISE_SAMPLE_SIZE 999983  ///< Define maximum RMS measurement sample size.
 // NOTE: This is chosen to be a prime number to reduce the risk of
 //       obtaining a stride that is a multiple of the x-axis size.
-#define NOISE_SAMPLE_SIZE 999983
 
-// Define size of kB, MB and GB
-#define KILOBYTE       1024
-#define MEGABYTE    1048576
-#define GIGABYTE 1073741824
+#define KILOBYTE       1024  ///< Size of a kilobyte (in bytes).
+#define MEGABYTE    1048576  ///< Size of a megabyte (in bytes).
+#define GIGABYTE 1073741824  ///< Size of a gigabyte (in bytes).
 
 // Define object-oriented terminology
-#define CLASS struct
-#define PUBLIC extern
-#define PRIVATE static
+#define CLASS struct    ///< Define `CLASS` as alias of `struct` (in analogy to C++ '`class`').
+#define PUBLIC extern   ///< Define `PUBLIC` as alias of `extern` (in analogy to C++ '`public`').
+#define PRIVATE static  ///< Define `PRIVATE` as alias of `static` (in analogy to C++ '`private`').
 
 // Define error codes
-#define ERR_SUCCESS      0
-#define ERR_FAILURE      1
-#define ERR_NULL_PTR     2
-#define ERR_MEM_ALLOC    3
-#define ERR_INDEX_RANGE  4
-#define ERR_FILE_ACCESS  5
-#define ERR_INT_OVERFLOW 6
-#define ERR_USER_INPUT   7
-#define ERR_NO_SRC_FOUND 8
+#define ERR_SUCCESS      0  ///< Return code on success.
+#define ERR_FAILURE      1  ///< Return code on failure; indicating that an unspecified error occurred.
+#define ERR_NULL_PTR     2  ///< Return code on failure; indicating an attempt to dereference `NULL` pointer.
+#define ERR_MEM_ALLOC    3  ///< Return code on failure; indicating a memory allocation error.
+#define ERR_INDEX_RANGE  4  ///< Return code on failure; indicating that an array index is out of range.
+#define ERR_FILE_ACCESS  5  ///< Return code on failure; indicating a file access error.
+#define ERR_INT_OVERFLOW 6  ///< Return code on failure; indicating an integer overflow error.
+#define ERR_USER_INPUT   7  ///< Return code on failure; indicating invalid user input.
+#define ERR_NO_SRC_FOUND 8  ///< Return code on failure; indicating that no sources were found by SoFiA.
 
 // Generic compile time check; should result in a compiler error if
 // condition is false due to attempt to create array of negative size.
 // NOTE: This does not actually create a physical array, but merely
 //       defines a new type.
-#define COMPILE_TIME_CHECK(condition, message) typedef char message[(condition) ? 1 : -1]
+#define COMPILE_TIME_CHECK(condition, message) typedef char message[(condition) ? 1 : -1]  ///< Check `condition` at compile time and terminate compilation if `false`.
 
 // Check condition and exit if not met
 void ensure(const bool condition, const int errorCode, const char *format, ...);

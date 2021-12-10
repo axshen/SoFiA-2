@@ -29,6 +29,12 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Source.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Class for storing and handling source parameters (header).
+
+
 #ifndef SOURCE_H
 #define SOURCE_H
 

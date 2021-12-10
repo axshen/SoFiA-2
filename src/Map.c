@@ -32,7 +32,7 @@
 /// @file   Map.c
 /// @author Tobias Westmeier
 /// @date   23/11/2021
-/// @brief  Container class for storing key-value pairs of type @p size_t.
+/// @brief  Container class for storing key-value pairs of type `size_t`.
 
 
 #include <stdlib.h>
@@ -40,7 +40,7 @@
 
 
 
-/// @brief Container class for storing key-value pairs of type @p size_t.
+/// @brief Container class for storing key-value pairs of type `size_t`.
 ///
 /// The purpose of this class is to provide a structure for storing
 /// and updating source parameters handled by the linker implemented
@@ -140,7 +140,7 @@ PUBLIC void Map_push(Map *self, const size_t key, const size_t value)
 /// @param self  Object self-reference.
 /// @param key   Key to be retrieved.
 ///
-/// @return Value belonging to @p key.
+/// @return Value belonging to `key`.
 
 PUBLIC size_t Map_get_value(const Map *self, const size_t key)
 {
@@ -181,13 +181,13 @@ PUBLIC size_t Map_get_size(const Map *self)
 /// @brief Check if key exists
 ///
 /// Public method for checking if the specified key exists. The
-/// method will return @p true if the key is found and @p false
+/// method will return `true` if the key is found and `false`
 /// otherwise.
 ///
 /// @param self  Object self-reference.
 /// @param key   Key to be checked.
 ///
-/// @return Returns @p true if key exists, @p false otherwise.
+/// @return Returns `true` if key exists, `false` otherwise.
 
 PUBLIC bool Map_key_exists(const Map *self, const size_t key)
 {

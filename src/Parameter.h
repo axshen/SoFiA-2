@@ -29,13 +29,19 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Parameter.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Class for storing and handling SoFiA parameter settings (header).
+
+
 #ifndef PARAMETER_H
 #define PARAMETER_H
 
 #include <stdbool.h>
 #include "common.h"
 
-#define PARAMETER_MAX_LINE_SIZE 1024
+#define PARAMETER_MAX_LINE_SIZE 1024  ///< Maximum supported length of a single line in a SoFiA parameter file (in bytes).
 
 enum {PARAMETER_APPEND, PARAMETER_UPDATE};
 

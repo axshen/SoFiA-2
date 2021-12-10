@@ -29,6 +29,12 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   String.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Container class for handling strings (header).
+
+
 #ifndef STRING_H
 #define STRING_H
 

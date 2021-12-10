@@ -29,9 +29,15 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Array_siz.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Container class template for storing a dynamic array of values of type `size_t` (header).
+
 
 // WARNING: This is a template that needs to be instantiated before use.
-//          Do not edit template instances, as they are auto-generated!
+//          Do not edit template instances, as they are auto-generated
+//          and will be overwritten during instantiation!
 
 
 #ifndef ARRAY_siz_H

@@ -29,13 +29,19 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Table.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Container class for reading tabulated data from text files (header).
+
+
 #ifndef TABLE_H
 #define TABLE_H
 
 #include "common.h"
 
-#define TABLE_INDEX(r,c) ((c) + self->cols * (r))
-#define TABLE_MAX_LINE_SIZE 65536
+#define TABLE_INDEX(r,c) ((c) + self->cols * (r))  ///< Returns the array index of the table entry in row `r` and column `c`.
+#define TABLE_MAX_LINE_SIZE 65536   ///< Maximum supported length of a single line in the input file from which the table data are read.
 
 typedef CLASS Table Table;
 

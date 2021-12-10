@@ -29,6 +29,12 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Flagger.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Class for storing data flagging information (header). **WORK IN PROGRESS!**
+
+
 #ifndef FLAGGER_H
 #define FLAGGER_H
 

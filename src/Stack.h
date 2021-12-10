@@ -29,6 +29,12 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Stack.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Class implementing a simple LIFO stack for the recursive linker algorithm (header).
+
+
 #ifndef STACK_H
 #define STACK_H
 

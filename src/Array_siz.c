@@ -36,7 +36,8 @@
 
 
 // WARNING: This is a template that needs to be instantiated before use.
-//          Do not edit template instances, as they are auto-generated!
+//          Do not edit template instances, as they are auto-generated
+//          and will be overwritten during instantiation!
 
 
 #include <stdlib.h>

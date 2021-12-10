@@ -29,6 +29,12 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   DataCube.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Class for storage, source finding and parameterisation of FITS data cubes (header).
+
+
 #ifndef DATACUBE_H
 #define DATACUBE_H
 
@@ -47,8 +53,7 @@
 #include "WCS.h"
 #include "Parameter.h"
 
-#define DESTROY  false
-#define PRESERVE true
+enum {DESTROY, PRESERVE};
 typedef enum {NOISE_STAT_STD, NOISE_STAT_MAD, NOISE_STAT_GAUSS, NOISE_STAT_MEAN, NOISE_STAT_MEDIAN} noise_stat;
 
 

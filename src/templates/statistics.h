@@ -29,9 +29,15 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   statistics_SFX.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Function templates for basic statistical analysis of data of type `DATA_T` (header).
+
 
 // WARNING: This is a template that needs to be instantiated before use.
-//          Do not edit template instances, as they are auto-generated!
+//          Do not edit template instances, as they are auto-generated
+//          and will be overwritten during instantiation!
 
 
 #ifndef STATISTICS_SFX_H
@@ -43,8 +49,8 @@
 // -------------------------- //
 // Settings for boxcar filter //
 // -------------------------- //
-#define BOXCAR_MIN_ITER 3
-#define BOXCAR_MAX_ITER 6
+#define BOXCAR_MIN_ITER 3  ///< Minimum number of iterations required for boxcar approximation of Gaussian smoothing kernel.
+#define BOXCAR_MAX_ITER 6  ///< Maximum number of iterations allowed for boxcar approximation of Gaussian smoothing kernel.
 
 
 

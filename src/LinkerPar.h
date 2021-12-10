@@ -29,18 +29,26 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   LinkerPar.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Class for managing the parameters of detections formed by the linker in SoFiA 2 (header).
+
+
 #ifndef LINKERPAR_H
 #define LINKERPAR_H
 
-#define LINKERPAR_PEAK 0
-#define LINKERPAR_SUM  1
-#define LINKERPAR_MEAN 2
-#define LINKERPAR_CHAN 3
-#define LINKERPAR_PIX  4
-#define LINKERPAR_FILL 5
-#define LINKERPAR_STD  6
-#define LINKERPAR_SKEW 7
-#define LINKERPAR_KURT 8
+enum {
+	LINKERPAR_PEAK,
+	LINKERPAR_SUM,
+	LINKERPAR_MEAN,
+	LINKERPAR_CHAN,
+	LINKERPAR_PIX,
+	LINKERPAR_FILL,
+	LINKERPAR_STD,
+	LINKERPAR_SKEW,
+	LINKERPAR_KURT
+};
 
 #include "common.h"
 #include "Table.h"

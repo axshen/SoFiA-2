@@ -29,19 +29,25 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Header.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Class for storing and managing FITS file headers (header).
+
+
 #ifndef HEADER_H
 #define HEADER_H
 
 #include "common.h"
 #include "String.h"
 
-#define FITS_HEADER_BLOCK_SIZE   2880
-#define FITS_HEADER_LINE_SIZE      80
-#define FITS_HEADER_LINES          36
-#define FITS_HEADER_KEYWORD_SIZE    8
-#define FITS_HEADER_KEY_SIZE       10
-#define FITS_HEADER_VALUE_SIZE     70
-#define FITS_HEADER_FIXED_WIDTH    20
+#define FITS_HEADER_BLOCK_SIZE   2880  ///< Size of a single FITS header block (in bytes).
+#define FITS_HEADER_LINE_SIZE      80  ///< Size of a single FITS header line (in bytes).
+#define FITS_HEADER_LINES          36  ///< Number of lines in a single FITS header block.
+#define FITS_HEADER_KEYWORD_SIZE    8  ///< Maximum size of a FITS header keyword (in bytes).
+#define FITS_HEADER_KEY_SIZE       10  ///< Size of a FITS header key, including '=' assignment (in bytes).
+#define FITS_HEADER_VALUE_SIZE     70  ///< Maximum size of a FITS header value (in bytes).
+#define FITS_HEADER_FIXED_WIDTH    20  ///< Size of a FITS header value of fixed width (in bytes).
 
 
 // ----------------------------------------------------------------- //

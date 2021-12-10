@@ -29,6 +29,12 @@
 // ____________________________________________________________________ //
 //                                                                      //
 
+/// @file   Map.h
+/// @author Tobias Westmeier
+/// @date   10/12/2021
+/// @brief  Container class for storing key-value pairs of type `size_t` (header).
+
+
 #ifndef MAP_H
 #define MAP_H
 

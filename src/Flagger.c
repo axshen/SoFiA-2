@@ -32,7 +32,7 @@
 /// @file   Flagger.c
 /// @author Tobias Westmeier
 /// @date   26/11/2021
-/// @brief  Class for storing data flagging information (**WORK IN PROGRESS**).
+/// @brief  Class for storing data flagging information. **WORK IN PROGRESS!**
 
 
 #include <stdlib.h>
