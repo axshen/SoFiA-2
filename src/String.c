@@ -65,7 +65,7 @@ CLASS String
 /// that the destructor will have to be called explicitly once the
 /// object is no longer required to release its memory again.
 ///
-/// @param string  String to be assigned to the new String object.
+/// @param string  C string to be assigned to the new String object.
 ///                Use `""` to create an empty string.
 ///
 /// @return Pointer to newly created String object.
@@ -302,7 +302,7 @@ PUBLIC String *String_set_int(String *self, const char *format, const long int v
 /// @brief Set string from or until delimiting character
 ///
 /// Public method for setting a String object to the specified
-/// string up to or until the specified delimiting character. The
+/// string from or until the specified delimiting character. The
 /// delimiting character can either be the first from the start or
 /// the last before the end (argument `first`), and either the sub-
 /// string until the delimiter or from the delimiter onward can be

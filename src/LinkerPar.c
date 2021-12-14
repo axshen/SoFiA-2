@@ -1462,53 +1462,73 @@ PUBLIC void LinkerPar_rel_plots(const LinkerPar *self, const Array_siz *rel_par_
 				
 				// npix
 				// 10
-				plot_x = plot_offset_x;
-				plot_y = (data_min_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
-				
 				fprintf(fp, "0.9 0.9 0.9 rgb\n");
 				fprintf(fp, "[0.5 2] 0 setdash\n");
 				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				
+				plot_x = plot_offset_x;
+				plot_y = (data_min_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
 				
 				plot_x = plot_offset_x + plot_size_x;
 				plot_y = (data_max_x - 1 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
 				
-				// 100
-				plot_x = plot_offset_x;
-				plot_y = (data_min_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				plot_x = (data_min_y + 1 - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x + 10;
+				plot_y = plot_offset_y + 10;
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				fprintf(fp, "(10) show\n");
 				
+				// 100
 				fprintf(fp, "0.8 0.8 0.8 rgb\n");
 				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				
+				plot_x = plot_offset_x;
+				plot_y = (data_min_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
 				
 				plot_x = plot_offset_x + plot_size_x;
 				plot_y = (data_max_x - 2 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
 				
-				// 1000
-				plot_x = plot_offset_x;
-				plot_y = (data_min_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				plot_x = (data_min_y + 2 - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x + 10;
+				plot_y = plot_offset_y + 10;
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				fprintf(fp, "(100) show\n");
 				
+				// 1000
 				fprintf(fp, "0.7 0.7 0.7 rgb\n");
 				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				
+				plot_x = plot_offset_x;
+				plot_y = (data_min_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
 				
 				plot_x = plot_offset_x + plot_size_x;
 				plot_y = (data_max_x - 3 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
 				
-				// 10000
-				plot_x = plot_offset_x;
-				plot_y = (data_min_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
+				plot_x = (data_min_y + 3 - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x + 10;
+				plot_y = plot_offset_y + 10;
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				fprintf(fp, "(1000) show\n");
 				
+				// 10000
 				fprintf(fp, "0.6 0.6 0.6 rgb\n");
 				fprintf(fp, "np %zu %zu m %zu %zu l %zu %zu l %zu %zu l cp clip\n", plot_offset_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y, plot_offset_x + plot_size_x, plot_offset_y + plot_size_y, plot_offset_x, plot_offset_y + plot_size_y);
+				
+				plot_x = plot_offset_x;
+				plot_y = (data_min_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
 				
 				plot_x = plot_offset_x + plot_size_x;
 				plot_y = (data_max_x - 4 - data_min_y) * plot_size_y / (data_max_y - data_min_y) + plot_offset_y;
 				fprintf(fp, "%.2f %.2f l s\n", plot_x, plot_y);
+				
+				plot_x = (data_min_y + 4 - data_min_x) * plot_size_x / (data_max_x - data_min_x) + plot_offset_x + 10;
+				plot_y = plot_offset_y + 10;
+				fprintf(fp, "%.2f %.2f m\n", plot_x, plot_y);
+				fprintf(fp, "(10000 px) show\n");
 				
 				fprintf(fp, "grestore\n");
 			}
