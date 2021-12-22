@@ -1,37 +1,43 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (Array_SFX.c) - Source Finding Application               ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (Array_SFX.c) - Source Finding Application               //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   Array_SFX.c
+/// @author Tobias Westmeier
+/// @date   25/11/2021
+/// @brief  Container class template for storing a dynamic array of values of type `DATA_T`.
 
 
 // WARNING: This is a template that needs to be instantiated before use.
-//          Do not edit template instances, as they are auto-generated!
+//          Do not edit template instances, as they are auto-generated
+//          and will be overwritten during instantiation!
 
 
 #include <stdlib.h>
@@ -42,39 +48,36 @@
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Array_SFX                      //
-// ----------------------------------------------------------------- //
+/// @brief Container class template for storing a dynamic array of values of type `DATA_T`.
+///
+/// The purpose of this class is to provide a convenient way to store
+/// multiple values of a specific type in an array-like structure. A
+/// new array can either be of a given size and empty (using the
+/// standard constructor) or provided with a list of comma-separated
+/// values that will be stored in the array and used to determine its
+/// size (using the alternative constructor).
 
 CLASS Array_SFX
 {
-	size_t size;
-	DATA_T *values;
+	size_t size;     ///< Size of the array.
+	DATA_T *values;  ///< Pointer to array of values.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) size - Size of the array to be created.                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Array_SFX object.                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new Array_SFX object of     //
-//   given size and type and return a pointer to the newly created   //
-//   object. Sufficient memory will be allocated to store the array  //
-//   values of the specified type. Note that the destructor will     //
-//   need to be called explicitly once the object is no longer re-   //
-//   quired to release any memory allocated during the lifetime of   //
-//   the object. NOTE that the array will be initialised to 0.       //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new Array_SFX object of
+/// given size and type and return a pointer to the newly created
+/// object. Sufficient memory will be allocated to store the array
+/// values of the specified type. Note that the destructor will
+/// need to be called explicitly once the object is no longer
+/// required to release any memory allocated during the lifetime
+/// of the object. Note that the array will be initialised to 0.
+///
+/// @param size  Size of the array to be created.
+///
+/// @return Pointer to newly created Array_SFX object.
 
 PUBLIC Array_SFX *Array_SFX_new(const size_t size)
 {
@@ -90,29 +93,20 @@ PUBLIC Array_SFX *Array_SFX_new(const size_t size)
 
 
 
-// ----------------------------------------------------------------- //
-// Alternative constructor                                           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) string - String containing the values to be stored in the   //
-//                array, separated by commas.                        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Array_SFX object.                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Alternative constructor. Will create a new Array_SFX object,    //
-//   the size of which is determined by the number of comma-separa-  //
-//   ted values specified in 'string'. A pointer to the newly crea-  //
-//   ted object will be returned. Sufficient memory will be alloca-  //
-//   ted to store the array values. Note that the destructor will    //
-//   need to be called explicitly once the object is no longer re-   //
-//   quired to release any memory allocated during the lifetime of   //
-//   the object.                                                     //
-// ----------------------------------------------------------------- //
+/// @brief Alternative constructor
+///
+/// Alternative constructor. Will create a new Array_SFX object,
+/// the size of which is determined by the number of comma-separated
+/// values specified in `string`. A pointer to the newly created
+/// object will be returned. Sufficient memory will be allocated
+/// to store the array values. Note that the destructor will need
+/// to be called explicitly once the object is no longer required to
+/// release any memory allocated during the lifetime of the object.
+///
+/// @param string  String containing the values to be stored in the
+///                array, separated by commas.
+///
+/// @return Pointer to newly created Array_SFX object.
 
 PUBLIC Array_SFX *Array_SFX_new_str(const char *string)
 {
@@ -156,26 +150,18 @@ PUBLIC Array_SFX *Array_SFX_new_str(const char *string)
 
 
 
-// ----------------------------------------------------------------- //
-// Copy constructor                                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) source - Array to be copied.                                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created copy of array object.                  //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Copy constructor. Will create a new array of the same size as   //
-//   the source array and then copy all elements from source. A      //
-//   pointer to the newly created array copy will be returned. Note  //
-//   that the destructor will need to be called explicitly once the  //
-//   object is no longer required to release any memory allocated    //
-//   during the lifetime the object.                                 //
-// ----------------------------------------------------------------- //
+/// @brief Copy constructor
+///
+/// Copy constructor. Will create a new array of the same size as
+/// the source array and then copy all elements from source. A
+/// pointer to the newly created array copy will be returned. Note
+/// that the destructor will need to be called explicitly once the
+/// object is no longer required to release any memory allocated
+/// during the lifetime the object.
+///
+/// @param source  Array to be copied.
+///
+/// @return Pointer to newly created copy of array object.
 
 PUBLIC Array_SFX *Array_SFX_copy(const Array_SFX *source)
 {
@@ -193,23 +179,13 @@ PUBLIC Array_SFX *Array_SFX_copy(const Array_SFX *source)
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the
+/// memory occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void Array_SFX_delete(Array_SFX *self)
 {
@@ -220,21 +196,13 @@ PUBLIC void Array_SFX_delete(Array_SFX *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Get size of array                                                 //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Size of the array.                                              //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the size of the specified array.    //
-// ----------------------------------------------------------------- //
+/// @brief Get size of array
+///
+/// Public method for returning the size of the specified array.
+///
+/// @param self  Object self-reference.
+///
+/// @return Size of the array.
 
 PUBLIC size_t Array_SFX_get_size(const Array_SFX *self)
 {
@@ -244,23 +212,15 @@ PUBLIC size_t Array_SFX_get_size(const Array_SFX *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Get pointer to data array                                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to the first element of the array. If the array has     //
-//   size 0, a NULL pointer will be returned instead,                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning a pointer to the first element of   //
-//   the array.                                                      //
-// ----------------------------------------------------------------- //
+/// @brief Get pointer to data array
+///
+/// Public method for returning a pointer to the first element of
+/// the array.
+///
+/// @param self  Object self-reference.
+///
+/// @return Pointer to the first element of the array. If the array has
+///         size 0, a `NULL` pointer will be returned instead.
 
 PUBLIC const DATA_T *Array_SFX_get_ptr(const Array_SFX *self)
 {
@@ -270,22 +230,14 @@ PUBLIC const DATA_T *Array_SFX_get_ptr(const Array_SFX *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Push new element                                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) value    - Value to be added.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to modified array.                                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding a new element at the end of the array. //
-// ----------------------------------------------------------------- //
+/// @brief Push new element
+///
+/// Public method for adding a new element at the end of the array.
+///
+/// @param self   Object self-reference.
+/// @param value  Value to be added.
+///
+/// @return Pointer to modified array.
 
 PUBLIC Array_SFX *Array_SFX_push(Array_SFX *self, const DATA_T value)
 {
@@ -297,23 +249,15 @@ PUBLIC Array_SFX *Array_SFX_push(Array_SFX *self, const DATA_T value)
 
 
 
-// ----------------------------------------------------------------- //
-// Get array element                                                 //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the element to be returned.             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Value of the requested element.                                 //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for retrieving the array value at the specified   //
-//   index.                                                          //
-// ----------------------------------------------------------------- //
+/// @brief Get array element
+///
+/// Public method for retrieving the array value at the specified
+/// index.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the element to be returned.
+///
+/// @return Value of the requested element.
 
 PUBLIC DATA_T Array_SFX_get(const Array_SFX *self, const size_t index)
 {
@@ -324,24 +268,16 @@ PUBLIC DATA_T Array_SFX_get(const Array_SFX *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Set array element                                                 //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the element to be set.                  //
-//   (3) value    - Value of the element to be set.                  //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to modified array.                                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the value of the array element at the //
-//   specified index.                                                //
-// ----------------------------------------------------------------- //
+/// @brief Set array element
+///
+/// Public method for setting the value of the array element at the
+/// specified index.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the element to be set.
+/// @param value  Value of the element to be set.
+///
+/// @return Pointer to modified array.
 
 PUBLIC Array_SFX *Array_SFX_set(Array_SFX *self, const size_t index, const DATA_T value)
 {
@@ -353,24 +289,16 @@ PUBLIC Array_SFX *Array_SFX_set(Array_SFX *self, const size_t index, const DATA_
 
 
 
-// ----------------------------------------------------------------- //
-// Add value to array element                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the element to be set.                  //
-//   (3) value    - Value to be added to the element.                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to modified array.                                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding the specified value to the array ele-  //
-//   ment at the specified index.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Add value to array element
+///
+/// Public method for adding the specified value to the array
+/// element at the specified index.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the element to be set.
+/// @param value  Value to be added to the element.
+///
+/// @return Pointer to modified array.
 
 PUBLIC Array_SFX *Array_SFX_add(Array_SFX *self, const size_t index, const DATA_T value)
 {
@@ -382,23 +310,36 @@ PUBLIC Array_SFX *Array_SFX_add(Array_SFX *self, const size_t index, const DATA_
 
 
 
-// ----------------------------------------------------------------- //
-// Concatenate two arrays                                            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) source   - Array to be added.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to modified array.                                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for concatenating two arrays by adding the ele-   //
-//   ments of source at the end of self.                             //
-// ----------------------------------------------------------------- //
+/// @brief Multiply array element by value
+///
+/// Public method for multiplying the array element at the
+/// specified index by the specified value.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the element to be set.
+/// @param value  Value to be multiplied by.
+///
+/// @return Pointer to modified array.
+
+PUBLIC Array_SFX *Array_SFX_mul(Array_SFX *self, const size_t index, const DATA_T value)
+{
+	check_null(self);
+	ensure(index < self->size, ERR_INDEX_RANGE, "Array index out of range.");
+	self->values[index] *= value;
+	return self;
+}
+
+
+
+/// @brief Concatenate two arrays
+///
+/// Public method for concatenating two arrays by adding the
+/// elements of `source` at the end of `self`.
+///
+/// @param self    Object self-reference.
+/// @param source  Array to be added.
+///
+/// @return Pointer to modified array.
 
 PUBLIC Array_SFX *Array_SFX_cat(Array_SFX *self, const Array_SFX *source)
 {
@@ -414,23 +355,15 @@ PUBLIC Array_SFX *Array_SFX_cat(Array_SFX *self, const Array_SFX *source)
 
 
 
-// ----------------------------------------------------------------- //
-// Sort array elements                                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self       - Object self-reference.                         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to sorted array.                                        //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for sorting the array in ascending order. A poin- //
-//   ter to the sorted array will be returned for convenience to al- //
-//   low chaining of methods.                                        //
-// ----------------------------------------------------------------- //
+/// @brief Sort array elements
+///
+/// Public method for sorting the array in ascending order. A pointer
+/// to the sorted array will be returned for convenience to allow
+/// chaining of methods.
+///
+/// @param self  Object self-reference.
+///
+/// @return Pointer to sorted array.
 
 PUBLIC Array_SFX *Array_SFX_sort(Array_SFX *self)
 {

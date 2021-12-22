@@ -1,33 +1,39 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (Parameter.c) - Source Finding Application               ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (Parameter.c) - Source Finding Application               //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   Parameter.c
+/// @author Tobias Westmeier
+/// @date   23/11/2021
+/// @brief  Class for storing and handling SoFiA parameter settings.
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -41,40 +47,36 @@
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Parameter                      //
-// ----------------------------------------------------------------- //
+/// @brief Class for storing and handling SoFiA parameter settings
+///
+/// The purpose of this class is to provide a structure for handling
+/// SoFiA parameter settings. Settings can be loaded from a file and
+/// then read or updated as needed. All parameter settings are treated
+/// as strings, and several methods are available for extracting the
+/// parameter value as a specific data type.
 
 CLASS Parameter
 {
-	size_t   n_par;
-	String **keys;
-	String **values;
-	int      verbosity;
+	size_t   n_par;      ///< Number of parameter settings.
+	String **keys;       ///< Pointer to array of String objects holding the parameter names.
+	String **values;     ///< Pointer to array of String objects holding the parameter values.
+	int      verbosity;  ///< Verbosity level.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) verbosity - Verbosity level of the new object.              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Parameter object.                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new and empty Parameter ob- //
-//   ject and return a pointer to the newly created object. No memo- //
-//   ry will be allocated other than for the object itself. Note     //
-//   that the destructor will need to be called explicitly once the  //
-//   object is no longer required to release any memory allocated    //
-//   during the lifetime of the object.                              //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new and empty Parameter object
+/// and return a pointer to the newly created object. No memory will
+/// be allocated other than for the object itself. Note that the
+/// destructor will need to be called explicitly once the object is no
+/// longer required to release any memory allocated during the
+/// lifetime of the object.
+///
+/// @param verbosity  Verbosity level of the new object.
+///
+/// @return Pointer to newly created Parameter object.
 
 PUBLIC Parameter *Parameter_new(const bool verbosity)
 {
@@ -91,23 +93,13 @@ PUBLIC Parameter *Parameter_new(const bool verbosity)
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the memory
+/// occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void Parameter_delete(Parameter *self)
 {
@@ -126,22 +118,14 @@ PUBLIC void Parameter_delete(Parameter *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Return the number of parameters in the list                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of currently stored parameters.                          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the number of parameters currently  //
-//   stored in the parameter list object.                            //
-// ----------------------------------------------------------------- //
+/// @brief Return the number of parameters in the list
+///
+/// Public method for returning the number of parameters currently
+/// stored in the parameter list object.
+///
+/// @param self  Object self-reference.
+///
+/// @return Number of currently stored parameters.
 
 PUBLIC size_t Parameter_get_size(const Parameter *self)
 {
@@ -151,26 +135,16 @@ PUBLIC size_t Parameter_get_size(const Parameter *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Set parameter to given value                                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Name of the parameter to be set.                 //
-//   (3) value    - String containing the value of the parameter.    //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting a parameter to a specified value. If  //
-//   a parameter of that name already exists, its previous value     //
-//   will be overwritten. Otherwise, a new parameter will be append- //
-//   ed to the current parameter list.                               //
-// ----------------------------------------------------------------- //
+/// @brief Set parameter to given value
+///
+/// Public method for setting a parameter to a specified value. If
+/// a parameter of that name already exists, its previous value will
+/// be overwritten. Otherwise, a new parameter will be appended to
+/// the current parameter list.
+///
+/// @param self   Object self-reference.
+/// @param key    Name of the parameter to be set.
+/// @param value  String containing the value of the parameter.
 
 PUBLIC void Parameter_set(Parameter *self, const char *key, const char *value)
 {
@@ -200,31 +174,23 @@ PUBLIC void Parameter_set(Parameter *self, const char *key, const char *value)
 
 
 
-// ----------------------------------------------------------------- //
-// Check if parameter exists                                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Name of the parameter to be checked.             //
-//   (3) index    - Pointer to an index variable that will be set to //
-//                  the index of the parameter, if found. This can   //
-//                  be NULL if the index is not required.            //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns true if the specified parameter exists and false other- //
-//   wise.                                                           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for checking if the specified parameter name al-  //
-//   ready exists in the current parameter list. If the parameter is //
-//   found, the function returns true, otherwise false. The variable //
-//   'index' will be set to the index of the parameter if found and  //
-//   otherwise be left untouched. If the index is not required, a    //
-//   NULL pointer can instead be provided.                           //
-// ----------------------------------------------------------------- //
+/// @brief Check if parameter exists
+///
+/// Public method for checking if the specified parameter name
+/// already exists in the current parameter list. If the parameter
+/// is found, the function returns`true`, otherwise `false`. The
+/// variable `index` will be set to the index of the parameter if
+/// found and otherwise be left untouched. If the index is not
+/// required, a `NULL` pointer can instead be provided.
+///
+/// @param self   Object self-reference.
+/// @param key    Name of the parameter to be checked.
+/// @param index  Pointer to an index variable that will be set to
+///               the index of the parameter, if found. This can
+///               be `NULL` if the index is not required.
+///
+/// @return Returns `true` if the specified parameter exists and
+///         `false` otherwise.
 
 PUBLIC bool Parameter_exists(const Parameter *self, const char *key, size_t *index)
 {
@@ -247,24 +213,16 @@ PUBLIC bool Parameter_exists(const Parameter *self, const char *key, size_t *ind
 
 
 
-// ----------------------------------------------------------------- //
-// Extract parameter value as floating-point number                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Name of the parameter to be extracted.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the value of the specified parameter.                   //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the value of the specified parame-  //
-//   ter as a double-precision floating-point number. If the parame- //
-//   ter does not exist, a value of NaN will instead be returned.    //
-// ----------------------------------------------------------------- //
+/// @brief Extract parameter value as floating-point number
+///
+/// Public method for returning the value of the specified parameter
+/// as a double-precision floating-point number. If the parameter
+/// does not exist, a value of `NaN` will instead be returned.
+///
+/// @param self  Object self-reference.
+/// @param key   Name of the parameter to be extracted.
+///
+/// @return Returns the value of the specified parameter.
 
 PUBLIC double Parameter_get_flt(const Parameter *self, const char *key)
 {
@@ -275,24 +233,16 @@ PUBLIC double Parameter_get_flt(const Parameter *self, const char *key)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract parameter value as integer number                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Name of the parameter to be extracted.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the value of the specified parameter.                   //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the value of the specified parame-  //
-//   ter as a long integer number. If the parameter does not exist,  //
-//   a value of 0 will instead be returned.                          //
-// ----------------------------------------------------------------- //
+/// @brief Extract parameter value as integer number
+///
+/// Public method for returning the value of the specified parameter
+/// as a long integer number. If the parameter does not exist, a
+/// value of 0 will instead be returned.
+///
+/// @param self  Object self-reference.
+/// @param key   Name of the parameter to be extracted.
+///
+/// @return Returns the value of the specified parameter.
 
 PUBLIC long int Parameter_get_int(const Parameter *self, const char *key)
 {
@@ -303,24 +253,16 @@ PUBLIC long int Parameter_get_int(const Parameter *self, const char *key)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract parameter value as unsigned integer number                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Name of the parameter to be extracted.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the value of the specified parameter.                   //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the value of the specified parame-  //
-//   ter as an unsigned integer number. If the parameter does not    //
-//   exist, a value of 0 will instead be returned.                   //
-// ----------------------------------------------------------------- //
+/// @brief Extract parameter value as unsigned integer number
+///
+/// Public method for returning the value of the specified parameter
+/// as an unsigned integer number. If the parameter does not exist,
+/// a value of 0 will instead be returned.
+///
+/// @param self  Object self-reference.
+/// @param key   Name of the parameter to be extracted.
+///
+/// @return Returns the value of the specified parameter.
 
 PUBLIC unsigned long int Parameter_get_uint(const Parameter *self, const char *key)
 {
@@ -331,24 +273,16 @@ PUBLIC unsigned long int Parameter_get_uint(const Parameter *self, const char *k
 
 
 
-// ----------------------------------------------------------------- //
-// Extract parameter value as Boolean value                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Name of the parameter to be extracted.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the value of the specified parameter.                   //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the value of the specified parame-  //
-//   ter as a Boolean value (true or false). If the parameter does   //
-//   not exist, a value of false will be returned.                   //
-// ----------------------------------------------------------------- //
+/// @brief Extract parameter value as Boolean value
+///
+/// Public method for returning the value of the specified parameter
+/// as a Boolean value (true or false). If the parameter does not
+/// exist, a value of `false` will be returned.
+///
+/// @param self  Object self-reference.
+/// @param key   Name of the parameter to be extracted.
+///
+/// @return Returns the value of the specified parameter.
 
 PUBLIC bool Parameter_get_bool(const Parameter *self, const char *key)
 {
@@ -359,33 +293,36 @@ PUBLIC bool Parameter_get_bool(const Parameter *self, const char *key)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract parameter value as String                                 //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Name of the parameter to be extracted.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns a pointer to the string representing the value.         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the value of the specified parame-  //
-//   ter as a pointer to a string value. If the parameter does not   //
-//   exist, a NULL pointer will be returned. Note that this is just  //
-//   a convenience function that will simply return the output of    //
-//   Parameter_get_raw().                                            //
-// ----------------------------------------------------------------- //
+/// @brief Extract parameter value as String
+///
+/// Public method for returning the value of the specified parameter
+/// as a pointer to a string value. If the parameter does not exist,
+/// a `NULL` pointer will be returned. Note that this is just a
+/// convenience function that will simply return the output of
+/// Parameter_get_raw().
+///
+/// @param self  Object self-reference.
+/// @param key   Name of the parameter to be extracted.
+///
+/// @return Returns a pointer to the string representing the value.
 
 PUBLIC const char *Parameter_get_str(const Parameter *self, const char *key)
 {
 	return Parameter_get_raw(self, key);
 }
 
-// Same, but by index
+
+
+/// @brief Extract parameter value as String by index
+///
+/// Public method for returning the value of the parameter specified
+/// by `index` as a pointer to a string value. If the index is out
+/// of range, the process will be terminated.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the parameter to be extracted.
+///
+/// @return Returns a pointer to the string representing the value.
 
 PUBLIC const char *Parameter_get_str_index(const Parameter *self, const size_t index)
 {
@@ -396,24 +333,16 @@ PUBLIC const char *Parameter_get_str_index(const Parameter *self, const size_t i
 
 
 
-// ----------------------------------------------------------------- //
-// Extract key at specified index position                           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the key to be returned.                 //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns a pointer to the string representing the key.           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the name of the parameter at the    //
-//   specified index position as a pointer to a string value. The    //
-//   method will be terminated if the index is out of range.         //
-// ----------------------------------------------------------------- //
+/// @brief Extract key at specified index position
+///
+/// Public method for returning the name of the parameter at the
+/// specified index position as a pointer to a string value. The
+/// process will be terminated if the index is out of range.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the key to be returned.
+///
+/// @return Returns a pointer to the string representing the key.
 
 PUBLIC const char *Parameter_get_key(const Parameter *self, const size_t index)
 {
@@ -424,24 +353,16 @@ PUBLIC const char *Parameter_get_key(const Parameter *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract parameter value as raw string                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) key      - Name of the parameter to be extracted.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns the value of the specified parameter as a raw string.   //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for returning the value of the specified parame- //
-//   ter as a pointer to the raw value string. If the parameter does //
-//   not exist, a NULL pointer will instead be returned.             //
-// ----------------------------------------------------------------- //
+/// @brief Extract parameter value as raw string
+///
+/// Private method for returning the value of the specified parameter
+/// as a pointer to the raw value string. If the parameter does not
+/// exist, a `NULL` pointer will instead be returned.
+///
+/// @param self  Object self-reference.
+/// @param key   Name of the parameter to be extracted.
+///
+/// @return Returns the value of the specified parameter as a raw string.
 
 PRIVATE const char *Parameter_get_raw(const Parameter *self, const char *key)
 {
@@ -452,40 +373,31 @@ PRIVATE const char *Parameter_get_raw(const Parameter *self, const char *key)
 
 
 
-// ----------------------------------------------------------------- //
-// Load parameter settings from file                                 //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) filename - Name of the input file.                          //
-//   (3) mode     - Mode of operation; can be PARAMETER_APPEND or    //
-//                  PARAMETER_UPDATE.                                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for loading parameter settings from an input file //
-//   of the name 'filename'. The parameter settings in the file must //
-//   be of the form                                                  //
-//                                                                   //
-//     key = [value] [# comment]                                     //
-//                                                                   //
-//   where both the value and comment are optional (indicated by the //
-//   brackets). Empty lines and lines starting with # (comments)     //
-//   will be ignored. If mode = PARAMETER_APPEND, the function will  //
-//   update any existing parameter or append a new parameter setting //
-//   if the parameter name does not yet exist. If mode = PARAMETER_  //
-//   UPDATE, the function will only update existing parameters and   //
-//   discard any non-existing parameter settings. If the parameter   //
-//   'pipeline.pedantic' is found and set to true, an error message  //
-//   will be produced if a non-existing parameter name is found, and //
-//   the pipeline will be terminated in this case (only for mode =   //
-//   PARAMETER_UPDATE).
-// ----------------------------------------------------------------- //
+/// @brief Load parameter settings from file
+///
+/// Public method for loading parameter settings from an input file
+/// of the name `filename`. The parameter settings in the file must
+/// be of the form
+///
+/// \code
+///   key = [value] [# comment]
+/// \endcode
+///
+/// where both the value and comment are optional (indicated by the
+/// brackets). Empty lines and lines starting with # (comments) will be
+/// ignored. If mode = `PARAMETER_APPEND`, the function will update any
+/// existing parameter or append a new parameter setting if the parameter
+/// name does not yet exist. If mode = `PARAMETER_UPDATE`, the function
+/// will only update existing parameters and discard any non-existing
+/// parameter settings. If the parameter `pipeline.pedantic` is found
+/// and set to true, an error message will be produced if a non-existing
+/// parameter name is found, and the process will be terminated in this
+/// case (only for mode = `PARAMETER_UPDATE`).
+///
+/// @param self      Object self-reference.
+/// @param filename  Name of the input file.
+/// @param mode      Mode of operation; can be `PARAMETER_APPEND` or
+///                  `PARAMETER_UPDATE`.
 
 PUBLIC void Parameter_load(Parameter *self, const char *filename, const int mode)
 {
@@ -558,26 +470,15 @@ PUBLIC void Parameter_load(Parameter *self, const char *filename, const int mode
 
 
 
-// ----------------------------------------------------------------- //
-// Set SoFiA default parameters                                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the SoFiA default parameters. Parame- //
-//   ters that don't yet exist will be created and any existing ones //
-//   reset to their default value, so this method can either be used //
-//   on a new Parameter object to establish default settings or on   //
-//   an already populated Parameter object to reset all values to    //
-//   their default.                                                  //
-// ----------------------------------------------------------------- //
+/// @brief Set SoFiA default parameters
+///
+/// Public method for setting the SoFiA default parameters. Parameters
+/// that do not yet exist will be created and any existing ones reset
+/// to their default value, so this method can either be used on a new
+/// Parameter object to establish default settings or on an already
+/// populated Parameter object to reset all values to their default.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void Parameter_default(Parameter *self)
 {
@@ -711,27 +612,17 @@ PUBLIC void Parameter_default(Parameter *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Reallocate memory for one additional parameter setting            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for allocating additional memory for one more    //
-//   parameter in the specified parameter list. Note that this will  //
-//   not create a new parameter setting yet, but will just allocate  //
-//   the memory needed to append a parameter at the end of the cur-  //
-//   rent list. The function should be called from public member     //
-//   functions that will add parameters to a parameter list prior to //
-//   inserting the new parameter name and value at the end.          //
-// ----------------------------------------------------------------- //
+/// @brief Reallocate memory for one additional parameter setting
+///
+/// Private method for allocating additional memory for one more
+/// parameter in the specified parameter list. Note that this will
+/// not create a new parameter setting yet, but will just allocate
+/// the memory needed to append a parameter at the end of the
+/// current list. The function should be called from public member
+/// functions that will add parameters to a parameter list prior to
+/// inserting the new parameter name and value at the end.
+///
+/// @param self  Object self-reference.
 
 PRIVATE void Parameter_append_memory(Parameter *self)
 {

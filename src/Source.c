@@ -1,33 +1,39 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (Source.c) - Source Finding Application                  ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (Source.c) - Source Finding Application                  //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   Source.c
+/// @author Tobias Westmeier
+/// @date   25/11/2021
+/// @brief  Class for storing and handling source parameters.
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,54 +44,53 @@
 #include "Source.h"
 #include "String.h"
 
-
-
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Source                         //
-// ----------------------------------------------------------------- //
-
+/// @brief Make SourceValue union a type.
 typedef union SourceValue SourceValue;
 
+/// @brief Union for storing either integer or floating-point parameter value.
 union SourceValue
 {
-	double value_flt;
-	size_t value_int;
+	double value_flt;  ///< Floating-point parameter value.
+	size_t value_int;  ///< Integer parameter value.
 };
+
+
+
+/// @brief Class for storing and handling source parameters
+///
+/// The purpose of this class is to provide a structure for storing
+/// and handling the measured parameters of a source. Parameters are
+/// composed of a name, value, type and unit. Both long integer and
+/// double-precision floating-point values are supported. In addition,
+/// a source can be assigned an identifier in the form of a string,
+/// e.g. a source name.
 
 CLASS Source
 {
-	String         *identifier;
-	size_t          n_par;
-	SourceValue    *values;
-	unsigned char  *types;
-	String        **names;
-	String        **units;
-	String        **ucds;
-	int             verbosity;
+	String         *identifier;  ///< Source name.
+	size_t          n_par;       ///< Total number of source parameters stored.
+	SourceValue    *values;      ///< Array of source parameter values.
+	unsigned char  *types;       ///< Array of source parameter data types. Can be SOURCE_TYPE_INT or SOURCE_TYPE_FLT.
+	String        **names;       ///< Array of source parameter names.
+	String        **units;       ///< Array of source parameter units.
+	String        **ucds;        ///< Array of Unified Content Descriptors (UCDs).
+	int             verbosity;   ///< Verbosity level (0 or 1).
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) verbosity - Verbosity level of the new object.              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Source object.                         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new and empty Source object //
-//   and return a pointer to the newly created object. No memory     //
-//   will be allocated other than for the object itself. Note that   //
-//   the destructor will need to be called explicitly once the ob-   //
-//   ject is no longer required to release any memory allocated du-  //
-//   ring the lifetime of the object.                                //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new and empty Source object
+/// and return a pointer to the newly created object. No memory
+/// will be allocated other than for the object itself. Note that
+/// the destructor will need to be called explicitly once the object
+/// is no longer required to release any memory allocated during the
+/// the lifetime of the object.
+///
+/// @param verbosity  Verbosity level of the new object.
+///
+/// @return Pointer to newly created Source object.
 
 PUBLIC Source *Source_new(const bool verbosity)
 {
@@ -108,26 +113,18 @@ PUBLIC Source *Source_new(const bool verbosity)
 
 
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object. NOTE that if the source is added   //
-//   to a catalogue object, the destructor MUST NOT be called manu-  //
-//   ally, as the catalogue object will take ownership of the source //
-//   and call its destructor at the end of its lifetime.             //
-// ----------------------------------------------------------------- //
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the me-
+/// mory occupied by the object.
+///
+/// @param self  Object self-reference.
+///
+/// @note If the source is added to a Catalog object, the
+///       destructor must not be called manually as the Catalog
+///       object will take ownership of the source and call its
+///       destructor at the end of its lifetime.
 
 PUBLIC void Source_delete(Source *self)
 {
@@ -156,23 +153,13 @@ PUBLIC void Source_delete(Source *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Set source identifier                                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) name     - Name to be used as identifier.                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the identifier of a source. Note that //
-//   names are case-sensitive.                                       //
-// ----------------------------------------------------------------- //
+/// @brief Set source identifier
+///
+/// Public method for setting the identifier of a source. Note that
+/// names are case-sensitive.
+///
+/// @param self  Object self-reference.
+/// @param name  Name to be used as identifier.
 
 PUBLIC void Source_set_identifier(Source *self, const char *name)
 {
@@ -183,30 +170,21 @@ PUBLIC void Source_set_identifier(Source *self, const char *name)
 
 
 
-// ----------------------------------------------------------------- //
-// Append a new parameter of floating-point type                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) name     - Name of the new parameter.                       //
-//   (3) value    - Value of the new parameter.                      //
-//   (3) unit     - Unit of the new parameter.                       //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for appending a new parameter of floating-point   //
-//   type to an existing source. The value will be stored as a       //
-//   double-precision floating-point number. NOTE that the function  //
-//   does not check if the specified parameter name already exists   //
-//   in the current parameter list; if it did, a new parameter with  //
-//   the same name would be appended at the end. Note that names are //
-//   case-sensitive.                                                 //
-// ----------------------------------------------------------------- //
+/// @brief Append a new parameter of floating-point type
+///
+/// Public method for appending a new parameter of floating-point
+/// type to an existing source. The value will be stored as a
+/// double-precision floating-point number. Note that the function
+/// does not check if the specified parameter name already exists
+/// in the current parameter list; if it did, a new parameter with
+/// the same name would be appended at the end. Note that names are
+/// case-sensitive.
+///
+/// @param self   Object self-reference.
+/// @param name   Name of the new parameter.
+/// @param value  Value of the new parameter.
+/// @param unit   Unit of the new parameter.
+/// @param ucd    Unified Content Descriptor for the new parameter.
 
 PUBLIC void Source_add_par_flt(Source *self, const char *name, const double value, const char *unit, const char *ucd)
 {
@@ -231,29 +209,20 @@ PUBLIC void Source_add_par_flt(Source *self, const char *name, const double valu
 
 
 
-// ----------------------------------------------------------------- //
-// Append a new parameter of integer type                            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) name     - Name of the new parameter.                       //
-//   (3) value    - Value of the new parameter.                      //
-//   (3) unit     - Unit of the new parameter.                       //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for appending a new parameter of integer type to  //
-//   an existing source. The value will be stored as a long inte-    //
-//   ger number. NOTE that the function does not check if the speci- //
-//   fied parameter name already exists in the current parameter     //
-//   list; if it did, a new parameter with the same name would be    //
-//   appended at the end. Note that names are case-sensitive.        //
-// ----------------------------------------------------------------- //
+/// @brief Append a new parameter of integer type
+///
+/// Public method for appending a new parameter of integer type to
+/// an existing source. The value will be stored as a long integer
+/// number. Note that the function does not check if the specified
+/// parameter name already exists in the current parameter list;
+/// if it did, a new parameter with the same name would be
+/// appended at the end. Note that names are case-sensitive.
+///
+/// @param self   Object self-reference.
+/// @param name   Name of the new parameter.
+/// @param value  Value of the new parameter.
+/// @param unit   Unit of the new parameter.
+/// @param ucd    Unified Content Descriptor for the new parameter.
 
 PUBLIC void Source_add_par_int(Source *self, const char *name, const long int value, const char *unit, const char *ucd)
 {
@@ -278,32 +247,23 @@ PUBLIC void Source_add_par_int(Source *self, const char *name, const long int va
 
 
 
-// ----------------------------------------------------------------- //
-// Set source parameter as floating-point value                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) name     - Name of the parameter to be set.                 //
-//   (3) value    - Value of the parameter to be set.                //
-//   (4) unit     - Unit of the parameter to be set.                 //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the specified parameter of the speci- //
-//   fied source as a double-precision floating-point number. If a   //
-//   parameter of the same name already exists, its value will be    //
-//   replaced; otherwise, a new parameter will be created and added  //
-//   to the existing parameter list. Note that names are case-sensi- //
-//   tive.                                                           //
-//   If the parameter already exists and only its value should be    //
-//   updated, then unit and ucd can be set to NULL. This would cause //
-//   an error, however, if the parameter did not yet exist.          //
-// ----------------------------------------------------------------- //
+/// @brief Set source parameter as floating-point value
+///
+/// Public method for setting the specified parameter of the specified
+/// source as a double-precision floating-point number. If a parameter
+/// of the same name already exists, its value will be replaced;
+/// otherwise, a new parameter will be created and added to the
+/// existing parameter list. Note that names are case-sensitive.
+///
+/// If the parameter already exists and only its value should be
+/// updated, then `unit` and `ucd` can be set to `NULL`. This would
+/// cause an error, however, if the parameter did not yet exist.
+///
+/// @param self   Object self-reference.
+/// @param name   Name of the parameter to be set.
+/// @param value  Value of the parameter to be set.
+/// @param unit   Unit of the parameter to be set.
+/// @param ucd    Unified Content Descriptor for the parameter.
 
 PUBLIC void Source_set_par_flt(Source *self, const char *name, const double value, const char *unit, const char *ucd)
 {
@@ -336,31 +296,23 @@ PUBLIC void Source_set_par_flt(Source *self, const char *name, const double valu
 
 
 
-// ----------------------------------------------------------------- //
-// Set source parameter as integer value                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) name     - Name of the parameter to be set.                 //
-//   (3) value    - Value of the parameter to be set.                //
-//   (4) unit     - Unit of the parameter to be set.                 //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the specified parameter of the speci- //
-//   fied source as a long integer number. If a parameter of the     //
-//   same name already exists, its value will be replaced; other-    //
-//   wise, a new parameter will be created and added to the existing //
-//   parameter list. Note that names are case-sensitive.             //
-//   If the parameter already exists and only its value should be    //
-//   updated, then unit and ucd can be set to NULL. This would cause //
-//   an error, however, if the parameter did not yet exist.          //
-// ----------------------------------------------------------------- //
+/// @brief Set source parameter as integer value
+///
+/// Public method for setting the specified parameter of the specified
+/// source as a long integer number. If a parameter of the same name
+/// already exists, its value will be replaced; otherwise, a new
+/// parameter will be created and added to the existing parameter list.
+/// Note that names are case-sensitive.
+///
+/// If the parameter already exists and only its value should be
+/// updated, then `unit` and `ucd` can be set to `NULL`. This would
+/// cause an error, however, if the parameter did not yet exist.
+///
+/// @param self   Object self-reference.
+/// @param name   Name of the parameter to be set.
+/// @param value  Value of the parameter to be set.
+/// @param unit   Unit of the parameter to be set.
+/// @param ucd    Unified Content Descriptor for the parameter.
 
 PUBLIC void Source_set_par_int(Source *self, const char *name, const long int value, const char *unit, const char *ucd)
 {
@@ -393,24 +345,16 @@ PUBLIC void Source_set_par_int(Source *self, const char *name, const long int va
 
 
 
-// ----------------------------------------------------------------- //
-// Extract a parameter as floating-point value                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the parameter to be extracted.          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Parameter value as type double.                                 //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for extracting the value of the specified parame- //
-//   ter from the specified source as a double-precision floating-   //
-//   point number.                                                   //
-// ----------------------------------------------------------------- //
+/// @brief Extract a parameter as floating-point value
+///
+/// Public method for extracting the value of the specified parameter
+/// from the specified source as a double-precision floating-point
+/// number.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the parameter to be extracted.
+///
+/// @return Requested parameter value as type `double`.
 
 PUBLIC double Source_get_par_flt(const Source *self, const size_t index)
 {
@@ -421,23 +365,15 @@ PUBLIC double Source_get_par_flt(const Source *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract a parameter as integer value                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the parameter to be extracted.          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Parameter value as type long int.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for extracting the value of the specified parame- //
-//   ter from the specified source as a long integer number.         //
-// ----------------------------------------------------------------- //
+/// @brief Extract a parameter as integer value
+///
+/// Public method for extracting the value of the specified parameter
+/// from the specified source as a long integer number.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the parameter to be extracted.
+///
+/// @return Requested parameter value as type `long int`.
 
 PUBLIC long int Source_get_par_int(const Source *self, const size_t index)
 {
@@ -448,25 +384,17 @@ PUBLIC long int Source_get_par_int(const Source *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract a parameter by name as floating-point value               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) name     - Name of the parameter to be extracted.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Parameter value as type double.                                 //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for extracting the value of the specified parame- //
-//   ter from the specified source as a double-precision floating-   //
-//   point number. If a parameter of the same name does not exist, a //
-//   value of NaN will instead be returned.                          //
-// ----------------------------------------------------------------- //
+/// @brief Extract a parameter by name as floating-point value
+///
+/// Public method for extracting the value of the specified parameter
+/// from the specified source as a double-precision floating-point
+/// number. If a parameter of the same name does not exist, a value
+/// of `NaN` will instead be returned.
+///
+/// @param self  Object self-reference.
+/// @param name  Name of the parameter to be extracted.
+///
+/// @return Requested parameter value as type `double`.
 
 PUBLIC double Source_get_par_by_name_flt(const Source *self, const char *name)
 {
@@ -479,25 +407,17 @@ PUBLIC double Source_get_par_by_name_flt(const Source *self, const char *name)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract a parameter by name as integer value                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) name     - Name of the parameter to be extracted.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Parameter value as type long int.                               //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for extracting the value of the specified parame- //
-//   ter from the specified source as a signed long integer value.   //
-//   If a parameter of the same name does not exist, a value of 0    //
-//   will instead be returned.                                       //
-// ----------------------------------------------------------------- //
+/// @brief Extract a parameter by name as integer value
+///
+/// Public method for extracting the value of the specified parameter
+/// from the specified source as a signed long integer value. If a
+/// parameter of the same name does not exist, a value of 0 will
+/// instead be returned.
+///
+/// @param self  Object self-reference.
+/// @param name  Name of the parameter to be extracted.
+///
+/// @return Requested parameter value as type `long int`.
 
 PUBLIC long int Source_get_par_by_name_int(const Source *self, const char *name)
 {
@@ -510,28 +430,18 @@ PUBLIC long int Source_get_par_by_name_int(const Source *self, const char *name)
 
 
 
-// ----------------------------------------------------------------- //
-// Add a position offset to x, y, z parameters                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) dx       - Position offset in x.                            //
-//   (3) dy       - Position offset in y.                            //
-//   (4) dz       - Position offset in z.                            //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding a position offset to parameters named  //
-//   x, y, z, x_min, x_max, y_min, y_max, z_min, and z_max. Only     //
-//   existing parameters will be shifted and non-existing ones ig-   //
-//   nored. Offsets can only be positive, as negative pixel coordi-  //
-//   nates are not possible.                                         //
-// ----------------------------------------------------------------- //
+/// @brief Add a position offset to `x`, `y`, `z` parameters
+///
+/// Public method for adding a position offset to parameters named
+/// `x`, `y`, `z`, `x_min`, `x_max`, `y_min`, `y_max`,
+/// `z_min`, and `z_max`. Only existing parameters will be shifted
+/// and non-existing ones ignored. Offsets can only be positive, as
+/// negative pixel coordinates are not possible.
+///
+/// @param self  Object self-reference.
+/// @param dx    Position offset in x.
+/// @param dy    Position offset in y.
+/// @param dz    Position offset in z.
 
 PUBLIC void Source_offset_xyz(Source *self, const size_t dx, const size_t dy, const size_t dz)
 {
@@ -555,30 +465,22 @@ PUBLIC void Source_offset_xyz(Source *self, const size_t dx, const size_t dy, co
 
 
 
-// ----------------------------------------------------------------- //
-// Check if source parameter exists                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) name     - Name of the parameter to be checked.             //
-//   (3) index    - Pointer to a variable that will hold the index   //
-//                  of the source parameter if found.                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Returns true if the parameter exists, false otherwise.          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for checking if a parameter of the specified name //
-//   already exists in the specified source. The function will re-   //
-//   turn true if the parameter exists and false otherwise. Note     //
-//   that name is case-sensitive. The variable 'index' will be set   //
-//   to the index of the parameter if found. Otherwise it will be    //
-//   left untouched. If no index is required, a NULL pointer can in- //
-//   stead be provided.                                              //
-// ----------------------------------------------------------------- //
+/// @brief Check if source parameter exists
+///
+/// Public method for checking if a parameter of the specified name
+/// already exists in the specified source. The function will return
+/// `true` if the parameter exists and `false` otherwise. Note
+/// that name is case-sensitive. The variable `index` will be set
+/// to the index of the parameter if found. Otherwise it will be
+/// left untouched. If no index is required, a `NULL` pointer can
+/// instead be provided.
+///
+/// @param self   Object self-reference.
+/// @param name   Name of the parameter to be checked.
+/// @param index  Pointer to a variable that will hold the index
+///               of the source parameter if found.
+///
+/// @return Returns `true` if the parameter exists, `false` otherwise.
 
 PUBLIC bool Source_par_exists(const Source *self, const char *name, size_t *index)
 {
@@ -600,24 +502,16 @@ PUBLIC bool Source_par_exists(const Source *self, const char *name, size_t *inde
 
 
 
-// ----------------------------------------------------------------- //
-// Extract name of parameter by index                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the parameter the unit of which is to   //
-//                  be returned.                                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to the name string of the specified parameter.          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning a pointer to the name string of the //
-//   specified parameter.                                            //
-// ----------------------------------------------------------------- //
+/// @brief Extract name of parameter by index
+///
+/// Public method for returning a pointer to the name string of the
+/// specified parameter.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the parameter the unit of which is to
+///               be returned.
+///
+/// @return Pointer to the name string of the specified parameter.
 
 PUBLIC const char *Source_get_name(const Source *self, const size_t index)
 {
@@ -628,24 +522,16 @@ PUBLIC const char *Source_get_name(const Source *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract unit of parameter by index                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the parameter the unit of which is to   //
-//                  be returned.                                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to the unit string of the specified parameter.          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning a pointer to the unit string of the //
-//   specified parameter.                                            //
-// ----------------------------------------------------------------- //
+/// @brief Extract unit of parameter by index
+///
+/// Public method for returning a pointer to the unit string of the
+/// specified parameter.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the parameter the unit of which is to
+///               be returned.
+///
+/// @return Pointer to the unit string of the specified parameter.
 
 PUBLIC const char *Source_get_unit(const Source *self, const size_t index)
 {
@@ -656,24 +542,16 @@ PUBLIC const char *Source_get_unit(const Source *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract type of parameter by index                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the parameter the type of which is to   //
-//                  be returned.                                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Data type of the specified parameter.                           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the data type of the specified      //
-//   parameter, where 0 means integer and 1 means floating point.    //
-// ----------------------------------------------------------------- //
+/// @brief Extract type of parameter by index
+///
+/// Public method for returning the data type of the specified
+/// parameter, where 0 means integer and 1 means floating-point.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the parameter the type of which is to
+///               be returned.
+///
+/// @return Data type of the specified parameter.
 
 PUBLIC unsigned char Source_get_type(const Source *self, const size_t index)
 {
@@ -684,24 +562,16 @@ PUBLIC unsigned char Source_get_type(const Source *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Extract UCD of parameter by index                                 //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) index    - Index of the parameter the UCD of which is to    //
-//                  be returned.                                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to the UCD string of the specified parameter.           //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning a pointer to the Unified Content    //
-//   Descriptor (UCD) string of the specified parameter.             //
-// ----------------------------------------------------------------- //
+/// @brief Extract UCD of parameter by index
+///
+/// Public method for returning a pointer to the Unified Content
+/// Descriptor (UCD) string of the specified parameter.
+///
+/// @param self   Object self-reference.
+/// @param index  Index of the parameter the UCD of which is to
+///               be returned.
+///
+/// @return Pointer to the UCD string of the specified parameter.
 
 PUBLIC const char *Source_get_ucd(const Source *self, const size_t index)
 {
@@ -712,23 +582,15 @@ PUBLIC const char *Source_get_ucd(const Source *self, const size_t index)
 
 
 
-// ----------------------------------------------------------------- //
-// Get identifier of specified source                                //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Identifier of the specified source.                             //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the identifier string of the speci- //
-//   fied source. If no identifier has been set, an empty string     //
-//   will be returned instead.                                       //
-// ----------------------------------------------------------------- //
+/// @brief Get identifier of specified source
+///
+/// Public method for returning the identifier string of the specified
+/// source. If no identifier has been set, an empty string will be
+/// returned instead.
+///
+/// @param self  Object self-reference.
+///
+/// @return Identifier of the specified source.
 
 PUBLIC const char *Source_get_identifier(const Source *self)
 {
@@ -738,22 +600,14 @@ PUBLIC const char *Source_get_identifier(const Source *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Get number of parameters for specified source                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of parameters currently defined.                         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the number of parameters currently  //
-//   defined for the specified source.                               //
-// ----------------------------------------------------------------- //
+/// @brief Get number of parameters for specified source
+///
+/// Public method for returning the number of parameters currently
+/// defined for the specified source.
+///
+/// @param self  Object self-reference.
+///
+/// @return Number of parameters currently defined.
 
 PUBLIC size_t Source_get_num_par(const Source *self)
 {
@@ -763,27 +617,17 @@ PUBLIC size_t Source_get_num_par(const Source *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Reallocate memory for one additional parameter                    //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for allocating additional memory for one more    //
-//   parameter in the specified source. Note that this will not cre- //
-//   ate a new parameter yet, but just allocate the memory needed to //
-//   append a parameter at the end of the parameter list. The func-  //
-//   tion should be called from public member functions that will    //
-//   add parameters to a source prior to assigning the new parameter //
-//   values.                                                         //
-// ----------------------------------------------------------------- //
+/// @brief Reallocate memory for one additional parameter
+///
+/// Private method for allocating additional memory for one more
+/// parameter in the specified source. Note that this will not
+/// create a new parameter yet, but just allocate the memory needed
+/// to append a parameter at the end of the parameter list. The
+/// function should be called from public member functions that will
+/// add parameters to a source prior to assigning the new parameter
+/// values.
+///
+/// @param self  Object self-reference.
 
 PRIVATE void Source_append_memory(Source *self)
 {

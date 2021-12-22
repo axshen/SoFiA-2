@@ -1,77 +1,76 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (Matrix.c) - Source Finding Application                  ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (Matrix.c) - Source Finding Application                  //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   Matrix.c
+/// @author Tobias Westmeier
+/// @date   23/11/2021
+/// @brief  Class for handling matrices and enabling basic matrix manipulation.
+
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include "Matrix.h"
+#include "Array_dbl.h"
 
 
 
-// ----------------------------------------------------------------- //
-// Declaration of properties of class Matrix                         //
-// ----------------------------------------------------------------- //
+/// @brief Class for handling matrices
+///
+/// The purpose of this class is to provide a way of storing and
+/// handling matrices.
 
 CLASS Matrix
 {
-	size_t  rows;
-	size_t  cols;
-	double *values;
+	size_t  rows;    ///< Number of matrix rows.
+	size_t  cols;    ///< Number of matrix columns.
+	double *values;  ///< Array containing the values of the matrix.
 };
 
 
 
-// ----------------------------------------------------------------- //
-// Standard constructor                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) rows     - Number of rows.                                  //
-//   (2) cols     - Number of columns.                               //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created Matrix object.                         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Standard constructor. Will create a new, empty Matrix object    //
-//   and return a pointer to the newly created object. The number of //
-//   rows and columns of the matrix needs to be specified. The ma-   //
-//   trix will be initialised with 0. Note that the destructor will  //
-//   need to be called explicitly once the object is no longer re-   //
-//   quired to release any memory allocated during the lifetime of   //
-//   the object.                                                     //
-// ----------------------------------------------------------------- //
+/// @brief Standard constructor
+///
+/// Standard constructor. Will create a new, empty Matrix object and
+/// return a pointer to the newly created object. The number of rows
+/// and columns of the matrix needs to be specified. The matrix will
+/// be initialised with 0. Note that the destructor will need to be
+/// called explicitly once the object is no longer required to release
+/// any memory allocated during the lifetime of the object.
+///
+/// @param rows  Number of matrix rows.
+/// @param cols  Number of matrix columns.
+///
+/// @return Pointer to newly created Matrix object.
 
 PUBLIC Matrix *Matrix_new(const size_t rows, const size_t cols)
 {
@@ -90,25 +89,17 @@ PUBLIC Matrix *Matrix_new(const size_t rows, const size_t cols)
 
 
 
-// ----------------------------------------------------------------- //
-// Copy constructor                                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) source   - Matrix to be copied.                             //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created copy of matrix.                        //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Copy constructor. Will create a new matrix with the same dimen- //
-//   sions as the specified source matrix and copy all entries from  //
-//   source. A pointer to the newly created copy will be returned.   //
-//   Note that the destructor will need to be called on the copy if  //
-//   it is no longer required to release its memory.                 //
-// ----------------------------------------------------------------- //
+/// @brief Copy constructor
+///
+/// Copy constructor. Will create a new matrix with the same dimensions
+/// as the specified source matrix and copy all entries from `source`. A
+/// pointer to the newly created copy will be returned. Note that the
+/// destructor will need to be called on the copy if it is no longer
+/// required to release its memory.
+///
+/// @param source  Original matrix to be copied.
+///
+/// @return Pointer to newly created copy of matrix.
 
 PUBLIC Matrix *Matrix_copy(const Matrix *source)
 {
@@ -126,25 +117,17 @@ PUBLIC Matrix *Matrix_copy(const Matrix *source)
 
 
 
-// ----------------------------------------------------------------- //
-// Constructor for square identity matrix                            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) size     - Size of the new matrix.                          //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Pointer to newly created identity matrix.                       //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Variant of the standard constructor that will create a square   //
-//   identity matrix where all diagonal elements are set to 1. A     //
-//   pointer to the newly created matrix will be returned. Note that //
-//   the destructor will need to be called on the matrix if it is no //
-//   longer required to release its memory.                          //
-// ----------------------------------------------------------------- //
+/// @brief Constructor for square identity matrix
+///
+/// Variant of the standard constructor that will create a square
+/// identity matrix where all diagonal elements are set to 1. A
+/// pointer to the newly created matrix will be returned. Note that
+/// the destructor will need to be called on the matrix if it is no
+/// longer required to release its memory.
+///
+/// @param size  Size of the new matrix.
+///
+/// @return Pointer to newly created identity matrix.
 
 PUBLIC Matrix *Matrix_identity(const size_t size)
 {
@@ -161,24 +144,68 @@ PUBLIC Matrix *Matrix_identity(const size_t size)
 }
 
 
+/// @brief Constructor for covariance matrix
+///
+/// Variant of the standard constructor that will create the covariance
+/// matrix from a flattened array of values specified by the user. A
+/// pointer to the newly created covariance will be returned. Note that
+/// the destructor will need to be called on the matrix if it is no
+/// longer required to release its memory.
+///
+/// The specified array of values must be a flattened array of `size`
+/// columns representing the different variables or parameters for which
+/// the covariance matrix is to be calculated and `samples` rows which
+/// represent the list of samples supplied to the covariance calculation.
+/// Hence, the array of `values` must be of length `size * samples`.
+///
+/// @param size      Size of covariance matrix. Must be equal to the number
+///                  of columns in the array prior to flattening (i.e.
+///                  number of variables or dimensions).
+/// @param samples   Number of rows in the array prior to flattening, i.e.
+///                  the number of samples.
+/// @param values    Flattened array of values. Must be of length `size *
+///                  samples`.
+///
+/// @return Pointer to newly created covariance matrix.
 
-// ----------------------------------------------------------------- //
-// Destructor                                                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Destructor. Note that the destructor must be called explicitly  //
-//   if the object is no longer required. This will release the me-  //
-//   mory occupied by the object.                                    //
-// ----------------------------------------------------------------- //
+PUBLIC Matrix *Matrix_covar(const size_t size, const size_t samples, const double *values)
+{
+	// Create empty square matrix
+	Matrix *covar = Matrix_new(size, size);
+	
+	// Calculate mean values
+	Array_dbl *mean = Array_dbl_new(size);
+	for(size_t i = size; i--;)
+	{
+		for(size_t j = 0; j < samples; ++j) Array_dbl_add(mean, i, values[size * j + i]);
+		Array_dbl_mul(mean, i, 1.0 / samples);
+	}
+	
+	// Then calculate the covariance matrix
+	for(size_t i = size; i--;)
+	{
+		for(size_t j = size; j--;)
+		{
+			for(size_t k = 0; k < size * samples; k += size) Matrix_add_value(covar, i, j, (values[k + i] - Array_dbl_get(mean, i)) * (values[k + j] - Array_dbl_get(mean, j)));
+			Matrix_mul_value(covar, i, j, 1.0 / samples);
+		}
+	}
+	
+	// Clean up
+	Array_dbl_delete(mean);
+	
+	return covar;
+}
+
+
+
+/// @brief Destructor
+///
+/// Destructor. Note that the destructor must be called explicitly
+/// if the object is no longer required. This will release the
+/// memory occupied by the object.
+///
+/// @param self  Object self-reference.
 
 PUBLIC void Matrix_delete(Matrix *self)
 {
@@ -190,22 +217,14 @@ PUBLIC void Matrix_delete(Matrix *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Return number of rows                                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of matrix rows.                                          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the number of rows of the specified //
-//   matrix.                                                         //
-// ----------------------------------------------------------------- //
+/// @brief Returns number of rows
+///
+/// Public method for returning the number of rows of the specified
+/// matrix.
+///
+/// @param self  Object self-reference.
+///
+/// @return Number of matrix rows.
 
 PUBLIC size_t Matrix_rows(const Matrix *self)
 {
@@ -215,22 +234,14 @@ PUBLIC size_t Matrix_rows(const Matrix *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Return number of columns                                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Number of matrix columns.                                       //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the number of columns of the speci- //
-//   fied matrix.                                                    //
-// ----------------------------------------------------------------- //
+/// @brief Return number of columns
+///
+/// @param self  Object self-reference.
+///
+/// @return Number of matrix columns.
+///
+/// Public method for returning the number of columns of the
+/// specified matrix.
 
 PUBLIC size_t Matrix_cols(const Matrix *self)
 {
@@ -240,26 +251,17 @@ PUBLIC size_t Matrix_cols(const Matrix *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Set matrix element to specified value                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) row      - Row of the element to be set.                    //
-//   (3) col      - Column of the element to be set.                 //
-//   (4) value    - Value to set the element to.                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for setting the element at position (row, col) to //
-//   the specified value. If row or col are out of range, the pro-   //
-//   cess will be terminated.                                        //
-// ----------------------------------------------------------------- //
+/// @brief Set matrix element to specified value
+///
+/// Public method for setting the element at position (`row`, `col`)
+/// to the specified value. If `row` or `col` are out of range, the
+/// process will be terminated. See Matrix_set_value_nocheck() for a
+/// faster version without sanity checks.
+///
+/// @param self   Object self-reference.
+/// @param row    Row of the element to be set.
+/// @param col    Column of the element to be set.
+/// @param value  Value to set the element to.
 
 PUBLIC void Matrix_set_value(Matrix *self, const size_t row, const size_t col, const double value)
 {
@@ -272,7 +274,19 @@ PUBLIC void Matrix_set_value(Matrix *self, const size_t row, const size_t col, c
 	return;
 }
 
-// Same, but without sanity checks (faster)
+
+
+/// @brief Set matrix element to specified value (no sanity checks)
+///
+/// Public method for setting the element at position (`row`, `col`)
+/// to the specified value. If `row` or `col` are out of range, the
+/// process will be terminated. Identical to Matrix_set_value(), but
+/// without sanity checks for better performance.
+///
+/// @param self   Object self-reference.
+/// @param row    Row of the element to be set.
+/// @param col    Column of the element to be set.
+/// @param value  Value to set the element to.
 
 PUBLIC void Matrix_set_value_nocheck(Matrix *self, const size_t row, const size_t col, const double value)
 {
@@ -282,25 +296,19 @@ PUBLIC void Matrix_set_value_nocheck(Matrix *self, const size_t row, const size_
 
 
 
-// ----------------------------------------------------------------- //
-// Get matrix element at specified position                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) row      - Row of the element to be retrieved.              //
-//   (3) col      - Column of the element to be retrieved.           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Value of the matrix element at (row, col).                      //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for retrieving the value of the matrix at the po- //
-//   sition specified by row and col. If row or col are out of       //
-//   range, the process will be terminated.                          //
-// ----------------------------------------------------------------- //
+/// @brief Get matrix element at specified position
+///
+/// Public method for retrieving the value of the matrix at the
+/// position specified by `row` and `col`. If `row` or `col`
+/// are out of range, the process will be terminated. Also see
+/// Matrix_get_value_nocheck() for a version without sanity
+/// checks for better performance.
+///
+/// @param self  Object self-reference.
+/// @param row   Row of the element to be retrieved.
+/// @param col   Column of the element to be retrieved.
+///
+/// @return Value of the matrix element at (row, col).
 
 PUBLIC double Matrix_get_value(const Matrix *self, const size_t row, const size_t col)
 {
@@ -311,7 +319,21 @@ PUBLIC double Matrix_get_value(const Matrix *self, const size_t row, const size_
 	return self->values[Matrix_get_index(self, row, col)];
 }
 
-// Same, but without sanity checks (faster)
+
+
+/// @brief Get matrix element at specified position (no sanity checks)
+///
+/// Public method for retrieving the value of the matrix at the
+/// position specified by `row` and `col`. If `row` or `col`
+/// are out of range, the process will be terminated. Identical
+/// to Matrix_get_value(), but without sanity checks for better
+/// performance.
+///
+/// @param self  Object self-reference.
+/// @param row   Row of the element to be retrieved.
+/// @param col   Column of the element to be retrieved.
+///
+/// @return Value of the matrix element at (row, col).
 
 PUBLIC double Matrix_get_value_nocheck(const Matrix *self, const size_t row, const size_t col)
 {
@@ -320,26 +342,16 @@ PUBLIC double Matrix_get_value_nocheck(const Matrix *self, const size_t row, con
 
 
 
-// ----------------------------------------------------------------- //
-// Add specified value to matrix element                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) row      - Row of the element to be set.                    //
-//   (3) col      - Column of the element to be set.                 //
-//   (4) value    - Value to add to the element.                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding the specified value to the matrix ele- //
-//   ment specified by (row, col). If row or col are out of range,   //
-//   the process will be terminated.                                 //
-// ----------------------------------------------------------------- //
+/// @brief Add specified value to matrix element
+///
+/// Public method for adding the specified value to the matrix element
+/// specified by (`row`, `col`). If `row` or `col` are out of range,
+/// the process will be terminated.
+///
+/// @param self   Object self-reference.
+/// @param row    Row of the element to be set.
+/// @param col    Column of the element to be set.
+/// @param value  Value to add to the element.
 
 PUBLIC void Matrix_add_value(Matrix *self, const size_t row, const size_t col, const double value)
 {
@@ -354,26 +366,16 @@ PUBLIC void Matrix_add_value(Matrix *self, const size_t row, const size_t col, c
 
 
 
-// ----------------------------------------------------------------- //
-// Multiply matrix element by specified value                        //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) row      - Row of the element to be set.                    //
-//   (3) col      - Column of the element to be set.                 //
-//   (4) value    - Value to multiply element by.                    //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for multiplying the matrix element specified by   //
-//   (row, col) by value. If row or col are out of range, the pro-   //
-//   cess will be terminated.                                        //
-// ----------------------------------------------------------------- //
+/// @brief Multiply matrix element by specified value
+///
+/// Public method for multiplying the matrix element specified by
+/// (`row`, `col`) by value. If `row` or `col` are out of range,
+/// the process will be terminated.
+///
+/// @param self   Object self-reference.
+/// @param row    Row of the element to be set.
+/// @param col    Column of the element to be set.
+/// @param value  Value to multiply element by.
 
 PUBLIC void Matrix_mul_value(Matrix *self, const size_t row, const size_t col, const double value)
 {
@@ -388,23 +390,13 @@ PUBLIC void Matrix_mul_value(Matrix *self, const size_t row, const size_t col, c
 
 
 
-// ----------------------------------------------------------------- //
-// Multiply matrix by scalar                                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) scalar   - Scalar to multiply the matrix by.                //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for multiplying the matrix with the specified     //
-//   scalar value. The matrix will be multiplied in situ.            //
-// ----------------------------------------------------------------- //
+/// @brief Multiply matrix by scalar
+///
+/// Public method for multiplying the matrix with the specified
+/// scalar value. The matrix will be multiplied in situ.
+///
+/// @param self    Object self-reference.
+/// @param scalar  Scalar to multiply the matrix by.
 
 PUBLIC void Matrix_mul_scalar(Matrix *self, const double scalar)
 {
@@ -418,29 +410,20 @@ PUBLIC void Matrix_mul_scalar(Matrix *self, const double scalar)
 
 
 
-// ----------------------------------------------------------------- //
-// Matrix multiplication                                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) matrix   - Matrix by which to multiply.                     //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Result of the matrix multiplication.                            //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for multiplying a matrix with another one. The    //
-//   result of the multiplication will be written to a new matrix    //
-//   that will be returned by the method. For this to work, the num- //
-//   ber of columns in the left operand (self) must be equal to the  //
-//   number of rows in the right operand (matrix). If not, the pro-  //
-//   cess will be terminated. The user is responsible for calling    //
-//   the destructor on the returned result matrix once it is no      //
-//   longer needed.                                                  //
-// ----------------------------------------------------------------- //
+/// @brief Matrix multiplication
+///
+/// Public method for multiplying a matrix with another one. The
+/// result of the multiplication will be written to a new matrix
+/// that will be returned by the method. For this to work, the number
+/// of columns in the left operand (self) must be equal to the number
+/// of rows in the right operand (matrix). If not, the process will
+/// be terminated. The user is responsible for calling the destructor
+/// on the returned result matrix once it is no longer needed.
+///
+/// @param self    Object self-reference.
+/// @param matrix  Matrix by which to multiply.
+///
+/// @return Result of the matrix multiplication.
 
 PUBLIC Matrix *Matrix_mul_matrix(const Matrix *self, const Matrix *matrix)
 {
@@ -468,24 +451,14 @@ PUBLIC Matrix *Matrix_mul_matrix(const Matrix *self, const Matrix *matrix)
 
 
 
-// ----------------------------------------------------------------- //
-// Add two matrices                                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) matrix   - Matrix to be added.                              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for adding one matrix to another. Both matrices   //
-//   must have the same size, otherwise the process will be termina- //
-//   ted. The input matrix will be modified in situ.                 //
-// ----------------------------------------------------------------- //
+/// @brief Add two matrices
+///
+/// Public method for adding one matrix to another. Both matrices
+/// must have the same size, otherwise the process will be terminated.
+/// The input matrix will be modified in situ.
+///
+/// @param self    Object self-reference.
+/// @param matrix  Matrix to be added.
 
 PUBLIC void Matrix_add_matrix(Matrix *self, const Matrix *matrix)
 {
@@ -507,26 +480,19 @@ PUBLIC void Matrix_add_matrix(Matrix *self, const Matrix *matrix)
 }
 
 
-// ----------------------------------------------------------------- //
-// Calculate v^T M v                                                 //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) vector   - Vector to be multiplied.                         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Result of v^T M v (which is a scalar).                          //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for calculating the product of v^T M v between    //
-//   the specified matrix, M, and vector, v, where v^T denotes the   //
-//   transpose of the vector. The matrix must be a square matrix     //
-//   with a size equal to that of the vector. The vector is expected //
-//   to be a column vector.                                          //
-// ----------------------------------------------------------------- //
+/// @brief Calculate v^T M v
+///
+/// Public method for calculating the product of v^T M v between
+/// the specified matrix, M, and vector, v, where v^T denotes the
+/// transpose of the vector. The matrix must be a square matrix
+/// with a size equal to that of the vector. The vector is expected
+/// to be a column vector. Also see Matrix_vMv_nocheck() for a
+/// version without sanity checks for better performance.
+///
+/// @param self    Object self-reference.
+/// @param vector  Vector to be multiplied.
+///
+/// @return Result of v^T M v (which is a scalar).
 
 PUBLIC double Matrix_vMv(const Matrix *self, const Matrix *vector)
 {
@@ -555,7 +521,21 @@ PUBLIC double Matrix_vMv(const Matrix *self, const Matrix *vector)
 	return result;
 }
 
-// Same, but without sanity checks (faster)
+
+
+/// @brief Calculate v^T M v (no sanity checks)
+///
+/// Public method for calculating the product of v^T M v between
+/// the specified matrix, M, and vector, v, where v^T denotes the
+/// transpose of the vector. The matrix must be a square matrix
+/// with a size equal to that of the vector. The vector is expected
+/// to be a column vector. Identical to Matrix_vMv(), but without
+/// sanity checks for better performance.
+///
+/// @param self    Object self-reference.
+/// @param vector  Vector to be multiplied.
+///
+/// @return Result of v^T M v (which is a scalar).
 
 PUBLIC double Matrix_vMv_nocheck(const Matrix *self, const Matrix *vector)
 {
@@ -579,24 +559,15 @@ PUBLIC double Matrix_vMv_nocheck(const Matrix *self, const Matrix *vector)
 
 
 
-// ----------------------------------------------------------------- //
-// Transpose matrix                                                  //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Transpose of the input matrix.                                  //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for transposing the specified matrix. The trans-  //
-//   posed matrix will be returned. The user will be responsible for //
-//   calling the destructor on the transposed matrix once it is no   //
-//   longer needed.                                                  //
-// ----------------------------------------------------------------- //
+/// @brief Transpose matrix
+///
+/// Public method for transposing the specified matrix. The transposed
+/// matrix will be returned. The user will be responsible for calling
+///  the destructor on the transposed matrix once it is no longer needed.
+///
+/// @param self  Object self-reference.
+///
+/// @return Transpose of the input matrix.
 
 PUBLIC Matrix *Matrix_transpose(const Matrix *self)
 {
@@ -620,28 +591,23 @@ PUBLIC Matrix *Matrix_transpose(const Matrix *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Invert matrix                                                     //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Inverse of the input matrix, or NULL if not invertible.         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for inverting the specified matrix. The method    //
-//   makes use of the Gauss-Jordan elimination algorithm for this    //
-//   purpose, unless the matrix size is <= 3, in which case the so-  //
-//   lution is calculated analytically. The inverted matrix will be  //
-//   returned. If the matrix is not invertible, a NULL pointer will  //
-//   instead be returned. NOTE that the Gauss-Jordan elimination al- //
-//   gorithm can be numerically unstable, and integer numbers might  //
-//   get represented as non-integer values.                          //
-// ----------------------------------------------------------------- //
+/// @brief Invert matrix
+///
+/// Public method for inverting the specified matrix. The method
+/// makes use of the Gauss-Jordan elimination algorithm for this
+/// purpose, unless the matrix size is <= 3, in which case the
+/// solution is calculated analytically. The inverted matrix will
+/// be returned. If the matrix is not invertible, a `NULL` pointer
+/// will instead be returned. The user is responsible for calling
+/// the destructor once the matrix is no longer needed.
+///
+/// @param self  Object self-reference.
+///
+/// @return Inverse of the input matrix, or NULL if not invertible.
+///
+/// @note The Gauss-Jordan elimination algorithm can be numerically
+/// unstable, and integer numbers may get represented as non-integer
+/// values.
 
 PUBLIC Matrix *Matrix_invert(const Matrix *self)
 {
@@ -779,26 +745,16 @@ PUBLIC Matrix *Matrix_invert(const Matrix *self)
 
 
 
-// ----------------------------------------------------------------- //
-// Print matrix                                                      //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) width    - Width of each column in characters.              //
-//   (3) decimals - Number of decimals after the decimal point.      //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for printing the matrix to the standard output.   //
-//   The width parameter specifies how many characters each printed  //
-//   column is wide. The number of decimals after the decimal point  //
-//   is specified with the decimals argument.                        //
-// ----------------------------------------------------------------- //
+/// @brief Print matrix
+///
+/// Public method for printing the matrix to the standard output.
+/// The width parameter specifies how many characters each printed
+/// column is wide. The number of decimals after the decimal point
+/// is specified with the decimals argument.
+///
+/// @param self      Object self-reference.
+/// @param width     Width of each column in characters.
+/// @param decimals  Number of decimals after the decimal point.
 
 PUBLIC void Matrix_print(const Matrix *self, const unsigned int width, const unsigned int decimals)
 {
@@ -816,32 +772,25 @@ PUBLIC void Matrix_print(const Matrix *self, const unsigned int width, const uns
 
 
 
-// ----------------------------------------------------------------- //
-// Calculate determinant                                             //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) scale_factor - A scale factor by which each element of the  //
-//                      matrix is multiplied before calculating the  //
-//                      determinant. Set to 1 for no scaling.        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Determinant of specified matrix.                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for returning the determinant of the specified    //
-//   matrix. The determinant for matrices of size <= 3 is calculated //
-//   analytically, while the determinant of larger matrices is not   //
-//   yet implemented.                                                //
-//   The purpose of the scale factor is to be able to make use of    //
-//   the fact that det(f * M) = f^n * det(M). By setting the scale   //
-//   factor to a value != 1, one can efficiently calculate the pro-  //
-//   duct f^n * det(M), which is needed in the calculation of the    //
-//   PDF of the multivariate normal distribution below.              //
-// ----------------------------------------------------------------- //
+/// @brief Calculate determinant
+///
+/// Public method for returning the determinant of the specified
+/// matrix. The determinant for matrices of size <= 3 is calculated
+/// analytically, while the determinant of larger matrices will be
+/// calculated numerically.
+///
+/// The purpose of the scale factor is to be able to make use of
+/// the fact that det(f * M) = f^n * det(M). By setting the scale
+/// factor to a value != 1, one can efficiently calculate the product
+/// f^n * det(M), which is needed in the calculation of the PDF of
+/// the multivariate normal distribution below.
+///
+/// @param self          Object self-reference.
+/// @param scale_factor  A scale factor by which each element of the
+///                      matrix is multiplied before calculating the
+///                      determinant. Set to 1 for no scaling.
+///
+/// @return Determinant of specified matrix.
 
 PUBLIC double Matrix_det(const Matrix *self, const double scale_factor)
 {
@@ -918,41 +867,36 @@ PUBLIC double Matrix_det(const Matrix *self, const double scale_factor)
 
 
 
-// ----------------------------------------------------------------- //
-// Probability density of a multivariate normal distribution         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) covar_inv - Inverse of the covariance matrix. Can be calcu- //
-//                   lated with Matrix_invert().                     //
-//   (2) vector    - Coordinate (or parameter) vector relative to    //
-//                   the mean for which the probability density is   //
-//                   to be returned.                                 //
-//   (3) scal_fact - Scale factor of 1 divided by the square root of //
-//                   the determinant of 2 pi times the covariance    //
-//                   matrix, 1 / SQRT(|2 pi COV|).                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Probability density at the position of vector.                  //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for calculating the probability density of a mul- //
-//   tivariate normal distribution described by the specified co-    //
-//   variance matrix at the location specified by 'vector' (relative //
-//   to the mean). For this to work, the covariance matrix must be   //
-//   square and invertible, and the vector must be in column form    //
-//   with a size equal to that of the covariance matrix. The vector  //
-//   entries must be relative to the centroid (x - <x>) such that 0  //
-//   corresponds to the peak of the PDF. The PDF will be correctly   //
-//   normalised such that the integral over the entire n-dimensional //
-//   space is 1 if the correct scale factor is supplied.             //
-//   NOTE that det(f * M) = f^n * det(M), hence the scale factor is  //
-//   such that 1 / SQRT(|2 pi COV|) = 1 / SQRT((2 pi)^n |COV|),      //
-//   which is the correct normalisation factor of the multivariate   //
-//   normal distribution in n dimensions.                            //
-// ----------------------------------------------------------------- //
+/// @brief Probability density of a multivariate normal distribution
+///
+/// Public method for calculating the probability density of a
+/// multivariate normal distribution described by the specified
+/// covariance matrix at the location specified by `vector`
+/// (relative to the mean). For this to work, the covariance
+/// matrix must be square and invertible, and the vector must be
+/// in column form with a size equal to that of the covariance
+/// matrix. The vector entries must be relative to the centroid
+/// (x - x_cen) such that 0 corresponds to the peak of the PDF.
+/// The PDF will be correctly normalised such that the integral
+/// over the entire n-dimensional space is 1 if the correct scale
+/// factor is supplied. Also see Matrix_prob_dens_nocheck() for a
+/// version without sanity checks for better performance.
+///
+/// @param covar_inv  Inverse of the covariance matrix. Can be
+///                   calculated with Matrix_invert().
+/// @param vector     Coordinate (or parameter) vector relative to
+///                   the mean for which the probability density is
+///                   to be returned.
+/// @param scal_fact  Scale factor of 1 divided by the square root of
+///                   the determinant of 2 pi times the covariance
+///                   matrix, 1 / SQRT(|2 pi COV|).
+///
+/// @return Probability density at the position of vector.
+///
+/// @note det(f * M) = f^n * det(M), hence the scale factor is
+/// such that 1 / SQRT(|2 pi COV|) = 1 / SQRT((2 pi)^n |COV|),
+/// which is the correct normalisation factor of the multivariate
+/// normal distribution in n dimensions.
 
 PUBLIC double Matrix_prob_dens(const Matrix *covar_inv, const Matrix *vector, const double scal_fact)
 {
@@ -966,7 +910,38 @@ PUBLIC double Matrix_prob_dens(const Matrix *covar_inv, const Matrix *vector, co
 	return scal_fact * exp(-0.5 * Matrix_vMv_nocheck(covar_inv, vector));
 }
 
-// Same, but without sanity checks (faster)
+
+
+/// @brief Probability density of a multivariate normal distribution (no sanity checks)
+///
+/// Public method for calculating the probability density of a
+/// multivariate normal distribution described by the specified
+/// covariance matrix at the location specified by `vector`
+/// (relative to the mean). For this to work, the covariance
+/// matrix must be square and invertible, and the vector must be
+/// in column form with a size equal to that of the covariance
+/// matrix. The vector entries must be relative to the centroid
+/// (x - x_cen) such that 0 corresponds to the peak of the PDF.
+/// The PDF will be correctly normalised such that the integral
+/// over the entire n-dimensional space is 1 if the correct scale
+/// factor is supplied. Identical to Matrix_prob_dens(), but
+/// without sanity checks for better performance.
+///
+/// @param covar_inv  Inverse of the covariance matrix. Can be
+///                   calculated with Matrix_invert().
+/// @param vector     Coordinate (or parameter) vector relative to
+///                   the mean for which the probability density is
+///                   to be returned.
+/// @param scal_fact  Scale factor of 1 divided by the square root of
+///                   the determinant of 2 pi times the covariance
+///                   matrix, 1 / SQRT(|2 pi COV|).
+///
+/// @return Probability density at the position of vector.
+///
+/// @note det(f * M) = f^n * det(M), hence the scale factor is
+/// such that 1 / SQRT(|2 pi COV|) = 1 / SQRT((2 pi)^n |COV|),
+/// which is the correct normalisation factor of the multivariate
+/// normal distribution in n dimensions.
 
 PUBLIC double Matrix_prob_dens_nocheck(const Matrix *covar_inv, const Matrix *vector, const double scal_fact)
 {
@@ -976,148 +951,26 @@ PUBLIC double Matrix_prob_dens_nocheck(const Matrix *covar_inv, const Matrix *ve
 
 
 
-// ----------------------------------------------------------------- //
-// Get array index from row and column                               //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) row      - Row number.                                      //
-//   (3) col      - Column number.                                   //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Array index corresponding to the row and column number.         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for returning the array index corresponding to   //
-//   the specified row and column number. This can be used to di-    //
-//   rectly access the data array from within public and private     //
-//   methods without having to use the Matrix_get_value() and        //
-//   Matrix_set_value() methods.                                     //
-// ----------------------------------------------------------------- //
-
-PRIVATE inline size_t Matrix_get_index(const Matrix *self, const size_t row, const size_t col)
-{
-	return row + self->rows * col;
-}
-
-
-
-// ----------------------------------------------------------------- //
-// Swap two matrix rows                                              //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) row1     - First row to be swapped.                         //
-//   (3) row2     - Second row to be swapped.                        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for swapping the two rows specified by row1 and  //
-//   row2 of the matrix. This method is needed for the Gauss-Jordan  //
-//   elimination algorithm.                                          //
-// ----------------------------------------------------------------- //
-
-PRIVATE void Matrix_swap_rows(Matrix *self, const size_t row1, const size_t row2)
-{
-	for(size_t i = self->cols; i--;) swap(self->values + Matrix_get_index(self, row1, i), self->values + Matrix_get_index(self, row2, i));
-	return;
-}
-
-
-
-// ----------------------------------------------------------------- //
-// Add factor * row2 to row1                                         //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) row1     - Row to be manipulated.                           //
-//   (3) row2     - Row to be scaled and added to row1.              //
-//   (4) factor   - Factor to multiply row2 by.                      //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for multiplying row2 by factor and adding the    //
-//   result to row1 of the specified matrix. This method is needed   //
-//   for the Gauss-Jordan elimination algorithm.                     //
-// ----------------------------------------------------------------- //
-
-PRIVATE void Matrix_add_row(Matrix *self, const size_t row1, const size_t row2, const double factor)
-{
-	for(size_t i = self->cols; i--;) self->values[Matrix_get_index(self, row1, i)] += factor * self->values[Matrix_get_index(self, row2, i)];
-	return;
-}
-
-
-
-// ----------------------------------------------------------------- //
-// Multiply row by factor                                            //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) self     - Object self-reference.                           //
-//   (2) row      - Row to be multipled.                             //
-//   (3) factor   - Factor to multiply row by.                       //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Private method for multiplying the specified row of the matrix  //
-//   by the specified factor. This method is needed for the Gauss-   //
-//   Jordan elimination algorithm.                                   //
-// ----------------------------------------------------------------- //
-
-PRIVATE void Matrix_mul_row(Matrix *self, const size_t row, const double factor)
-{
-	for(size_t i = self->cols; i--;) self->values[Matrix_get_index(self, row, i)] *= factor;
-	return;
-}
-
-
-
-// ----------------------------------------------------------------- //
-// Create error ellipse from covariance matrix                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) covar      - Covariance matrix.                             //
-//   (2) par1       - First parameter to use.                        //
-//   (3) par2       - Second parameter to use.                       //
-//   (5) radius_maj - Radius of the ellipse along major axis.        //
-//   (6) radius_min - Radius of the ellipse along minor axis.        //
-//   (7) pa         - Position angle of the ellipse.                 //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Public method for determining the radii and position angle of   //
-//   the error ellipse corresponding to the specified covariance ma- //
-//   trix. The radii correspond to the standard deviation (sigma).   //
-//   The results will be written into the parameters radius_maj,     //
-//   radius_min and pa. NOTE that the covariance matrix must be a    //
-//   square matrix for this to make sense. The parameters par1 and   //
-//   par2 are used to select two of of the N parameters of the co-   //
-//   riance matrix, and the ellipse parameters will then be deter-   //
-//   mined for this specific 2-D projection.                         //
-// ----------------------------------------------------------------- //
+/// @brief Create error ellipse from covariance matrix
+///
+/// Public method for determining the radii and position angle of
+/// the error ellipse corresponding to the specified covariance
+/// matrix. The radii correspond to the standard deviation (sigma).
+/// The results will be written into the parameters `radius_maj`,
+/// `radius_min` and `pa`.
+///
+/// @param covar       Covariance matrix.
+/// @param par1        First parameter to use.
+/// @param par2        Second parameter to use.
+/// @param radius_maj  Radius of the ellipse along major axis.
+/// @param radius_min  Radius of the ellipse along minor axis.
+/// @param pa          Position angle of the ellipse.
+///
+/// @note The covariance matrix must be a square matrix for this
+/// to make sense. The parameters `par1` and `par2` are used to
+/// select two of of the N parameters of the covariance matrix, and
+/// the ellipse parameters will then be determined for this specific
+/// 2-D projection.
 
 PUBLIC void Matrix_err_ellipse(const Matrix *covar, const size_t par1, const size_t par2, double *radius_maj, double *radius_min, double *pa)
 {
@@ -1180,43 +1033,78 @@ PUBLIC void Matrix_err_ellipse(const Matrix *covar, const size_t par1, const siz
 	return;
 }
 
-/**
- * @brief Calculate covariance matrix from a flattened array of values.
- *
- * Compute the covariance matrix from an array of values. Will update
- * the values in place for provided matrix.
- *  
- * @param values[] Flattened array of values.
- * @param dim Number of columns in the array prior to flattening (number of variables).
- * @param length Number of rows in the array prior to flattening (number of examples).
- */
 
-PUBLIC void Matrix_covariance(Matrix *self, const double values[], const size_t dim, const size_t length)
+
+/// @brief Get array index from row and column
+///
+/// Private method for returning the array index corresponding to
+/// the specified row and column number. This can be used to
+/// directly access the data array from within public and private
+/// methods without having to use the Matrix_get_value() and
+/// Matrix_set_value() methods.
+///
+/// @param self  Object self-reference.
+/// @param row   Row number.
+/// @param col   Column number.
+///
+/// @return Array index corresponding to the row and column number.
+
+PRIVATE inline size_t Matrix_get_index(const Matrix *self, const size_t row, const size_t col)
 {
-	ensure(self->cols == dim, ERR_USER_INPUT, "Dimensions must equal covariance matrix dimensions");
-	ensure(self->rows == self->cols, ERR_USER_INPUT, "Covariance matrix must be square.");
+	return row + self->rows * col;
+}
 
-	// Calculate mean values
-	double mean[dim];
-	for(size_t i = dim; i--;)
-	{
-		mean[i] = 0.0;
-		for(size_t j = 0; j < length; ++j) mean[i] += values[dim * j + i];
-		mean[i] /= length;
-	}
 
-	// Then calculate the covariance matrix
-	for(size_t i = dim; i--;)
-	{
-		for(size_t j = dim; j--;)
-		{
-			for(size_t k = 0; k < dim * length; k += dim)
-			{
-				Matrix_add_value(self, i, j, (values[k + i] - mean[i]) * (values[k + j] - mean[j]));
-			}
-			Matrix_mul_value(self, i, j, 1.0 / length);
-		}
-	}
 
+/// @brief Swap two matrix rows
+///
+/// Private method for swapping the two rows specified by `row1` and
+/// `row2` of the matrix. This method is needed for the Gauss-Jordan
+/// elimination algorithm.
+///
+/// @param self  Object self-reference.
+/// @param row1  First row to be swapped.
+/// @param row2  Second row to be swapped.
+
+PRIVATE void Matrix_swap_rows(Matrix *self, const size_t row1, const size_t row2)
+{
+	for(size_t i = self->cols; i--;) swap(self->values + Matrix_get_index(self, row1, i), self->values + Matrix_get_index(self, row2, i));
+	return;
+}
+
+
+
+/// @brief Add `factor * row2` to `row1`
+///
+/// Private method for multiplying `row2` by `factor` and adding
+/// the result to `row1` of the specified matrix. This method is
+/// needed for the Gauss-Jordan elimination algorithm.
+///
+/// @param self    Object self-reference.
+/// @param row1    Row to be manipulated.
+/// @param row2    Row to be scaled and added to row1.
+/// @param factor  Factor to multiply row2 by.
+
+PRIVATE void Matrix_add_row(Matrix *self, const size_t row1, const size_t row2, const double factor)
+{
+	for(size_t i = self->cols; i--;) self->values[Matrix_get_index(self, row1, i)] += factor * self->values[Matrix_get_index(self, row2, i)];
+	return;
+}
+
+
+
+/// @brief Multiply row by factor
+///
+/// Private method for multiplying the specified row of the
+/// matrix by the specified factor. This method is needed for
+/// the Gauss-Jordan elimination algorithm.
+///
+/// @param self    Object self-reference.
+/// @param row     Row to be multipled.
+/// @param factor  Factor to multiply row by.
+
+PRIVATE void Matrix_mul_row(Matrix *self, const size_t row, const double factor)
+{
+	for(size_t i = self->cols; i--;) self->values[Matrix_get_index(self, row, i)] *= factor;
 	return;
 }

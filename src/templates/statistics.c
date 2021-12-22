@@ -1,37 +1,43 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (statistics_SFX.c) - Source Finding Application          ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (statistics_SFX.c) - Source Finding Application          //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
+
+/// @file   statistics_SFX.c
+/// @author Tobias Westmeier
+/// @date   26/11/2021
+/// @brief  Function templates for basic statistical analysis of data of type `DATA_T`.
 
 
 // WARNING: This is a template that needs to be instantiated before use.
-//          Do not edit template instances, as they are auto-generated!
+//          Do not edit template instances, as they are auto-generated
+//          and will be overwritten during instantiation!
 
 
 #include <stdlib.h>
@@ -44,28 +50,15 @@
 
 
 
-// -------------------------------- //
-// Check if data array contains NaN //
-// -------------------------------- //
-
-// --------------------------------------------------------- //
-// Check if data contains NaN                                //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)      data - Pointer to the input data array         //
-//   (2)      size - Size of the input data array            //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   True if NaN found, false otherwise.                     //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Checks if the data array contains values of Not a Num-  //
-//   ber (NaN).                                              //
-// --------------------------------------------------------- //
+/// @brief Check if data contains `NaN`
+///
+/// Checks if the data array contains values of Not a
+/// Number (`NaN`).
+///
+/// @param data  Pointer to the input data array.
+/// @param size  Size of the input data array.
+///
+/// @return True if `NaN` found, false otherwise.
 
 bool contains_nan_SFX(const DATA_T *data, const size_t size)
 {
@@ -76,26 +69,17 @@ bool contains_nan_SFX(const DATA_T *data, const size_t size)
 
 
 
-// --------------------------------------------------------- //
-// Check if data contains Inf                                //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)      data - Pointer to the input data array         //
-//   (2)      size - Size of the input data array            //
-//   (3)  flag_inf - If true, set Inf values to NaN          //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   True if Inf found, false otherwise.                     //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Checks if the data array contains values of infinity    //
-//   (Inf). If flag_inf is set to true, all values of Inf    //
-//   will be replaced with NaN.                              //
-// --------------------------------------------------------- //
+/// @brief Check if data contains `Inf`
+///
+/// Checks if the data array contains values of infinity
+/// (`Inf`). If `flag_inf` is set to `true`, all values of
+/// `Inf` will be replaced with `NaN`.
+///
+/// @param data      Pointer to the input data array.
+/// @param size      Size of the input data array.
+/// @param flag_inf  If true, set `Inf` values to `NaN`.
+///
+/// @return `true` if `Inf` found, `false` otherwise.
 
 bool contains_inf_SFX(DATA_T *data, const size_t size, const bool flag_inf)
 {
@@ -117,29 +101,19 @@ bool contains_inf_SFX(DATA_T *data, const size_t size, const bool flag_inf)
 
 
 
-// --------------------------------------------------------- //
-// Maximum and minimum                                       //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)      data - Pointer to the input data array         //
-//   (2)      size - Size of the input data array            //
-//   (3) value_max - Pointer to variable for holding maximum //
-//   (4) value_min - Pointer to variable for holding minimum //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   No return value.                                        //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Determines the maximum and minimum value in the input   //
-//   data array simultaneously. This is faster that calling  //
-//   the max() and min() functions separately in situations  //
-//   where both values are required. If the array contains   //
-//   only NaN, value_min and value_max are both set to NaN.  //
-// --------------------------------------------------------- //
+/// @brief Maximum and minimum
+///
+/// Determines the maximum and minimum value in the input
+/// data array simultaneously. This is faster that calling
+/// the max() and min() functions separately in situations
+/// where both values are required. If the array contains
+/// only `NaN`, `value_min` and `value_max` will both be
+/// set to `NaN`.
+///
+/// @param data       Pointer to the input data array.
+/// @param size       Size of the input data array.
+/// @param value_max  Pointer to variable for holding maximum.
+/// @param value_min  Pointer to variable for holding minimum.
 
 void max_min_SFX(const DATA_T *data, const size_t size, DATA_T *value_max, DATA_T *value_min)
 {
@@ -163,25 +137,16 @@ void max_min_SFX(const DATA_T *data, const size_t size, DATA_T *value_max, DATA_
 
 
 
-// --------------------------------------------------------- //
-// Maximum                                                   //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the input data array              //
-//   (2) size - Size of the input data array                 //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Maximum value of the input array. NaN will be returned  //
-//   for NaN-only input arrays.                              //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Determines the maximum value in the input data array.   //
-//   If the array contains only NaN, then NaN is returned.   //
-// --------------------------------------------------------- //
+/// @brief Maximum
+///
+/// Determines the maximum value in the input data array.
+/// If the array contains only `NaN`, then `NaN` is returned.
+///
+/// @param data  Pointer to the input data array.
+/// @param size  Size of the input data array.
+///
+/// @return Maximum value of the input array. `NaN` will be returned
+/// for `NaN`-only input arrays.
 
 DATA_T max_SFX(const DATA_T *data, const size_t size)
 {
@@ -196,25 +161,16 @@ DATA_T max_SFX(const DATA_T *data, const size_t size)
 
 
 
-// --------------------------------------------------------- //
-// Minimum                                                   //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the input data array              //
-//   (2) size - Size of the input data array                 //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Minimum value of the input array. NaN will be returned  //
-//   for NaN-only input arrays.                              //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Determines the minimum value in the input data array.   //
-//   If the array contains only NaN, then NaN is returned.   //
-// --------------------------------------------------------- //
+/// @brief Minimum
+///
+/// Determines the minimum value in the input data array.
+/// If the array contains only `NaN`, then `NaN` is returned.
+///
+/// @param data  Pointer to the input data array.
+/// @param size  Size of the input data array.
+///
+/// @return Minimum value of the input array. `NaN` will be returned
+/// for `NaN`-only input arrays.
 
 DATA_T min_SFX(const DATA_T *data, const size_t size)
 {
@@ -229,29 +185,20 @@ DATA_T min_SFX(const DATA_T *data, const size_t size)
 
 
 
-// --------------------------------------------------------- //
-// Sum and mean                                              //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the input data array              //
-//   (2) size - Size of the input data array                 //
-//   (3) mean - If true, return the mean; otherwise the sum  //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Sum or mean of the data array. NaN will be returned for //
-//   NaN-only input arrays.                                  //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Depending on the value of mean, either the sum or the   //
-//   mean of the non-NaN elements of the input array is      //
-//   returned. Two convenient wrapper functions, sum() and   //
-//   mean(), have been provided to explicitly return the sum //
-//   and the mean of the array, respectively.                //
-// --------------------------------------------------------- //
+/// @brief Sum and mean
+///
+/// Depending on the value of mean, either the sum or the
+/// mean of the non-`NaN` elements of the input array is
+/// returned. Two convenient wrapper functions, sum() and
+/// mean(), have been provided to explicitly return the sum
+/// and the mean of the array, respectively.
+///
+/// @param data  Pointer to the input data array.
+/// @param size  Size of the input data array.
+/// @param mean  If `true`, return the mean, otherwise the sum.
+///
+/// @return Sum or mean of the data array. `NaN` will be returned for
+///         `NaN`-only input arrays.
 
 double summation_SFX(const DATA_T *data, const size_t size, const bool mean)
 {
@@ -271,38 +218,57 @@ double summation_SFX(const DATA_T *data, const size_t size, const bool mean)
 	if(counter) return mean ? result / counter : result;
 	return NAN;
 }
+
+
+
+/// @brief Sum
+///
+/// Wrapper function for summation_SFX() that will return the
+/// sum of the non-`NaN` elements of the input array.
+///
+/// @param data  Pointer to the input data array.
+/// @param size  Size of the input data array.
+///
+/// @return Sum of the data array values. `NaN` will be returned
+///         for `NaN`-only input arrays.
+
 double sum_SFX(const DATA_T *data, const size_t size) { return summation_SFX(data, size, false); }
+
+
+
+/// @brief Mean
+///
+/// Wrapper function for summation_SFX() that will return the
+/// mean of the non-`NaN` elements of the input array.
+///
+/// @param data  Pointer to the input data array.
+/// @param size  Size of the input data array.
+///
+/// @return Mean of the data array values. `NaN` will be returned
+///         for `NaN`-only input arrays.
+
 double mean_SFX(const DATA_T *data, const size_t size) { return summation_SFX(data, size, true); }
 
 
 
-// --------------------------------------------------------- //
-// N-th moment about value                                   //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)  data - Pointer to the input data array             //
-//   (2)  size - Size of the input data array                //
-//   (3) order - Order of the moment to be calculated        //
-//   (4) value - Value about which to calculate the moment   //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   N-th moment of the data array. NaN will be returned for //
-//   NaN-only input arrays.                                  //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the N-th moment of the input data array. The //
-//   N-th moment is defined as                               //
-//                                                           //
-//     sum((x - value)^N) / n                                //
-//                                                           //
-//   where the summation is over all n data values, x, of    //
-//   the input array that are not NaN. The most sensible use //
-//   would be to calculate the moment about the mean.        //
-// --------------------------------------------------------- //
+/// @brief N-th moment about value
+///
+/// Calculates the N-th moment of the input data array. The
+/// N-th moment is defined as
+///
+///   sum((x - value)^N) / n
+///
+/// where the summation is over all n data values, x, of
+/// the input array that are not `NaN`. The most sensible
+/// use would be to calculate the moment about the mean.
+///
+/// @param data   Pointer to the input data array.
+/// @param size   Size of the input data array.
+/// @param order  Order of the moment to be calculated.
+/// @param value  Value about which to calculate the moment.
+///
+/// @return N-th moment of the data array. `NaN` will be returned for
+///         `NaN`-only input arrays.
 
 double moment_SFX(const DATA_T *data, const size_t size, unsigned int order, const double value)
 {
@@ -330,31 +296,20 @@ double moment_SFX(const DATA_T *data, const size_t size, unsigned int order, con
 
 
 
-// --------------------------------------------------------- //
-// Moments 2, 3 and 4 about value                            //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)  data - Pointer to the input data array             //
-//   (2)  size - Size of the input data array                //
-//   (3) value - Value about which to calculate the moments  //
-//   (4)    m2 - Pointer to a variable for storing moment 2  //
-//   (5)    m3 - Pointer to a variable for storing moment 3  //
-//   (6)    m4 - Pointer to a variable for storing moment 4  //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   No return value.                                        //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the 2nd, 3rd and 4th moment of a data array  //
-//   simultaneously. This will enable faster calculation of  //
-//   skewness and kurtosis, both of which depend on multiple //
-//   moments of the same data array. Moments are defined in  //
-//   the same way as in function moment().                   //
-// --------------------------------------------------------- //
+/// @brief Moments 2, 3 and 4 about value
+///
+/// Calculates the 2nd, 3rd and 4th moment of a data array
+/// simultaneously. This will enable faster calculation of
+/// skewness and kurtosis, both of which depend on multiple
+/// moments of the same data array. Moments are defined in
+/// the same way as in function moment().
+///
+/// @param data   Pointer to the input data array.
+/// @param size   Size of the input data array.
+/// @param value  Value about which to calculate the moments.
+/// @param m2     Pointer to a variable for storing moment 2.
+/// @param m3     Pointer to a variable for storing moment 3.
+/// @param m4     Pointer to a variable for storing moment 4.
 
 void moments_SFX(const DATA_T *data, const size_t size, const double value, double *m2, double *m3, double *m4)
 {
@@ -396,37 +351,28 @@ void moments_SFX(const DATA_T *data, const size_t size, const double value, doub
 
 
 
-// --------------------------------------------------------- //
-// Standard deviation about value                            //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)    data - Pointer to the input data array           //
-//   (2)    size - Size of the input data array              //
-//   (3)   value - Value about which to calculate the        //
-//                 standard deviation                        //
-//   (4) cadence - Can be set to > 1 to speed up algorithm   //
-//   (4)   range - Flux range to be used. Can be Negative    //
-//                 (-1), Full (0) or Positive (1).           //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Standard deviation about the specified value of the     //
-//   elements in the input data array. NaN will be returned  //
-//   for NaN-only input arrays.                              //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the standard deviation about a user-speci-   //
-//   fied value of all elements in the input data array that //
-//   are not NaN. The standard deviation is defined as       //
-//                                                           //
-//     sqrt[sum(x - value)^2 / n]                            //
-//                                                           //
-//   where the summation is over all n non-NaN elements, x,  //
-//   of the input array.                                     //
-// --------------------------------------------------------- //
+/// @brief Standard deviation about value
+///
+/// Calculates the standard deviation about a user-specified
+/// value of all elements in the input data array that are
+/// not `NaN`. The standard deviation is defined as
+///
+///   sqrt[sum(x - value)^2 / n]
+///
+/// where the summation is over all n non-`NaN` elements, x,
+/// of the input array.
+///
+/// @param data     Pointer to the input data array.
+/// @param size     Size of the input data array.
+/// @param value    Value about which to calculate the
+///                 standard deviation.
+/// @param cadence  Can be set to > 1 to speed up algorithm.
+/// @param range    Flux range to be used. Can be Negative
+///                 (-1), Full (0) or Positive (1).
+///
+/// @return Standard deviation about the specified value of
+///         the elements in the input data array. `NaN` will
+///         be returned for `NaN`-only input arrays.
 
 double std_dev_val_SFX(const DATA_T *data, const size_t size, const double value, const size_t cadence, const int range)
 {
@@ -453,32 +399,23 @@ double std_dev_val_SFX(const DATA_T *data, const size_t size, const double value
 
 
 
-// --------------------------------------------------------- //
-// Standard deviation about mean                             //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the input data array              //
-//   (2) size - Size of the input data array                 //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Standard deviation about the mean of the elements in    //
-//   the input data array. NaN will be returned for NaN-only //
-//   input arrays.                                           //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the standard deviation about the mean of all //
-//   elements in the input data array that are not NaN. The  //
-//   standard deviation is defined as                        //
-//                                                           //
-//     sqrt{sum[x - mean(x)]^2 / n}                          //
-//                                                           //
-//   where the summation is over all n non-NaN elements, x,  //
-//   of the input array.                                     //
-// --------------------------------------------------------- //
+/// @brief Standard deviation about mean
+///
+/// Calculates the standard deviation about the mean of all
+/// elements in the input data array that are not `NaN`. The
+/// standard deviation is defined as
+///
+///   sqrt{sum[x - mean(x)]^2 / n}
+///
+/// where the summation is over all n non-`NaN` elements, x,
+/// of the input array.
+///
+/// @param data  Pointer to the input data array.
+/// @param size  Size of the input data array.
+///
+/// @return Standard deviation about the mean of the elements
+///         in the input data array. `NaN` will be returned for
+///         `NaN`-only input arrays.
 
 double std_dev_SFX(const DATA_T *data, const size_t size)
 {
@@ -487,32 +424,24 @@ double std_dev_SFX(const DATA_T *data, const size_t size)
 
 
 
-// --------------------------------------------------------- //
-// N-th smallest element in array                            //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the data array to be sorted       //
-//   (2) size - Size of the input array                      //
-//   (3)    n - n-th smallest value will be returned         //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Value of the n-th smallest array element.               //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Partially sorts the input data array until the n-th-    //
-//   smallest element is at the n-th position within the     //
-//   array. After sorting, all elements below position n     //
-//   will be smaller than or equal to the n-th-smallest      //
-//   element, while all elements above position n will be    //
-//   greater than or equal to the n-th-smallest element. The //
-//   value of the n-th-smallest element is returned.         //
-//   Note that this function is not NaN-safe and will modify //
-//   the original data array.                                //
-// --------------------------------------------------------- //
+/// @brief N-th smallest element in array
+///
+/// Partially sorts the input data array until the
+/// n-th-smallest element is at the n-th position within
+/// the array. After sorting, all elements below position
+/// `n` will be smaller than or equal to the n-th-smallest
+/// element, while all elements above position `n` will be
+/// greater than or equal to the n-th-smallest element. The
+/// value of the n-th-smallest element is returned.
+///
+/// @param data  Pointer to the data array to be sorted.
+/// @param size  Size of the input array.
+/// @param n     n-th smallest value will be returned.
+///
+/// @return Value of the n-th smallest array element.
+///
+/// @note This function is not `NaN`-safe and will modify
+/// the original data array.
 
 DATA_T nth_element_SFX(DATA_T *data, const size_t size, const size_t n)
 {
@@ -550,28 +479,20 @@ DATA_T nth_element_SFX(DATA_T *data, const size_t size, const size_t n)
 
 
 
-// --------------------------------------------------------- //
-// Median                                                    //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the data array to be sorted       //
-//   (2) size - Size of the input array                      //
-//   (3) fast - If true, will return approximate median for  //
-//              even-sized arrays. If false, the exact       //
-//              median will be returned, which takes longer. //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Median of the data array values.                        //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the exact median of the input data array.    //
-//   NOTE that this function is not NaN-safe and will modify //
-//   the original data array.                                //
-// --------------------------------------------------------- //
+/// @brief Median
+///
+/// Calculates the median of the input data array.
+///
+/// @param data  Pointer to the data array to be sorted.
+/// @param size  Size of the input array.
+/// @param fast  If `true`, will return approximate median for
+///              even-sized arrays. If `false`, the exact
+///              median will be returned, which takes longer.
+///
+/// @return Median of the data array values.
+///
+/// @note This function is not `NaN`-safe and will modify
+/// the original data array.
 
 DATA_T median_SFX(DATA_T *data, const size_t size, const bool fast)
 {
@@ -579,7 +500,21 @@ DATA_T median_SFX(DATA_T *data, const size_t size, const bool fast)
 	return IS_ODD(size) || fast ? value : (value + max_SFX(data, size / 2)) / 2.0;
 }
 
-// Same, but does not alter the data array.
+/// @brief Median (safe)
+///
+/// Calculates the median of the input data array. Unlike median_SFX(),
+/// this function makes a copy of the data and does not alter the original
+/// data array.
+///
+/// @param data  Pointer to the data array to be sorted.
+/// @param size  Size of the input array.
+/// @param fast  If `true`, will return approximate median for
+///              even-sized arrays. If `false`, the exact
+///              median will be returned, which takes longer.
+///
+/// @return Median of the data array values.
+///
+/// @note This function is not `NaN`-safe.
 
 DATA_T median_safe_SFX(const DATA_T *data, const size_t size, const bool fast)
 {
@@ -592,36 +527,27 @@ DATA_T median_safe_SFX(const DATA_T *data, const size_t size, const bool fast)
 
 
 
-// --------------------------------------------------------- //
-// Median absolute deviation from value                      //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)  data   - Pointer to the data array to be sorted    //
-//   (2)  size   - Size of the input array                   //
-//   (3) value   - Value about which to calculate the MAD    //
-//   (4) cadence - Can be set to > 1 to speed up algorithm   //
-//   (5)   range - Flux range to be used. Can be Negative    //
-//                 (-1), Full (0) or Positive (1).           //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Median absolute deviation of the array values from the  //
-//   specified data value.                                   //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the median absolute deviation (MAD) of the   //
-//   data array values from a user-specified value. The MAD  //
-//   is defined as                                           //
-//                                                           //
-//     median(|x - value|)                                   //
-//                                                           //
-//   where x denotes the data values from the input array.   //
-//   NOTE that this function is NaN-safe and will not modify //
-//   the original data array.                                //
-// --------------------------------------------------------- //
+/// @brief Median absolute deviation from value
+///
+/// Calculates the median absolute deviation (MAD) of the
+/// data array values from a user-specified value. The MAD
+/// is defined as
+///
+///   median(|x - value|)
+///
+/// where x denotes the data values from the input array.
+/// Note that this function **is** `NaN`-safe and will **not**
+/// modify the original data array.
+///
+/// @param data     Pointer to the data array to be sorted.
+/// @param size     Size of the input array.
+/// @param value    Value about which to calculate the MAD.
+/// @param cadence  Can be set to > 1 to speed up algorithm.
+/// @param range    Flux range to be used. Can be Negative
+///                 (-1), Full (0) or Positive (1).
+///
+/// @return Median absolute deviation of the array values from
+/// the specified data value.
 
 DATA_T mad_val_SFX(const DATA_T *data, const size_t size, const DATA_T value, const size_t cadence, const int range)
 {
@@ -655,34 +581,26 @@ DATA_T mad_val_SFX(const DATA_T *data, const size_t size, const DATA_T value, co
 
 
 
-// --------------------------------------------------------- //
-// Median absolute deviation                                 //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the data array to be sorted       //
-//   (2) size - Size of the input array                      //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Median absolute deviation of the array values.          //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the median absolute deviation (MAD) of the   //
-//   data array values. The MAD is defined as                //
-//                                                           //
-//     median(|x - median(x)|)                               //
-//                                                           //
-//   where x denotes the data values from the input array.   //
-//   In the case of normally distributed random data values  //
-//   the standard deviation of the data values about the     //
-//   mean can be deduced by multiplying the MAD with the     //
-//   constant MAD_TO_STD.                                    //
-//   NOTE that this function is not NaN-safe and will modify //
-//   the original data array.                                //
-// --------------------------------------------------------- //
+/// @brief Median absolute deviation
+///
+/// Calculates the median absolute deviation (MAD) of the
+/// data array values. The MAD is defined as
+///
+///   median(|x - median(x)|)
+///
+/// where x denotes the data values from the input array.
+/// In the case of normally distributed random data values
+/// the standard deviation of the data values about the
+/// mean can be deduced by multiplying the MAD with the
+/// constant `MAD_TO_STD`.
+///
+/// @param data  Pointer to the data array to be sorted.
+/// @param size  Size of the input array.
+///
+/// @return Median absolute deviation of the array values.
+///
+/// @note This function is not `NaN`-safe and will modify
+/// the original data array.
 
 DATA_T mad_SFX(DATA_T *data, const size_t size)
 {
@@ -691,35 +609,26 @@ DATA_T mad_SFX(DATA_T *data, const size_t size)
 
 
 
-// --------------------------------------------------------- //
-// Robust noise measurement for contiguous data array        //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//    (1) data - Pointer to the data array.                  //
-//    (2) size - Size of the array.                          //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Robust noise measurement of the data.                   //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Uses a robust way of measuring the noise within the     //
-//   specified data array based on the median absolute de-   //
-//   viation (MAD). The following assumptions and conditions //
-//   apply:                                                  //
-//                                                           //
-//    - The noise is Gaussian and centred on zero.           //
-//    - Only negative data points will be used in the noise  //
-//      measurement.                                         //
-//    - The algorithm is NAN-safe and discards all NANs.     //
-//                                                           //
-//   The result of the median of the absolute values of the  //
-//   negative elements in the array will be returned. If no  //
-//   valid data are found, NaN will instead be returned.     //
-// --------------------------------------------------------- //
+/// @brief Robust noise measurement for contiguous data array
+///
+/// Uses a robust way of measuring the noise within the
+/// specified data array based on the median absolute
+/// deviation (MAD). The following assumptions and conditions
+/// apply:
+///
+///  * The noise is Gaussian and centred on zero.
+///  * Only **negative** data points will be used in the noise
+///    measurement.
+///  * The algorithm is `NAN`-safe and discards all `NAN`s.
+///
+/// The result of the median of the absolute values of the
+/// negative elements in the array will be returned. If no
+/// valid data are found, `NaN` will instead be returned.
+///
+/// @param data Pointer to the data array.
+/// @param size Size of the array.
+///
+/// @return Robust noise measurement of the data.
 
 DATA_T robust_noise_SFX(const DATA_T *data, const size_t size)
 {
@@ -742,7 +651,26 @@ DATA_T robust_noise_SFX(const DATA_T *data, const size_t size)
 
 
 
-// Same, but using positive and negative values
+/// @brief Robust noise measurement for contiguous data array
+///
+/// Uses a robust way of measuring the noise within the
+/// specified data array based on the median absolute
+/// deviation (MAD). The following assumptions and conditions
+/// apply:
+///
+///  * The noise is Gaussian and centred on zero.
+///  * Both **positive and negative** data points will be used
+///    in the noise measurement.
+///  * The algorithm is `NAN`-safe and discards all `NAN`s.
+///
+/// The result of the median of the absolute values of all
+/// positive and negative elements in the array will be returned.
+/// If no valid data are found, `NaN` will instead be returned.
+///
+/// @param data Pointer to the data array.
+/// @param size Size of the array.
+///
+/// @return Robust noise measurement of the data.
 
 DATA_T robust_noise_2_SFX(const DATA_T *data, const size_t size)
 {
@@ -768,44 +696,35 @@ DATA_T robust_noise_2_SFX(const DATA_T *data, const size_t size)
 
 
 
-// --------------------------------------------------------- //
-// Robust noise measurement in region of 3D array            //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the data array.                   //
-//   (2) nx   - Size of the data array in x.                 //
-//   (3) ny   - Size of the data array in y.                 //
-//   (4) x1   - Lower boundary of region in x.               //
-//   (5) x2   - Upper boundary of region in x.               //
-//   (6) y1   - Lower boundary of region in y.               //
-//   (7) y2   - Upper boundary of region in y.               //
-//   (8) z1   - Lower boundary of region in z.               //
-//   (9) z2   - Upper boundary of region in z.               //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Robust noise measurement within the specified region.   //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Uses a robust way of measuring the noise within the     //
-//   specified region of a 3D data array based on the median //
-//   absolute deviation (MAD). The following assumptions     //
-//   and conditions apply:                                   //
-//                                                           //
-//    - The array is contiguous in x and least contiguous    //
-//      along the z axis.                                    //
-//    - The noise is Gaussian and centred on zero.           //
-//    - Only negative data points will be used in the noise  //
-//      measurement.                                         //
-//    - The algorithm is NAN-safe and discards all NANs.     //
-//                                                           //
-//   The result of the median of the absolute values of the  //
-//   negative elements in the region will be returned. If no //
-//   valid data are found, NaN will instead be returned.     //
-// --------------------------------------------------------- //
+/// @brief Robust noise measurement in region of 3D array
+///
+/// Uses a robust way of measuring the noise within the
+/// specified region of a 3D data array based on the median
+/// absolute deviation (MAD). The following assumptions
+/// and conditions apply:
+///
+///  * The array is contiguous in x and least contiguous
+///    along the z axis.
+///  * The noise is Gaussian and centred on zero.
+///  * Only negative data points will be used in the noise
+///    measurement.
+///  * The algorithm is `NaN`-safe and discards all `NaN`s.
+///
+/// The result of the median of the absolute values of the
+/// negative elements in the region will be returned. If no
+/// valid data are found, `NaN` will instead be returned.
+///
+/// @param data  Pointer to the data array.
+/// @param nx    Size of the data array in x.
+/// @param ny    Size of the data array in y.
+/// @param x1    Lower boundary of region in x.
+/// @param x2    Upper boundary of region in x.
+/// @param y1    Lower boundary of region in y.
+/// @param y2    Upper boundary of region in y.
+/// @param z1    Lower boundary of region in z.
+/// @param z2    Upper boundary of region in z.
+///
+/// @return Robust noise measurement within the specified region.
 
 DATA_T robust_noise_in_region_SFX(const DATA_T *data, const size_t nx, const size_t ny, const size_t x1, const size_t x2, const size_t y1, const size_t y2, const size_t z1, const size_t z2)
 {
@@ -838,36 +757,28 @@ DATA_T robust_noise_in_region_SFX(const DATA_T *data, const size_t nx, const siz
 
 
 
-// --------------------------------------------------------- //
-// Create histogram from data array                          //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data     - Pointer to the data array to be sorted.  //
-//   (2) size     - Size of the input array.                 //
-//   (3) n_bins   - Number of bins of the histogram.         //
-//   (4) data_min - Lower flux limit of the histogram.       //
-//   (5) data_max - Upper flux limit of the histogram.       //
-//   (6) cadence - Cadence for generation of histogram. A    //
-//                 cadence of N means that only every N-th   //
-//                 data point will be used.                  //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Pointer to the generated histogram.                     //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Generates a histogram of the data values in 'data' with //
-//   the parameters as specified by the user. A pointer to   //
-//   the generated histogram will be returned. NOTE that it  //
-//   is the responsibility of the user to de-allocate the    //
-//   memory occupied by the histogram once it is no longer   //
-//   required (using free()) to ensure that there are no me- //
-//   mory leaks. This function is NaN-safe, and NaN values   //
-//   will simply be ignored (due to >= and <= comparison).   //
-// --------------------------------------------------------- //
+/// @brief Create histogram from data array
+///
+/// Generates a histogram of the data values in `data` with
+/// the parameters as specified by the user. A pointer to
+/// the generated histogram will be returned.
+///
+/// @param data      Pointer to the data array to be sorted.
+/// @param size      Size of the input array.
+/// @param n_bins    Number of bins of the histogram.
+/// @param data_min  Lower flux limit of the histogram.
+/// @param data_max  Upper flux limit of the histogram.
+/// @param cadence   Cadence for generation of histogram. A
+///                  cadence of N means that only every N-th
+///                  data point will be used.
+///
+/// @return Pointer to the generated histogram.
+///
+/// @note It is the responsibility of the user to de-allocate
+/// the memory occupied by the histogram once it is no longer
+/// required (using `free()`) to ensure that there are no
+/// memory leaks. This function is `NaN`-safe, and `NaN` values
+/// will simply be ignored (due to `>=` and `<=` comparison).
 
 size_t *create_histogram_SFX(const DATA_T *data, const size_t size, const size_t n_bins, const DATA_T data_min, const DATA_T data_max, const size_t cadence)
 {
@@ -894,50 +805,41 @@ size_t *create_histogram_SFX(const DATA_T *data, const size_t size, const size_t
 
 
 
-// --------------------------------------------------------- //
-// Gaussian fit to histogram                                 //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data    - Pointer to the data array to be sorted.   //
-//   (2) size    - Size of the input array.                  //
-//   (3) cadence - Cadence for generation of histogram. A    //
-//                 cadence of N means that only every N-th   //
-//                 data point will be used.                  //
-//   (4) range   - Flux range to use in histogram. Can be    //
-//                 -1, 0 or +1 to use only negative pixels,  //
-//                 all pixels, or only positive pixels, re-  //
-//                 spectively.                               //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Standard deviation from Gaussian fit.                   //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Generates a histogram from the data values in the input //
-//   array and fits a Gaussian function to that histogram to //
-//   determine the standard deviation. This is useful for    //
-//   measuring the noise level in the data cube.             //
-//                                                           //
-//   The user can choose which pixels from the data cube     //
-//   contribute to the histogram (positive, negative, or all //
-//   pixels and every N-th pixel as controlled by cadence).  //
-//   For the purpose of fitting, the histogram range will be //
-//   set such that the second moment fills an optimal frac-  //
-//   tion of the histogram width. A linear regression to the //
-//   logarithmic histogram, ln(h(x)) = a x^2 + b, will then  //
-//   be performed to derive the standard deviation from the  //
-//   slope of the fit. The advantage of this technique is    //
-//   that the regression can be solved analytically, making  //
-//   the algorithm extremely fast. The disadvantage is that  //
-//   the weighting of histogram bins will be higher near the //
-//   centre of the flux distribution and lower in the wings, //
-//   although this can actually be an advantage, as the      //
-//   wings are often affected by non-Gaussian effects such   //
-//   as flux from actual objects.                            //
-// --------------------------------------------------------- //
+/// @brief Gaussian fit to histogram
+///
+/// Generates a histogram from the data values in the input
+/// array and fits a Gaussian function to that histogram to
+/// determine the standard deviation. This is useful for
+/// measuring the noise level in the data cube.
+///
+/// The user can choose which pixels from the data cube
+/// contribute to the histogram (positive, negative, or all
+/// pixels and every N-th pixel as controlled by `cadence`).
+/// For the purpose of fitting, the histogram range will be
+/// set such that the second moment fills an optimal fraction
+/// of the histogram width. A linear regression to the
+/// logarithmic histogram, ln(h(x)) = a x^2 + b, will then
+/// be performed to derive the standard deviation from the
+/// slope of the fit. The advantage of this technique is
+/// that the regression can be solved analytically, making
+/// the algorithm extremely fast. The disadvantage is that
+/// the weighting of histogram bins will be higher near the
+/// centre of the flux distribution and lower in the wings,
+/// although this can actually be an advantage, as the
+/// wings are often affected by non-Gaussian effects such
+/// as flux from actual objects.
+///
+/// @param data     Pointer to the data array to be sorted.
+/// @param size     Size of the input array.
+/// @param cadence  Cadence for generation of histogram. A
+///                 cadence of N means that only every N-th
+///                 data point will be used.
+/// @param range    Flux range to use in histogram. Can be
+///                 -1, 0 or +1 to use only negative pixels,
+///                 all pixels, or only positive pixels,
+///                 respectively.
+///
+/// @return Standard deviation from Gaussian fit.
 
 DATA_T gaufit_SFX(const DATA_T *data, const size_t size, const size_t cadence, const int range)
 {
@@ -1060,32 +962,23 @@ DATA_T gaufit_SFX(const DATA_T *data, const size_t size, const size_t cadence, c
 
 
 
-// --------------------------------------------------------- //
-// Skewness                                                  //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the data array to be sorted       //
-//   (2) size - Size of the input array                      //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Skewness of the array values. NaN will be returned for  //
-//   NaN-only input arrays.                                  //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the skewness of the input data array values. //
-//   Skewness is defined as                                  //
-//                                                           //
-//     mom3 / sqrt(mom2^3)                                   //
-//                                                           //
-//   where mom2 and mom3 are the second and third moment of  //
-//   the data as returned by the moment() and moments()      //
-//   functions. The skewness of normally distributed data    //
-//   with a mean of zero should be 0.                        //
-// --------------------------------------------------------- //
+/// @brief Skewness
+///
+/// Calculates the skewness of the input data array values.
+/// Skewness is defined as
+///
+///   mom3 / sqrt(mom2^3)
+///
+/// where mom2 and mom3 are the second and third moment of
+/// the data as returned by the moment() and moments()
+/// functions. The skewness of normally distributed data
+/// with a mean of zero should be 0.
+///
+/// @param data  Pointer to the data array to be sorted.
+/// @param size  Size of the input array.
+///
+/// @return Skewness of the array values. `NaN` will be returned for
+///         `NaN`-only input arrays.
 
 double skewness_SFX(const DATA_T *data, const size_t size)
 {
@@ -1096,32 +989,23 @@ double skewness_SFX(const DATA_T *data, const size_t size)
 
 
 
-// --------------------------------------------------------- //
-// Kurtosis                                                  //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the data array to be sorted       //
-//   (2) size - Size of the input array                      //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   Kurtosis of the array values. NaN will be returned for  //
-//   NaN-only input arrays.                                  //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the kurtosis of the input data array values. //
-//   Kurtosis is defined as                                  //
-//                                                           //
-//     mom4 / mom2^2                                         //
-//                                                           //
-//   where mom2 and mom4 are the second and fourth moment of //
-//   the data as returned by the moment() and moments()      //
-//   functions. The kurtosis of normally distributed data    //
-//   with a mean of zero should be 3.                        //
-// --------------------------------------------------------- //
+/// @brief Kurtosis
+///
+/// Calculates the kurtosis of the input data array values.
+/// Kurtosis is defined as
+///
+///   mom4 / mom2^2
+///
+/// where mom2 and mom4 are the second and fourth moment of
+/// the data as returned by the moment() and moments()
+/// functions. The kurtosis of normally distributed data
+/// with a mean of zero should be 3.
+///
+/// @param data  Pointer to the data array to be sorted.
+/// @param size  Size of the input array.
+///
+/// @return Kurtosis of the array values. `NaN` will be returned for
+///         `NaN`-only input arrays.
 
 double kurtosis_SFX(const DATA_T *data, const size_t size)
 {
@@ -1132,31 +1016,20 @@ double kurtosis_SFX(const DATA_T *data, const size_t size)
 
 
 
-// --------------------------------------------------------- //
-// Skewness and kurtosis                                     //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data - Pointer to the data array to be sorted       //
-//   (2) size - Size of the input array                      //
-//   (3) skew - Pointer to variable for returning skewness   //
-//   (4) kurt - Pointer to variable for returning kurtosis   //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   No return value.                                        //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Calculates the skewness and kurtosis of the input data  //
-//   array simultaneously. This is faster than calculating   //
-//   them individually in situations where both are needed.  //
-//   See the skewness() and kurtosis() functions for more    //
-//   details on how these parameters are defined. Both skew  //
-//   and kurt will be set to NaN if the array only contains  //
-//   NaN values.                                             //
-// --------------------------------------------------------- //
+/// @brief Skewness and kurtosis
+///
+/// Calculates the skewness and kurtosis of the input data
+/// array simultaneously. This is faster than calculating
+/// them individually in situations where both are needed.
+/// See the skewness() and kurtosis() functions for more
+/// details on how these parameters are defined. Both skew
+/// and kurt will be set to `NaN` if the array contains only
+/// `NaN` values.
+///
+/// @param data  Pointer to the data array to be sorted.
+/// @param size  Size of the input array.
+/// @param skew  Pointer to variable for returning skewness.
+/// @param kurt  Pointer to variable for returning kurtosis.
 
 void skew_kurt_SFX(const DATA_T *data, const size_t size, double *skew, double *kurt)
 {
@@ -1169,34 +1042,23 @@ void skew_kurt_SFX(const DATA_T *data, const size_t size, double *skew, double *
 
 
 
-// --------------------------------------------------------- //
-// 1D boxcar filter                                          //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)          data - Pointer to data array to be         //
-//                       filtered.                           //
-//   (2)     data_copy - Pointer to data array to be used    //
-//                       for storing a copy of the data dur- //
-//                       ring filtering. Its size must be    //
-//                       equal to size + 2 * filter_radius.  //
-//   (3)          size - Size of input array.                //
-//   (4) filter_radius - Radius of boxcar filter.            //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   No return value.                                        //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Applies a boxcar filter to the data array. NOTE that    //
-//   this will modify the original data array. NaN values    //
-//   will be set to 0 prior to filtering only if replace_nan //
-//   is set to true (this is to avoid a check within this    //
-//   function for reasons of speed). Values outside of the   //
-//   boundaries of the array are assumed to be 0.            //
-// --------------------------------------------------------- //
+/// @brief 1D boxcar filter
+///
+/// Applies a boxcar filter to the data array. `NaN` values
+/// will be set to 0 prior to filtering only if `replace_nan`
+/// is set to `true` (this is to avoid a check within this
+/// function for reasons of speed). Values outside of the
+/// boundaries of the array are assumed to be 0.
+///
+/// @param data           Pointer to data array to be filtered.
+/// @param data_copy      Pointer to data array to be used for
+///                       storing a copy of the data during
+///                       filtering. Its size must be equal to
+///                       `size` + 2 * `filter_radius`.
+/// @param size           Size of input array.
+/// @param filter_radius  Radius of boxcar filter.
+///
+/// @note This function will modify the original data array.
 
 void filter_boxcar_1d_SFX(DATA_T *data, DATA_T *data_copy, const size_t size, const size_t filter_radius)
 {
@@ -1224,77 +1086,65 @@ void filter_boxcar_1d_SFX(DATA_T *data, DATA_T *data_copy, const size_t size, co
 
 
 
-// --------------------------------------------------------- //
-// 2D Gaussian filter                                        //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1)          data - Pointer to data array to be         //
-//                       filtered.                           //
-//   (2)     data_copy - Pointer to data array to be used    //
-//                       for storing a single column of the  //
-//                       data array. Its size must be equal  //
-//                       to size_y.                          //
-//   (3)      data_row - Pointer to data array to be used by //
-//                       the boxcar filter to be employed.   //
-//                       Its size must be equal to size_x +  //
-//                       2 * filter_radius.                  //
-//   (4)      data_col - Pointer to data array to be used by //
-//                       the boxcar filter to be employed.   //
-//                       Its size must be equal to size_y +  //
-//                       2 * filter_radius.                  //
-//   (5)        size_x - Size of the first dimension of the  //
-//                       input data array.                   //
-//   (6)        size_y - Size of the second dimension of the //
-//                       input data array.                   //
-//   (7)        n_iter - Number of iterations of boxcar fil- //
-//                       tering to be carried out.           //
-//   (8) filter_radius - Radius of the boxcar filter to be   //
-//                       applied. The filter width will be   //
-//                       defined as 2 * filter_radius + 1.   //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   No return value.                                        //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Applies a pseudo-Gaussian filter to the two-dimensional //
-//   data array by running a series of n_iter boxcar filters //
-//   of radius filter_radius across the data array in both   //
-//   dimensions. The function optimal_filter_size(...) can   //
-//   be used to automatically determine the required number  //
-//   of iterations and boxcar filter radius for a given      //
-//   standard deviation of the Gaussian.                     //
-//                                                           //
-//   For reasons of speed several data arrays must have been //
-//   pre-allocated and passed on to this function:           //
-//                                                           //
-//   - data_copy: Used to store a single column of the input //
-//                data. Must be of size size_y.              //
-//   - data_row:  Used to store a copy of the data passed on //
-//                to the boxcar filter. Must be of size      //
-//                size_x + 2 * filter_radius.                //
-//   - data_col:  Used to store a copy of the data passed on //
-//                to the boxcar filter. Must be of size      //
-//                size_y + 2 * filter_radius.                //
-//                                                           //
-//   The sole purpose of having these array created extern-  //
-//   ally and then passed on to the function is to improve   //
-//   the speed of the algorithm in cases where it needs to   //
-//   be invoked a large number of times.                     //
-//                                                           //
-//   Note that the function will only be able to approximate //
-//   a Gaussian, with the approximation becoming better for  //
-//   a larger number of iterations of the boxcar filter. 3-4 //
-//   iterations should already provide a reasonable approxi- //
-//   mation for the purpose of image filtering. Also note    //
-//   that the value of the standard deviation of the Gauss-  //
-//   ian will only be approximated by the optimal number of  //
-//   iterations and filter radius, usually to within several //
-//   percent.                                                //
-// --------------------------------------------------------- //
+/// @brief 2D Gaussian filter
+///
+/// Applies a pseudo-Gaussian filter to the two-dimensional
+/// data array by running a series of `n_iter` boxcar filters
+/// of radius `filter_radius` across the data array in both
+/// dimensions. The function optimal_filter_size() can
+/// be used to automatically determine the required number
+/// of iterations and boxcar filter radius for a given
+/// standard deviation of the Gaussian.
+///
+/// For reasons of speed several data arrays must have been
+/// pre-allocated and passed on to this function:
+///
+/// * `data_copy`: Used to store a single column of the input
+///   data. Must be of size `size_y`.
+/// * `data_row`:  Used to store a copy of the data passed on
+///   to the boxcar filter. Must be of size `size_x` +
+///   2 * `filter_radius`.
+/// * `data_col`:  Used to store a copy of the data passed on
+///   to the boxcar filter. Must be of size `size_y` +
+///   2 * `filter_radius`.
+///
+/// The sole purpose of having these array created externally
+/// and then passed on to the function is to improve
+/// the speed of the algorithm in cases where it needs to
+/// be invoked a large number of times.
+///
+/// Note that the function will only be able to approximate
+/// a Gaussian, with the approximation becoming better for
+/// a larger number of iterations of the boxcar filter. 3-4
+/// iterations should already provide a reasonable approximation
+/// for the purpose of image filtering. Also note that the value
+/// of the standard deviation of the Gaussian will only be
+/// approximated by the optimal number of iterations and filter
+/// radius, usually to within several percent.
+///
+/// @param data           Pointer to data array to be
+///                       filtered.
+/// @param data_copy      Pointer to data array to be used
+///                       for storing a single column of the
+///                       data array. Its size must be equal
+///                       to `size_y`.
+/// @param data_row       Pointer to data array to be used by
+///                       the boxcar filter to be employed.
+///                       Its size must be equal to `size_x` +
+///                       2 * `filter_radius`.
+/// @param data_col       Pointer to data array to be used by
+///                       the boxcar filter to be employed.
+///                       Its size must be equal to `size_y` +
+///                       2 * `filter_radius`.
+/// @param size_x         Size of the first dimension of the
+///                       input data array.
+/// @param size_y         Size of the second dimension of the
+///                       input data array.
+/// @param n_iter         Number of iterations of boxcar
+///                       filtering to be carried out.
+/// @param filter_radius  Radius of the boxcar filter to be
+///                       applied. The filter width will be
+///                       defined as 2 * `filter_radius` + 1.
 
 void filter_gauss_2d_SFX(DATA_T *data, DATA_T *data_copy, DATA_T *data_row, DATA_T *data_col, const size_t size_x, const size_t size_y, const size_t n_iter, const size_t filter_radius)
 {
@@ -1342,30 +1192,20 @@ void filter_gauss_2d_SFX(DATA_T *data, DATA_T *data_copy, DATA_T *data_row, DATA
 
 
 
-// --------------------------------------------------------- //
-// Shift and subtract data from itself                       //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) data          - Data array to be processed.         //
-//   (2) size          - Size of the data array.             //
-//   (3) shift         - Number of positions by which to     //
-//                       shift before subtraction.           //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   No return value.                                        //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   The function will subtract a shifted copy of the data   //
-//   array from itself. Processing will start from the end   //
-//   such that data[size - 1] -= data[size - 1 - shift],     //
-//   etc., until position data + shift is reached. The first //
-//   shift elements will be left unchanged. NOTE that this   //
-//   function will modify the input data array!              //
-// --------------------------------------------------------- //
+/// @brief Shift and subtract data from itself
+///
+/// The function will subtract a shifted copy of the data
+/// array from itself. Processing will start from the end
+/// such that `data[size - 1] -= data[size - 1 - shift]`,
+/// etc., until position `data + shift` is reached. The first
+/// `shift` elements will be left unchanged.
+///
+/// @param data   Data array to be processed.
+/// @param size   Size of the data array.
+/// @param shift  Number of positions by which to
+///               shift before subtraction.
+///
+/// @note This function will modify the input data array.
 
 void shift_and_subtract_SFX(DATA_T *data, const size_t size, const size_t shift)
 {
@@ -1375,32 +1215,21 @@ void shift_and_subtract_SFX(DATA_T *data, const size_t size, const size_t shift)
 
 
 
-// --------------------------------------------------------- //
-// Determine optimal boxcar filter size for Gaussian filter  //
-// --------------------------------------------------------- //
-//                                                           //
-// Arguments:                                                //
-//                                                           //
-//   (1) sigma         - Standard deviation of the Gaussian. //
-//   (2) filter_radius - Radius of the boxcar filter that is //
-//                       to be used in approximation.        //
-//   (3) n_iter        - Number of iteration of boxcar fil-  //
-//                       tering to be used in approximation. //
-//                                                           //
-// Returns:                                                  //
-//                                                           //
-//   No return value.                                        //
-//                                                           //
-// Description:                                              //
-//                                                           //
-//   Based on the specified standard deviation of the Gauss- //
-//   ian filter, this function will determine the optimal    //
-//   radius and number of iterations for the boxcar filter   //
-//   that is to be used to approximate the Gaussian kernel.  //
-//   Both 'filter_radius' and 'n_iter' are pointers and will //
-//   be set to the correct values by this function. They can //
-//   then be fed into the Gaussian filtering function.       //
-// --------------------------------------------------------- //
+/// @brief Determine optimal boxcar filter size for Gaussian filter
+///
+/// Based on the specified standard deviation of the Gaussian
+/// filter, this function will determine the optimal radius and
+/// number of iterations for the boxcar filter that is to be used
+/// to approximate the Gaussian kernel. Both `filter_radius` and
+/// `n_iter` are pointers and will be set to the correct values by
+/// this function. They can then be fed into the Gaussian filtering
+/// function, filter_gauss_2d_SFX().
+///
+/// @param sigma          Standard deviation of the Gaussian.
+/// @param filter_radius  Radius of the boxcar filter that is
+///                       to be used in approximation.
+/// @param n_iter         Number of iterations of boxcar filtering
+///                       to be used in approximation.
 
 void optimal_filter_size_SFX(const double sigma, size_t *filter_radius, size_t *n_iter)
 {
@@ -1433,45 +1262,36 @@ void optimal_filter_size_SFX(const double sigma, size_t *filter_radius, size_t *
 
 
 
-// ----------------------------------------------------------------- //
-// Fit ellipse to moment-0 map                                       //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) moment_map - Pointer to moment-0 map                        //
-//   (2) count_map  - Pointer to map containing number of channels   //
-//                    for each pixel in moment map.                  //
-//   (3) size_x     - Size of moment map in x.                       //
-//   (4) size_y     - Size of moment map in y.                       //
-//   (5) centroid_x - x position of source centroid relative to      //
-//                    moment map boundary.                           //
-//   (6) centroid_y - y position of source centroid relative to      //
-//                    moment map boundary.                           //
-//   (7) rms        - RMS noise level of the data.                   //
-//   (8) ell_maj    - Pointer to variable for ellipse major axis.    //
-//   (9) ell_min    - Pointer to variable for ellipse minor axis.    //
-//  (10) ell_pa     - Pointer to variable for ellipse pos. angle.    //
-//  (11) ell3s_maj  - Same, but for 3-sigma ellipse.                 //
-//  (12) ell3s_min  - Same, but for 3-sigma ellipse.                 //
-//  (13) ell3s_pa   - Same, but for 3-sigma ellipse.                 //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Function for fitting an ellipse to the specified moment-zero    //
-//   map. The moment and count map arrays must be contiguous in x.   //
-//   The source centroid must be relative to the boundaries of the   //
-//   moment map. The ellipse fit is carried out using 2nd-order mo-  //
-//   ment analysis.                                                  //
-//   Two types of ellipse are fitted: the first one is a fit to the  //
-//   flux-weighted positive pixels in the moment maps, while the se- //
-//   cond fit is to all pixels greater than 3 times the specified    //
-///  RMS noise level with equal weights. The results will be written //
-//   to the user-specified pointer variables.                        //
-// ----------------------------------------------------------------- //
+/// @brief Fit ellipse to moment-0 map
+///
+/// Function for fitting an ellipse to the specified moment-0 map.
+/// The moment and count map arrays must be contiguous in x. The
+/// source centroid must be relative to the boundaries of the
+/// moment map. The ellipse fit is carried out using 2nd-order
+/// moment analysis.
+///
+/// Two types of ellipse are fitted: the first one is a fit to the
+/// flux-weighted positive pixels in the moment maps, while the
+/// second fit is to all pixels greater than 3 times the specified
+/// RMS noise level with equal weights. The results will be written
+/// to the user-specified pointer variables.
+///
+/// @param moment_map  Pointer to moment-0 map
+/// @param count_map   Pointer to map containing number of channels
+///                    for each pixel in moment map.
+/// @param size_x      Size of moment map in x.
+/// @param size_y      Size of moment map in y.
+/// @param centroid_x  x position of source centroid relative to
+///                    moment map boundary.
+/// @param centroid_y  y position of source centroid relative to
+///                    moment map boundary.
+/// @param rms         RMS noise level of the data.
+/// @param ell_maj     Pointer to variable for ellipse major axis.
+/// @param ell_min     Pointer to variable for ellipse minor axis.
+/// @param ell_pa      Pointer to variable for ellipse position angle.
+/// @param ell3s_maj   Same, but for 3-sigma ellipse.
+/// @param ell3s_min   Same, but for 3-sigma ellipse.
+/// @param ell3s_pa    Same, but for 3-sigma ellipse.
 
 void moment_ellipse_fit_SFX(const DATA_T *moment_map, const size_t *count_map, const size_t size_x, const size_t size_y, const DATA_T centroid_x, const DATA_T centroid_y, const DATA_T rms, DATA_T *ell_maj, DATA_T *ell_min, DATA_T *ell_pa, DATA_T *ell3s_maj, DATA_T *ell3s_min, DATA_T *ell3s_pa)
 {
@@ -1547,31 +1367,20 @@ void moment_ellipse_fit_SFX(const DATA_T *moment_map, const size_t *count_map, c
 
 
 
-// ----------------------------------------------------------------- //
-// Determine w20 and w50 line widths from spectrum                   //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) spectrum   - Pointer to spectrum.                           //
-//   (2) size       - Size of spectrum.                              //
-//   (3) maximum    - Maximum (peak) of spectrum.                    //
-//   (4) w20        - Pointer to variable for w20 line width.        //
-//   (5) w50        - Pointer to variable for w50 line width.        //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   No return value.                                                //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Function for measuring the w20 and w50 line width of the speci- //
-//   fied spectrum. Both are measured by moving inwards from the     //
-//   edges of the spectrum until the point where the flux density    //
-//   increased above 20% (or 50%) of the peak flux density. Linear   //
-//   interpolation is used to improved the accuracy of the measured  //
-//   line widths. The results will be written to the user-specified  //
-//   w20 and w50 pointers.                                           //
-// ----------------------------------------------------------------- //
+/// @brief Determine w20 and w50 line widths from spectrum
+///
+/// Function for measuring the w20 and w50 line width of the specified
+/// spectrum. Both are measured by moving inwards from the edges of
+/// the spectrum until the point where the flux density increases
+/// above 20% (or 50%) of the peak flux density. Linear interpolation
+/// is used to improved the accuracy of the measured line widths. The
+/// results will be written to the user-specified `w20` and `w50`
+/// pointers.
+///
+/// @param spectrum  Pointer to spectrum.
+/// @param size      Size of spectrum.
+/// @param w20       Pointer to variable for w20 line width.
+/// @param w50       Pointer to variable for w50 line width.
 
 void spectral_line_width_SFX(const DATA_T *spectrum, const size_t size, DATA_T *w20, DATA_T *w50)
 {
@@ -1619,25 +1428,17 @@ void spectral_line_width_SFX(const DATA_T *spectrum, const size_t size, DATA_T *
 
 
 
-// ----------------------------------------------------------------- //
-// Determine wm50 line width from spectrum                           //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) spectrum   - Pointer to spectrum.                           //
-//   (2) size       - Size of spectrum.                              //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Value of wm50.                                                  //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Function for measuring the wm50 line width from a spectrum fol- //
-//   lowing the algorithm described in Courtois et al. (2009). If    //
-//   the measurement fails for some reason, then a value of 0 will   //
-//   be returned and a warning message printed.                      //
-// ----------------------------------------------------------------- //
+/// @brief Determine wm50 line width from spectrum
+///
+/// Function for measuring the wm50 line width from a spectrum
+/// following the algorithm described in Courtois et al. (2009).
+/// If the measurement fails for some reason, then a value of 0
+/// will be returned and a warning message printed.
+///
+/// @param spectrum  Pointer to spectrum.
+/// @param size      Size of spectrum.
+///
+/// @return Value of wm50.
 
 double wm50_line_width_SFX(const DATA_T *spectrum, const size_t size)
 {
@@ -1693,34 +1494,26 @@ double wm50_line_width_SFX(const DATA_T *spectrum, const size_t size)
 
 
 
-// ----------------------------------------------------------------- //
-// Determine kinematic major axis of galaxy                          //
-// ----------------------------------------------------------------- //
-// Arguments:                                                        //
-//                                                                   //
-//   (1) centroidX  - Array of x centroid positions per channel.     //
-//   (2) centroidY  - Array of y centroid positions per channel.     //
-//   (3) sum        - Array of summed flux densities per channel.    //
-//   (4) size       - Size of centroidX, centroidY and sum arrays.   //
-//   (5) first      - Index of first valid centroid position.        //
-//   (6) last       - Index of last valid centroid position.         //
-//                                                                   //
-// Return value:                                                     //
-//                                                                   //
-//   Position angle of kinematic major axis.                         //
-//                                                                   //
-// Description:                                                      //
-//                                                                   //
-//   Function for measuring the position angle of the kinematic      //
-//   major axis of a galaxy from an array of flux-weighted centroid  //
-//   measurements per spectral channel. The position angle is deter- //
-//   mined by fitting a straight line to the centroid values using   //
-//   orthogonal (Deming) regression. Missing or invalid centroids in //
-//   certain channels can be indicated by setting the corresponding  //
-//   value in the sum array to zero. The resulting position angle    //
-//   will point towards the side of the galaxy that sits at the up-  //
-//   per end of the channel range occupied by the galaxy.            //
-// ----------------------------------------------------------------- //
+/// @brief Determine kinematic major axis of galaxy
+///
+/// Function for measuring the position angle of the kinematic
+/// major axis of a galaxy from an array of flux-weighted centroid
+/// measurements per spectral channel. The position angle is
+/// determined by fitting a straight line to the centroid values using
+/// orthogonal (Deming) regression. Missing or invalid centroids in
+/// certain channels can be indicated by setting the corresponding
+/// value in the sum array to zero. The resulting position angle
+/// will point towards the side of the galaxy that sits at the upper
+/// end of the channel range occupied by the galaxy.
+///
+/// @param centroidX  Array of x centroid positions per channel.
+/// @param centroidY  Array of y centroid positions per channel.
+/// @param sum        Array of summed flux densities per channel.
+/// @param size       Size of `centroidX`, `centroidY` and `sum` arrays.
+/// @param first      Index of first valid centroid position.
+/// @param last       Index of last valid centroid position.
+///
+/// @return Position angle of kinematic major axis.
 
 DATA_T kin_maj_axis_SFX(const DATA_T *centroidX, const DATA_T *centroidY, const DATA_T *sum, const size_t size, const size_t first, const size_t last)
 {

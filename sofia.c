@@ -1,33 +1,33 @@
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// SoFiA 2.3.1 (sofia.c) - Source Finding Application                   ///
-/// Copyright (C) 2021 Tobias Westmeier                                  ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// Address:  Tobias Westmeier                                           ///
-///           ICRAR M468                                                 ///
-///           The University of Western Australia                        ///
-///           35 Stirling Highway                                        ///
-///           Crawley WA 6009                                            ///
-///           Australia                                                  ///
-///                                                                      ///
-/// E-mail:   tobias.westmeier [at] uwa.edu.au                           ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
-/// This program is free software: you can redistribute it and/or modify ///
-/// it under the terms of the GNU General Public License as published by ///
-/// the Free Software Foundation, either version 3 of the License, or    ///
-/// (at your option) any later version.                                  ///
-///                                                                      ///
-/// This program is distributed in the hope that it will be useful,      ///
-/// but WITHOUT ANY WARRANTY; without even the implied warranty of       ///
-/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         ///
-/// GNU General Public License for more details.                         ///
-///                                                                      ///
-/// You should have received a copy of the GNU General Public License    ///
-/// along with this program. If not, see http://www.gnu.org/licenses/.   ///
-/// ____________________________________________________________________ ///
-///                                                                      ///
+// ____________________________________________________________________ //
+//                                                                      //
+// SoFiA 2.4.1 (sofia.c) - Source Finding Application                   //
+// Copyright (C) 2021 The SoFiA 2 Authors                               //
+// ____________________________________________________________________ //
+//                                                                      //
+// Address:  Tobias Westmeier                                           //
+//           ICRAR M468                                                 //
+//           The University of Western Australia                        //
+//           35 Stirling Highway                                        //
+//           Crawley WA 6009                                            //
+//           Australia                                                  //
+//                                                                      //
+// E-mail:   tobias.westmeier [at] uwa.edu.au                           //
+// ____________________________________________________________________ //
+//                                                                      //
+// This program is free software: you can redistribute it and/or modify //
+// it under the terms of the GNU General Public License as published by //
+// the Free Software Foundation, either version 3 of the License, or    //
+// (at your option) any later version.                                  //
+//                                                                      //
+// This program is distributed in the hope that it will be useful,      //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of       //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the         //
+// GNU General Public License for more details.                         //
+//                                                                      //
+// You should have received a copy of the GNU General Public License    //
+// along with this program. If not, see http://www.gnu.org/licenses/.   //
+// ____________________________________________________________________ //
+//                                                                      //
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -1218,7 +1218,7 @@ int main(int argc, char **argv)
 		// Calculate reliability values
 		double scale_kernel = Parameter_get_flt(par, "reliability.scaleKernel");
 		Array_dbl *skellam = NULL;
-		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, &scale_kernel, rel_fmin, rel_min_pix, rel_cat, use_rel_plot ? &skellam : NULL);
+		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, &scale_kernel, rel_fmin, rel_min_pix, rel_cat, use_rel_plot || scale_kernel == 0 ? &skellam : NULL);
 		
 		// Create plots if requested
 		if(use_rel_plot)
@@ -1246,7 +1246,7 @@ int main(int argc, char **argv)
 		
 		// Check if any reliable sources left
 		ensure(Map_get_size(rel_filter), ERR_NO_SRC_FOUND, "No reliable sources found. Terminating pipeline.");
-		message("%zu reliable sources found.", Map_get_size(rel_filter));
+		message("%zu reliable %s found.", Map_get_size(rel_filter), Map_get_size(rel_filter) > 1 ? "sources" : "source");
 		
 		// Apply filter to mask cube, so unreliable sources are removed
 		// and reliable ones relabelled in consecutive order
