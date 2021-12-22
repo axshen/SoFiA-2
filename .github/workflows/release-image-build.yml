@@ -1,4 +1,4 @@
-name: Docker image build release
+name: Build release image
 
 on:
   push:
@@ -22,5 +22,5 @@ jobs:
       - 
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin docker.io
-          docker build download --tag docker.io/${{ secrets.DOCKERHUB_USERNAME }}/sofia2:$RELEASE_VERSION
+          docker build --tag docker.io/${{ secrets.DOCKERHUB_USERNAME }}/sofia2:$RELEASE_VERSION .
           docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/sofia2:$RELEASE_VERSION
