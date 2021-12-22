@@ -3,7 +3,7 @@ name: Docker image build latest
 on: [push]
 
 jobs:
-  build_image:
+  build-latest:
     runs-on: ubuntu-latest
     steps:
       - name: Build the Docker image
@@ -12,6 +12,6 @@ jobs:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
       - run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin docker.io
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin docker.io
           docker build download --tag docker.io/${{ secrets.DOCKERHUB_USERNAME }}/sofia2:latest
           docker push docker.io/${{ secrets.DOCKERHUB_USERNAME }}/sofia2:latest
