@@ -1214,11 +1214,17 @@ int main(int argc, char **argv)
 		if(IS_NAN(bmaj) || IS_NAN(bmin) || IS_NAN(cdelt)) warning("Failed to determine beam area from header information.\n         Value of reliability.minSNR will not be meaningful.");
 		else sqrt_beam_area = sqrt(M_PI * bmaj * bmin / (4.0 * log(2.0) * cdelt * cdelt));
 		const double rel_fmin = rel_snr_min * sqrt_beam_area;
-		
-		// Calculate reliability values
+
+		// Read reliability filter parameters
+		const bool ak_enable = Parameter_get_bool(par, "autokernel.enable");
+		const int ak_max_iter = Parameter_get_int(par, "autokernel.maxIter");
+		const double ak_threshold = Parameter_get_flt(par, "autokernel.threshold");
+		const double ak_change = Parameter_get_flt(par, "autokernel.change");
 		double scale_kernel = Parameter_get_flt(par, "reliability.scaleKernel");
+
+		// Calculate reliability values
 		Array_dbl *skellam = NULL;
-		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, &scale_kernel, rel_fmin, rel_min_pix, rel_cat, use_rel_plot || scale_kernel == 0 ? &skellam : NULL);
+		Matrix *covar = LinkerPar_reliability(lpar, rel_par_space, &scale_kernel, rel_fmin, rel_min_pix, rel_cat, use_rel_plot || scale_kernel == 0 ? &skellam : NULL, ak_enable, ak_max_iter, ak_threshold, ak_change);
 		
 		// Create plots if requested
 		if(use_rel_plot)

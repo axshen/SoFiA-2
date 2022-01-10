@@ -837,12 +837,13 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 /// The `scale_kernel` increments will become smaller as the algorithm approaches the
 /// threshold.
 
-PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, double *scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam)
+PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, double *scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam, const bool ak_enable, const int ak_max_iter, const double ak_threshold, const double ak_change)
 {
 	// Sanity checks
 	check_null(self);
 	ensure(self->size, ERR_NO_SRC_FOUND, "No sources left after linking. Cannot proceed.");
-	ensure(skellam != NULL || *scale_kernel != 0.0, ERR_USER_INPUT, "If auto-kernel scaling is enabled skellam must not be NULL.");
+	ensure(skellam != NULL || ak_enable == true, ERR_USER_INPUT, "If auto-kernel scaling is enabled skellam must not be NULL.");
+	ensure(*scale_kernel != 0.0, ERR_USER_INPUT, "Default reliability.scaleKernel value must not be 0.0");
 	
 	// Dimensionality of parameter space
 	const int dim = Array_siz_get_size(rel_par_space);
@@ -1033,9 +1034,9 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 	//       normalisation of the Gaussian kernel, so we might as well normalise
 	//       the amplitude to 1 rather than the integral. The normalisation factor 
 	//       does matter for the Skellam parameter, though.
-	
-	// Check if kernel scale factor provided
-	if(*scale_kernel != 0.0)
+
+	// Check if autokernel scaling enabled
+	if (ak_enable == false)
 	{
 		// Yes -> use fixed kernel scale factor
 		Matrix_mul_scalar(covar, pow(*scale_kernel, 2));  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
@@ -1048,21 +1049,19 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 		if(skellam != NULL) LinkerPar_calculate_skellam(skellam, covar_inv, par_pos, par_neg, dim, n_pos, n_neg, scal_fact);
 	}
 	else
-	{
+	{	
 		// No -> run auto-kernel by incrementally increasing scale
 		message("Using auto-kernel feature.");
 		
-		// TODO(austin): allow these to be set as initial parameters
+		const double scale_default = 0.4;
+		double skellam_med = 1e5;  // Arbitrary value greater than ak_threshold
+
+		// Loop variables
 		int iter = 0;
-		const int iter_max = 30;
 		double scale = 0.1;
 		double scale_old = 1.0;  // Must be initialised with 1!
-		const double scale_default = 0.4;
-		double skellam_med = 1e5;
-		const double skellam_tol = 0.05;
-		const double d_scale = 0.02;
 		
-		while(iter < iter_max && skellam_med > skellam_tol)
+		while(iter < ak_max_iter && skellam_med > ak_threshold)
 		{
 			// Calculate skellam array
 			Matrix_mul_scalar(covar, pow(scale / scale_old, 2));  // NOTE: Variance = sigma^2, hence scale_kernel^2 here.
@@ -1074,19 +1073,20 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 			skellam_med = fabs(median_dbl((double *)Array_dbl_get_ptr(*skellam), Array_dbl_get_size(*skellam), false));
 			// NOTE: Casting constness away, as median needs to partially sort array.
 			
+			// TODO(austin): deal with arbitrary constants
 			// Update with larger scale change far from target
 			scale_old = scale;
-			if(skellam_med < 10.0 * skellam_tol) scale += 2.0 * d_scale;
-			else if(skellam_med < 30.0 * skellam_tol) scale +=  5.0 * d_scale;
-			else if(skellam_med < 50.0 * skellam_tol) scale += 10.0 * d_scale;
-			else scale += d_scale;
+			if(skellam_med < 10.0 * ak_threshold) scale += 2.0 * ak_change;
+			else if(skellam_med < 30.0 * ak_threshold) scale +=  5.0 * ak_change;
+			else if(skellam_med < 50.0 * ak_threshold) scale += 10.0 * ak_change;
+			else scale += ak_change;
 			
 			++iter;
 			message("  Iter. %*d: kernel = %.3f, median = %.3f", 2, iter, scale_old, skellam_med);
 		}
 		
 		// Check if algorithm converged
-		if(skellam_med <= skellam_tol)
+		if(skellam_med <= ak_threshold)
 		{
 			*scale_kernel = scale_old;
 			message("Converged to scale_kernel = %.3f after %d iterations.", scale_old, iter);
