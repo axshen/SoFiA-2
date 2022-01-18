@@ -42,6 +42,7 @@
 #include <time.h>
 
 #include "Catalog.h"
+#include "String.h"
 
 
 
@@ -432,8 +433,8 @@ PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_f
 		for(size_t j = 0; j < Source_get_num_par(src0); ++j) fprintf(fp, "%*s", CATALOG_COLUMN_WIDTH, Source_get_name(src0, j));
 		fprintf(fp, "\n%c", char_comment);
 		
-		fprintf(fp, "%*s", 2 * CATALOG_COLUMN_WIDTH, " ");
-		for(size_t j = 0; j < Source_get_num_par(src0); ++j) fprintf(fp, "%*s", CATALOG_COLUMN_WIDTH, Source_get_unit(src0, j));
+		fprintf(fp, "%*s", 2 * CATALOG_COLUMN_WIDTH, "-");
+		for(size_t j = 0; j < Source_get_num_par(src0); ++j) fprintf(fp, "%*s", CATALOG_COLUMN_WIDTH, strlen(Source_get_unit(src0, j)) ? Source_get_unit(src0, j) : "-");
 		fprintf(fp, "\n\n");
 		
 		// Loop over all sources to write parameters
@@ -441,8 +442,12 @@ PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_f
 		{
 			Source *src = self->sources[i];
 			
+			String *identifier = String_new(Source_get_identifier(src));
+			String_prepend(identifier, "\"");
+			String_append(identifier, "\"");
 			fprintf(fp, "%c", char_nocomment);
-			fprintf(fp, "%*s", 2 * CATALOG_COLUMN_WIDTH, Source_get_identifier(src));
+			fprintf(fp, "%*s", 2 * CATALOG_COLUMN_WIDTH, String_get(identifier));
+			String_delete(identifier);
 			
 			for(size_t j = 0; j < Source_get_num_par(src); ++j)
 			{
