@@ -5122,10 +5122,10 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 	
 	// Determine moments 0 and 1
 	// NOTE: This should not be multi-threaded, as otherwise the moment-0 map would
-	///     no longer be deterministic due to the arbitrary order of the summation
-	///     which would result in slightly different rounding errors. While those
-	///     differences are negligible, the moment maps from different runs would
-	///     no longer be binary-identical, making unit testing impossible.
+	//       no longer be deterministic due to the arbitrary order of the summation
+	//       which would result in slightly different rounding errors. While those
+	//       differences are negligible, the moment maps from different runs would
+	//       no longer be binary-identical, making unit testing impossible.
 	for(size_t z = self->axis_size[2]; z--;)
 	{
 		double spectral = z;
