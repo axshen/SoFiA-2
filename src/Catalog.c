@@ -415,6 +415,13 @@ PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_f
 	{
 		// Write ASCII catalogue
 		fprintf(fp, "# SoFiA source catalogue\n# Creator: %s\n# Time:    %s\n#\n", SOFIA_VERSION_FULL, current_time_string);
+		fprintf(fp, "# Note that the plain-text catalogue is solely intended for\n");
+		fprintf(fp, "# visual inspection and should not be used for quantitative\n");
+		fprintf(fp, "# analysis due to limited precision and the lack of Unified\n");
+		fprintf(fp, "# Content Descriptors.  The XML catalogue should instead be\n");
+		fprintf(fp, "# imported into Python or VO-compatible software to analyse\n");
+		fprintf(fp, "# the source parameters measured by SoFiA, e.g. through the\n");
+		fprintf(fp, "# astropy.io.votable module of Astropy.\n#\n");
 		fprintf(fp, "# Header rows:\n#   1 = column number\n#   2 = parameter name\n#   3 = parameter unit\n%c\n%c", char_comment, char_comment);
 		
 		fprintf(fp, "%*d", 2 * CATALOG_COLUMN_WIDTH, 1);
