@@ -5018,7 +5018,12 @@ PRIVATE void DataCube_create_src_name(const DataCube *self, String **source_name
 ///                    pointing to the generated moment 2 map.
 /// @param  chan       Pointer to a data cube object that will be
 ///                    pointing to the generated map containing the
-///                    number of channels per pixel.
+///                    number of channels per pixel in the moment 0
+///                    map.
+/// @param  snr        Pointer to a data cube object that will be
+///                    pointing to the generated map containing the
+///                    signal-to-noise ratio (SNR) per pixel in the
+///                    moment 0 map.
 /// @param  obj_name   Name of the object for `OBJECT` header entry.
 ///                    If `NULL`, no `OBJECT` entry will be created.
 /// @param  use_wcs    If `true`, convert channel numbers to WCS.
@@ -5030,7 +5035,7 @@ PRIVATE void DataCube_create_src_name(const DataCube *self, String **source_name
 ///                    channels map to a proper SNR map. Set to 0
 ///                    to disable this conversion.
 
-PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, const char *obj_name, bool use_wcs, const double threshold, const double rms)
+PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, DataCube **snr, const char *obj_name, bool use_wcs, const double threshold, const double rms)
 {
 	// Sanity checks
 	check_null(self);
@@ -5075,6 +5080,13 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 		String_append(unit_flux_dens, String_get(unit_spec));
 	}
 	
+	// Initialise everything with NULL
+	*mom0 = NULL;
+	*mom1 = NULL;
+	*mom2 = NULL;
+	*chan = NULL;
+	*snr  = NULL;
+	
 	// Create empty moment 0 map
 	*mom0 = DataCube_blank(self->axis_size[0], self->axis_size[1], 1, -32, self->verbosity);
 	
@@ -5106,13 +5118,6 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 		Header_set_str((*mom1)->header, "BUNIT", use_wcs ? String_get(unit_spec) : " ");
 		Header_set_str((*mom2)->header, "BUNIT", use_wcs ? String_get(unit_spec) : " ");
 		Header_set_str((*chan)->header, "BUNIT", " ");
-	}
-	else
-	{
-		// 2-D image; point mom1 and mom2 to NULL
-		*mom1 = NULL;
-		*mom2 = NULL;
-		*chan = NULL;
 	}
 	
 	// Determine moments 0 and 1
@@ -5150,15 +5155,18 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 		}
 	}
 	
+	// If image is 2-D then return, as only mom0 needed and nothing else left to do
+	if(!is_3d) return;
+	
 	// Convert channel map to SNR map if requested
-	if(is_3d && rms > 0.0)
+	if(rms > 0.0)
 	{
 		// Create empty SNR map
-		DataCube *snr_map = DataCube_blank(self->axis_size[0], self->axis_size[1], 1, -32, self->verbosity);
-		Header_copy_wcs(self->header, snr_map->header);
-		Header_copy_misc(self->header, snr_map->header, false, true);
-		Header_set_str(snr_map->header, "BUNIT", " ");
-		if(obj_name != NULL) Header_set_str(snr_map->header, "OBJECT", obj_name);
+		*snr = DataCube_blank(self->axis_size[0], self->axis_size[1], 1, -32, self->verbosity);
+		Header_copy_wcs(self->header, (*snr)->header);
+		Header_copy_misc(self->header, (*snr)->header, false, true);
+		Header_set_str((*snr)->header, "BUNIT", " ");
+		if(obj_name != NULL) Header_set_str((*snr)->header, "OBJECT", obj_name);
 		
 		// Calculate SNR values
 		#pragma omp parallel for collapse(2) schedule(static)
@@ -5168,20 +5176,13 @@ PUBLIC void DataCube_create_moments(const DataCube *self, const DataCube *mask, 
 			{
 				const long int value_chan = DataCube_get_data_int(*chan, x, y, 0);
 				const double   value_flux = DataCube_get_data_flt(*mom0, x, y, 0);
-				if(value_chan > 0) DataCube_set_data_flt(snr_map, x, y, 0, value_flux / (rms * sqrt((double)value_chan)));
-				else DataCube_set_data_flt(snr_map, x, y, 0, NAN);
+				if(value_chan > 0) DataCube_set_data_flt(*snr, x, y, 0, value_flux / (rms * sqrt((double)value_chan)));
+				else DataCube_set_data_flt(*snr, x, y, 0, NAN);
 			}
 		}
-		
-		// Delete old channel map and point to new SNR map instead
-		DataCube_delete(*chan);
-		*chan = snr_map;
 	}
 	
-	// If image is 2-D then return, as nothing left to do
-	if(!is_3d) return;
-	
-	// Otherwise continue with creation of moments 1 and 2
+	// Continue with creation of moments 1 and 2
 	// Divide moment 1 by moment 0
 	#pragma omp parallel for collapse(2) schedule(static)
 	for(size_t y = 0; y < self->axis_size[1]; ++y)
@@ -5428,7 +5429,8 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 		DataCube *mom1;
 		DataCube *mom2;
 		DataCube *chan;
-		DataCube_create_moments(cubelet, masklet, &mom0, &mom1, &mom2, &chan, Source_get_identifier(src), use_wcs, threshold * rms, rms);
+		DataCube *snr;
+		DataCube_create_moments(cubelet, masklet, &mom0, &mom1, &mom2, &chan, &snr, Source_get_identifier(src), use_wcs, threshold * rms, rms);
 		
 		// Save output products...
 		// ...cubelet
@@ -5477,9 +5479,18 @@ PUBLIC void DataCube_create_cubelets(const DataCube *self, const DataCube *mask,
 		{
 			String_set(filename, String_get(filename_template));
 			String_append_int(filename, "%ld", src_id);
-			String_append(filename, "_snr.fits");
+			String_append(filename, "_chan.fits");
 			DataCube_add_history(chan, par);
 			DataCube_save(chan, String_get(filename), overwrite, DESTROY);
+		}
+		
+		if(snr != NULL)
+		{
+			String_set(filename, String_get(filename_template));
+			String_append_int(filename, "%ld", src_id);
+			String_append(filename, "_snr.fits");
+			DataCube_add_history(snr, par);
+			DataCube_save(snr, String_get(filename), overwrite, DESTROY);
 		}
 		
 		// ...spectrum

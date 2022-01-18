@@ -368,6 +368,7 @@ int main(int argc, char **argv)
 	Path *path_mom1      = Path_new();
 	Path *path_mom2      = Path_new();
 	Path *path_chan      = Path_new();
+	Path *path_snr       = Path_new();
 	Path *path_rel_plot  = Path_new();
 	Path *path_rel_cat_n = Path_new();
 	Path *path_rel_cat_p = Path_new();
@@ -388,6 +389,7 @@ int main(int argc, char **argv)
 	Path_set_dir(path_mom1,      String_get(output_dir_name));
 	Path_set_dir(path_mom2,      String_get(output_dir_name));
 	Path_set_dir(path_chan,      String_get(output_dir_name));
+	Path_set_dir(path_snr,       String_get(output_dir_name));
 	Path_set_dir(path_rel_plot,  String_get(output_dir_name));
 	Path_set_dir(path_rel_cat_n, String_get(output_dir_name));
 	Path_set_dir(path_rel_cat_p, String_get(output_dir_name));
@@ -408,6 +410,7 @@ int main(int argc, char **argv)
 	Path_set_file_from_template(path_mom1,       String_get(output_file_name), "_mom1",        ".fits");
 	Path_set_file_from_template(path_mom2,       String_get(output_file_name), "_mom2",        ".fits");
 	Path_set_file_from_template(path_chan,       String_get(output_file_name), "_chan",        ".fits");
+	Path_set_file_from_template(path_snr,        String_get(output_file_name), "_snr",         ".fits");
 	Path_set_file_from_template(path_rel_plot,   String_get(output_file_name), "_rel",         ".eps");
 	Path_set_file_from_template(path_rel_cat_n,  String_get(output_file_name), "_rel_cat_neg", ".xml");
 	Path_set_file_from_template(path_rel_cat_p,  String_get(output_file_name), "_rel_cat_pos", ".xml");
@@ -521,6 +524,9 @@ int main(int argc, char **argv)
 			ensure(!Path_file_is_readable(path_chan), ERR_FILE_ACCESS,
 				"Channel map already exists. Please delete the file\n"
 				"       or set \'output.overwrite = true\'.");
+			ensure(!Path_file_is_readable(path_snr), ERR_FILE_ACCESS,
+				   "SNR map already exists. Please delete the file\n"
+				   "       or set \'output.overwrite = true\'.");
 		}
 		if(use_reliability && use_rel_plot) {
 			ensure(!Path_file_is_readable(path_rel_plot), ERR_FILE_ACCESS,
@@ -1414,7 +1420,8 @@ int main(int argc, char **argv)
 		DataCube *mom1 = NULL;
 		DataCube *mom2 = NULL;
 		DataCube *chan = NULL;
-		DataCube_create_moments(dataCube, maskCube, &mom0, &mom1, &mom2, &chan, NULL, use_wcs, 0.0, 0.0);
+		DataCube *snr  = NULL;
+		DataCube_create_moments(dataCube, maskCube, &mom0, &mom1, &mom2, &chan, &snr, NULL, use_wcs, 0.0, 0.0);
 		
 		// Save moment maps to disk
 		if(mom0 != NULL)
@@ -1437,12 +1444,18 @@ int main(int argc, char **argv)
 			DataCube_add_history(chan, par);
 			DataCube_save(chan, Path_get(path_chan), overwrite, DESTROY);
 		}
+		if(snr != NULL)
+		{
+			DataCube_add_history(snr, par);
+			DataCube_save(snr, Path_get(path_snr), overwrite, DESTROY);
+		}
 		
 		// Delete moment maps again
 		DataCube_delete(mom0);
 		DataCube_delete(mom1);
 		DataCube_delete(mom2);
 		DataCube_delete(chan);
+		DataCube_delete(snr);
 		
 		// Print time
 		timestamp(start_time, start_clock);
@@ -1561,6 +1574,7 @@ int main(int argc, char **argv)
 	Path_delete(path_mom1);
 	Path_delete(path_mom2);
 	Path_delete(path_chan);
+	Path_delete(path_snr);
 	Path_delete(path_rel_plot);
 	Path_delete(path_rel_cat_n);
 	Path_delete(path_rel_cat_p);
