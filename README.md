@@ -37,6 +37,10 @@ As an alternative, we provide a `Makefile` for those who prefer to use `make` to
 
 **NOTE:** Others may have created alternative ways of downloading and installing SoFiA 2. As we have no control over such third-party distributions or packages, we cannot provide any support for installation methods other than the one described here. If you have installed SoFiA 2 through a third-party repository, please contact the administrator of that package in the case of installation issues.
 
+### Docker containers
+
+We also provide official Docker containers for all stable releases of SoFiA 2. These are available from https://hub.docker.com/r/sofiapipeline/sofia2. However, due to the significant overhead imposed by pre-packaged containers, we strongly advise users to install SoFiA 2 from source, which is straightforward using the instructions above and will use significantly less disc space.
+
 
 ## Documentation
 
