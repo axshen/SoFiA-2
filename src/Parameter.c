@@ -578,7 +578,7 @@ PUBLIC void Parameter_default(Parameter *self)
 	Parameter_set(self, "reliability.debug"        , "false");
 
 	// Autokernel
-	Parameter_set(self, "autokernel.enable"		   , "false");
+	Parameter_set(self, "autokernel.enable"        , "false");
 	Parameter_set(self, "autokernel.maxIter"       , "30");
 	Parameter_set(self, "autokernel.threshold"     , "0.05");
 	Parameter_set(self, "autokernel.change"        , "0.02");
