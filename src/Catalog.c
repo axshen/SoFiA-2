@@ -42,6 +42,7 @@
 #include <time.h>
 
 #include "Catalog.h"
+#include "String.h"
 
 
 
@@ -415,6 +416,13 @@ PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_f
 	{
 		// Write ASCII catalogue
 		fprintf(fp, "# SoFiA source catalogue\n# Creator: %s\n# Time:    %s\n#\n", SOFIA_VERSION_FULL, current_time_string);
+		fprintf(fp, "# Note that the plain-text catalogue is solely intended for\n");
+		fprintf(fp, "# visual inspection and should not be used for quantitative\n");
+		fprintf(fp, "# analysis due to limited precision and the lack of Unified\n");
+		fprintf(fp, "# Content Descriptors.  The XML catalogue should instead be\n");
+		fprintf(fp, "# imported into Python or VO-compatible software to analyse\n");
+		fprintf(fp, "# the source parameters measured by SoFiA, e.g. through the\n");
+		fprintf(fp, "# astropy.io.votable module of Astropy.\n#\n");
 		fprintf(fp, "# Header rows:\n#   1 = column number\n#   2 = parameter name\n#   3 = parameter unit\n%c\n%c", char_comment, char_comment);
 		
 		fprintf(fp, "%*d", 2 * CATALOG_COLUMN_WIDTH, 1);
@@ -425,8 +433,8 @@ PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_f
 		for(size_t j = 0; j < Source_get_num_par(src0); ++j) fprintf(fp, "%*s", CATALOG_COLUMN_WIDTH, Source_get_name(src0, j));
 		fprintf(fp, "\n%c", char_comment);
 		
-		fprintf(fp, "%*s", 2 * CATALOG_COLUMN_WIDTH, " ");
-		for(size_t j = 0; j < Source_get_num_par(src0); ++j) fprintf(fp, "%*s", CATALOG_COLUMN_WIDTH, Source_get_unit(src0, j));
+		fprintf(fp, "%*s", 2 * CATALOG_COLUMN_WIDTH, "-");
+		for(size_t j = 0; j < Source_get_num_par(src0); ++j) fprintf(fp, "%*s", CATALOG_COLUMN_WIDTH, strlen(Source_get_unit(src0, j)) ? Source_get_unit(src0, j) : "-");
 		fprintf(fp, "\n\n");
 		
 		// Loop over all sources to write parameters
@@ -434,8 +442,12 @@ PUBLIC void Catalog_save(const Catalog *self, const char *filename, const file_f
 		{
 			Source *src = self->sources[i];
 			
+			String *identifier = String_new(Source_get_identifier(src));
+			String_prepend(identifier, "\"");
+			String_append(identifier, "\"");
 			fprintf(fp, "%c", char_nocomment);
-			fprintf(fp, "%*s", 2 * CATALOG_COLUMN_WIDTH, Source_get_identifier(src));
+			fprintf(fp, "%*s", 2 * CATALOG_COLUMN_WIDTH, String_get(identifier));
+			String_delete(identifier);
 			
 			for(size_t j = 0; j < Source_get_num_par(src); ++j)
 			{
