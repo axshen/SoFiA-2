@@ -123,7 +123,7 @@ PUBLIC double     DataCube_stat_mad         (const DataCube *self, const double 
 PUBLIC double     DataCube_stat_gauss       (const DataCube *self, const size_t cadence, const int range);
 
 // Noise scaling
-PUBLIC void       DataCube_scale_noise_spec (const DataCube *self, const noise_stat statistic, const int range);
+PUBLIC Array_dbl *DataCube_scale_noise_spec (const DataCube *self, const noise_stat statistic, const int range);
 PUBLIC DataCube  *DataCube_scale_noise_local(DataCube *self, const noise_stat statistic, const int range, size_t window_spat, size_t window_spec, size_t grid_spat, size_t grid_spec, const bool interpolate);
 
 // Spatial and spectral smoothing
@@ -162,7 +162,7 @@ PUBLIC LinkerPar *DataCube_run_linker       (const DataCube *self, DataCube *mas
 PUBLIC void       DataCube_parameterise     (const DataCube *self, const DataCube *mask, Catalog *cat, bool use_wcs, bool physical, const char *prefix);
 
 // Create moment maps and cubelets
-PUBLIC void       DataCube_create_moments   (const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, const char *obj_name, bool use_wcs, const double threshold, const double rms);
+PUBLIC void       DataCube_create_moments   (const DataCube *self, const DataCube *mask, DataCube **mom0, DataCube **mom1, DataCube **mom2, DataCube **chan, DataCube **snr, const char *obj_name, bool use_wcs, const double threshold, const double rms);
 PUBLIC void       DataCube_create_cubelets  (const DataCube *self, const DataCube *mask, const Catalog *cat, const char *basename, const bool overwrite, bool use_wcs, bool physical, const size_t margin, const double threshold, const Parameter *par);
 
 // WCS

@@ -220,6 +220,7 @@ int main(int argc, char **argv)
 	const bool autoflag_log      = Parameter_get_bool(par, "flag.log");
 	const bool use_cont_sub      = Parameter_get_bool(par, "contsub.enable");
 	const bool use_noise_scaling = Parameter_get_bool(par, "scaleNoise.enable");
+	const bool use_local_scaling = (strcmp(Parameter_get_str(par, "scaleNoise.mode"), "local") == 0);
 	const bool use_sc_scaling    = Parameter_get_bool(par, "scaleNoise.scfind");
 	const bool use_ripple_filter = Parameter_get_bool(par, "rippleFilter.enable");
 	const bool use_scfind        = Parameter_get_bool(par, "scfind.enable");
@@ -399,7 +400,7 @@ int main(int argc, char **argv)
 	Path_set_file_from_template(path_cat_ascii,  String_get(output_file_name), "_cat",         ".txt");
 	Path_set_file_from_template(path_cat_xml,    String_get(output_file_name), "_cat",         ".xml");
 	Path_set_file_from_template(path_cat_sql,    String_get(output_file_name), "_cat",         ".sql");
-	Path_set_file_from_template(path_noise_out,  String_get(output_file_name), "_noise",       ".fits");
+	Path_set_file_from_template(path_noise_out,  String_get(output_file_name), "_noise",       use_local_scaling ? ".fits" : ".txt");
 	Path_set_file_from_template(path_filtered,   String_get(output_file_name), "_filtered",    ".fits");
 	Path_set_file_from_template(path_mask_out,   String_get(output_file_name), "_mask",        ".fits");
 	Path_set_file_from_template(path_mask_2d,    String_get(output_file_name), "_mask-2d",     ".fits");
@@ -489,9 +490,9 @@ int main(int argc, char **argv)
 				"SQL catalogue file already exists. Please delete the file\n"
 				"       or set \'output.overwrite = true\'.");
 		}
-		if(write_noise) {
+		if(use_noise_scaling && write_noise) {
 			ensure(!Path_file_is_readable(path_noise_out), ERR_FILE_ACCESS,
-				"Noise cube already exists. Please delete the file\n"
+				"Noise cube/spectrum already exists. Please delete the file\n"
 				"       or set \'output.overwrite = true\'.");
 		}
 		if(write_filtered) {
@@ -668,7 +669,7 @@ int main(int argc, char **argv)
 	{
 		status("Scaling data by noise");
 		
-		if(strcmp(Parameter_get_str(par, "scaleNoise.mode"), "local") == 0)
+		if(use_local_scaling)
 		{
 			// Local noise scaling
 			message("Correcting for local noise variations.");
@@ -701,7 +702,23 @@ int main(int argc, char **argv)
 			message("Correcting for noise variations along spectral axis.");
 			message("- Noise statistic:  %s", noise_stat_name[sn_statistic]);
 			message("- Flux range:       %s\n", flux_range_name[sn_range + 1]);
-			DataCube_scale_noise_spec(dataCube, sn_statistic, sn_range);
+			Array_dbl *noise_spectrum = DataCube_scale_noise_spec(dataCube, sn_statistic, sn_range);
+			
+			if(write_noise)
+			{
+				FILE *fp;
+				if(overwrite) fp = fopen(Path_get(path_noise_out), "wb");
+				else fp = fopen(Path_get(path_noise_out), "wxb");
+				ensure(fp != NULL, ERR_FILE_ACCESS, "Failed to open output file: %s", Path_get(path_noise_out));
+				message("Writing noise spectrum: %s", Path_get_file(path_noise_out));
+				
+				fprintf(fp, "# Measured noise spectrum\n# Creator: %s\n#\n# Channel\tNoise\n", SOFIA_VERSION_FULL);
+				for(size_t i = 0; i < Array_dbl_get_size(noise_spectrum); ++i) fprintf(fp, "%zu\t%.15f\n", i, Array_dbl_get(noise_spectrum, i));
+				
+				fclose(fp);
+			}
+			
+			Array_dbl_delete(noise_spectrum);
 		}
 		
 		// Print time
@@ -1420,7 +1437,10 @@ int main(int argc, char **argv)
 		DataCube *mom1 = NULL;
 		DataCube *mom2 = NULL;
 		DataCube *chan = NULL;
-		DataCube_create_moments(dataCube, maskCube, &mom0, &mom1, &mom2, &chan, NULL, use_wcs, 0.0, 0.0);
+		DataCube *snr  = NULL;
+		DataCube_create_moments(dataCube, maskCube, &mom0, &mom1, &mom2, &chan, &snr, NULL, use_wcs, 0.0, 0.0);
+		// NOTE: snr will not actually be created or written, as this would not work in general
+		//       unless the noise was guaranteed to be constant across the entire data cube.
 		
 		// Save moment maps to disk
 		if(mom0 != NULL)
@@ -1449,6 +1469,7 @@ int main(int argc, char **argv)
 		DataCube_delete(mom1);
 		DataCube_delete(mom2);
 		DataCube_delete(chan);
+		DataCube_delete(snr);
 		
 		// Print time
 		timestamp(start_time, start_clock);
