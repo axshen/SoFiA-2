@@ -1488,8 +1488,14 @@ PUBLIC double DataCube_stat_gauss(const DataCube *self, const size_t cadence, co
 /// @param range      Flux range to be used in noise measurement. Can
 ///                   be -1, 0 or +1 for negative range, full range
 ///                   or positive range, respectively.
+///
+/// @return Pointer to Array object containing the measured noise
+///         values for each channel.
+///
+/// @note The caller will be responsible for calling the destructor
+///       on the returned Array object once it is no longer needed.
 
-PUBLIC void DataCube_scale_noise_spec(const DataCube *self, const noise_stat statistic, const int range)
+PUBLIC Array_dbl *DataCube_scale_noise_spec(const DataCube *self, const noise_stat statistic, const int range)
 {
 	// Sanity checks
 	check_null(self);
@@ -1500,6 +1506,7 @@ PUBLIC void DataCube_scale_noise_spec(const DataCube *self, const noise_stat sta
 	const size_t size_xy = self->axis_size[0] * self->axis_size[1];
 	const size_t size_z  = self->axis_size[2];
 	double rms;
+	Array_dbl *noise_spectrum = Array_dbl_new(size_z);
 	
 	message("Dividing by noise in each image plane.");
 	size_t progress = 0;
@@ -1520,6 +1527,7 @@ PUBLIC void DataCube_scale_noise_spec(const DataCube *self, const noise_stat sta
 			else rms = gaufit_flt(ptr_start, size_xy, 1, range);
 			
 			for(float *ptr = ptr_start + size_xy; ptr --> ptr_start;) *ptr /= rms;
+			Array_dbl_set(noise_spectrum, i, rms);
 		}
 		else
 		{
@@ -1530,10 +1538,11 @@ PUBLIC void DataCube_scale_noise_spec(const DataCube *self, const noise_stat sta
 			else rms = gaufit_dbl(ptr_start, size_xy, 1, range);
 			
 			for(double *ptr = ptr_start + size_xy; ptr --> ptr_start;) *ptr /= rms;
+			Array_dbl_set(noise_spectrum, i, rms);
 		}
 	}
 	
-	return;
+	return noise_spectrum;
 }
 
 
