@@ -837,7 +837,7 @@ PRIVATE void LinkerPar_reallocate_memory(LinkerPar *self)
 /// The `scale_kernel` increments will become smaller as the algorithm approaches the
 /// threshold.
 
-PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, double *scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam, const bool ak_enable, const int ak_max_iter, const double ak_threshold, const double ak_change)
+PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_space, double *scale_kernel, const double fmin, const size_t minpix, const Table *rel_cat, Array_dbl **skellam, const bool ak_enable, const int ak_max_iter, const double ak_threshold)
 {
 	// Sanity checks
 	check_null(self);
@@ -1058,6 +1058,7 @@ PUBLIC Matrix *LinkerPar_reliability(LinkerPar *self, const Array_siz *rel_par_s
 
 		// Loop variables
 		int iter = 0;
+		const double ak_change = 0.02;
 		double scale = 0.1;
 		double scale_old = 1.0;  // Must be initialised with 1!
 		

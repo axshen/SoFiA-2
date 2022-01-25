@@ -123,7 +123,6 @@ reliability.debug          =  false
 autokernel.enable          = true
 autokernel.maxIter         = 30
 autokernel.threshold       = 0.05
-autokernel.change          = 0.02
 
 
 # Mask dilation
